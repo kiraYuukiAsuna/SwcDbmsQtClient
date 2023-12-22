@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QWidget>
-#include "../Generated/Message/Message.pb.h"
+#include "Message/Message.pb.h"
 #include "EditorBase.h"
 #include "Message/Response.pb.h"
 #include <QDialog>

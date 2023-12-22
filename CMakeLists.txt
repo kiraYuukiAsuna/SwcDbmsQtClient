@@ -24,7 +24,7 @@ find_package(gRPC CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
 include_directories(
-        Generated
+        SwcDbmsCommon/Generated/cpp
         src/styles
         ThirdParty/nlohmann_json
 )
@@ -49,14 +49,14 @@ set(PROJECT_SOURCES
 
         src/styles/QtAdvancedStylesheet.cpp
 
-        Generated/Message/Message.grpc.pb.cc
-        Generated/Message/Message.pb.cc
-        Generated/Message/Request.grpc.pb.cc
-        Generated/Message/Request.pb.cc
-        Generated/Message/Response.grpc.pb.cc
-        Generated/Message/Response.pb.cc
-        Generated/Service/Service.grpc.pb.cc
-        Generated/Service/Service.pb.cc
+        SwcDbmsCommon/Generated/cpp/Message/Message.grpc.pb.cc
+        SwcDbmsCommon/Generated/cpp/Message/Message.pb.cc
+        SwcDbmsCommon/Generated/cpp/Message/Request.grpc.pb.cc
+        SwcDbmsCommon/Generated/cpp/Message/Request.pb.cc
+        SwcDbmsCommon/Generated/cpp/Message/Response.grpc.pb.cc
+        SwcDbmsCommon/Generated/cpp/Message/Response.pb.cc
+        SwcDbmsCommon/Generated/cpp/Service/Service.grpc.pb.cc
+        SwcDbmsCommon/Generated/cpp/Service/Service.pb.cc
 
         src/ui/mainwindow.h
         src/ui/mainwindow.ui

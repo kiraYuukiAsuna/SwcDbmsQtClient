@@ -1,0 +1,3 @@
+[submodule "SwcDbmsCommon"]
+	path = SwcDbmsCommon
+	url = git@github.com:kiraYuukiAsuna/SwcDbmsCommon.git
