@@ -1,0 +1,216 @@
+#include "viewimportswcfromfile.h"
+#include "ui_ViewImportSwcFromFile.h"
+#include <QFileDialog>
+#include <QStandardPaths>
+#include "src/swcio/SwcIO.h"
+#include "Message/Request.pb.h"
+#include "src/framework/service/WrappedCall.h"
+#include "mainwindow.h"
+
+ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
+        QDialog(mainWindow), ui(new Ui::ViewImportSwcFromFile) {
+    ui->setupUi(this);
+
+    m_MainWindow = mainWindow;
+
+    ui->SwcFileInfo->clear();
+    ui->SwcFileInfo->setColumnCount(5);
+    QStringList headerLabels;
+    headerLabels
+            << "Swc FilePath"
+            << "Type"
+            << "Detected Swc Node Number"
+            << "New Name"
+            << "Import Status";
+    ui->SwcFileInfo->setHorizontalHeaderLabels(headerLabels);
+    ui->SwcFileInfo->resizeColumnsToContents();
+
+    connect(ui->SelectBtn, &QPushButton::clicked, this, [this]() {
+        QFileDialog fileDialog(this);
+        fileDialog.setWindowTitle("Select Swc Files");
+        fileDialog.setDirectory(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
+        fileDialog.setNameFilter(tr("File(*.swc *.eswc)"));
+        fileDialog.setFileMode(QFileDialog::ExistingFiles);
+        fileDialog.setViewMode(QFileDialog::Detail);
+
+        m_SwcList.clear();
+        m_ESwcList.clear();
+
+        QStringList fileNames;
+        if (fileDialog.exec()) {
+            fileNames = fileDialog.selectedFiles();
+            ui->SwcFileInfo->setRowCount(fileNames.size());
+            for (int i = 0; i < fileNames.size(); i++) {
+                std::filesystem::path filePath(fileNames[i].toStdString());
+                if (filePath.extension() == ".swc") {
+                    Swc swc(filePath.string());
+                    swc.ReadFromFile();
+                    auto neuron = swc.getNeuron();
+                    m_SwcList.emplace_back(swc);
+
+                    ui->SwcFileInfo->setItem(i, 0,
+                                             new QTableWidgetItem(QString::fromStdString(filePath.string())));
+                    ui->SwcFileInfo->setItem(i, 1,
+                                             new QTableWidgetItem("swc"));
+                    ui->SwcFileInfo->setItem(i, 2,
+                                             new QTableWidgetItem(
+                                                     QString::fromStdString(std::to_string(neuron.size()))));
+                    ui->SwcFileInfo->setItem(i, 3,
+                                             new QTableWidgetItem(
+                                                     QString::fromStdString(filePath.filename().string())));
+                    ui->SwcFileInfo->setItem(i, 4,
+                                             new QTableWidgetItem(QString::fromStdString("Unprocessed")));
+
+                } else if (filePath.extension() == ".eswc") {
+                    ESwc eSwc(filePath.string());
+                    eSwc.ReadFromFile();
+                    auto neuron = eSwc.getNeuron();
+                    m_ESwcList.emplace_back(eSwc);
+
+                    ui->SwcFileInfo->setItem(i, 0,
+                                             new QTableWidgetItem(QString::fromStdString(filePath.string())));
+                    ui->SwcFileInfo->setItem(i, 1,
+                                             new QTableWidgetItem("eswc"));
+                    ui->SwcFileInfo->setItem(i, 2,
+                                             new QTableWidgetItem(
+                                                     QString::fromStdString(std::to_string(neuron.size()))));
+                    ui->SwcFileInfo->setItem(i, 3,
+                                             new QTableWidgetItem(
+                                                     QString::fromStdString(filePath.filename().string())));
+                    ui->SwcFileInfo->setItem(i, 4,
+                                             new QTableWidgetItem(QString::fromStdString("Unprocessed")));
+                }
+            }
+            ui->SwcFileInfo->resizeColumnsToContents();
+        }
+
+    });
+
+    connect(ui->ImportBtn, &QPushButton::clicked, this, [this, &mainWindow]() {
+        if (ui->SwcFileInfo->rowCount() != m_SwcList.size() + m_ESwcList.size()) {
+            QMessageBox::critical(this, "Error", "Data outdated! Please reopen this import window!");
+            return;
+        }
+
+        if (m_ActionImportComplete) {
+            QMessageBox::information(this, "Warning",
+                                     "Import action has completed! Please reopen this import window if you want to import more data!");
+            return;
+        }
+
+        int processedSwcNumber = 0;
+        int processedESwcNumber = 0;
+        for (int i = 0; i < ui->SwcFileInfo->rowCount(); i++) {
+            if (ui->SwcFileInfo->item(i, 1)->text() == "swc") {
+                auto swcName = ui->SwcFileInfo->item(i, 3)->text().toStdString();
+                std::string description = "Auto Generated By SwcManagerClient.";
+                proto::CreateSwcResponse response;
+                if (WrappedCall::createSwcMeta(swcName, description, response, this)) {
+                    proto::SwcDataV1 swcData;
+                    auto &newSwcRawData = m_SwcList[processedSwcNumber].getNeuron();
+                    for (auto &val: newSwcRawData) {
+                        auto *newData = swcData.add_swcdata();
+                        auto internalData = newData->mutable_swcnodeinternaldata();
+                        internalData->set_n(val.n);
+                        internalData->set_type(val.type);
+                        internalData->set_x(val.x);
+                        internalData->set_y(val.y);
+                        internalData->set_z(val.z);
+                        internalData->set_radius(val.radius);
+                        internalData->set_parent(val.parent);
+                        internalData->set_seg_id(val.seg_id);
+                        internalData->set_level(val.level);
+                        internalData->set_mode(val.mode);
+                        internalData->set_timestamp(val.timestamp);
+                        internalData->set_feature_value(val.feature_value);
+                    }
+
+                    proto::CreateSwcNodeDataResponse response1;
+                    if (WrappedCall::addSwcNodeData(swcName, swcData, response1, this)) {
+                        ui->SwcFileInfo->item(i, 4)->setText("Import Success!");
+                        ui->SwcFileInfo->item(i, 1)->setBackground(QBrush(Qt::green));
+                        ui->SwcFileInfo->item(i, 1)->setBackground(QBrush(Qt::green));
+                        ui->SwcFileInfo->item(i, 2)->setBackground(QBrush(Qt::green));
+                        ui->SwcFileInfo->item(i, 3)->setBackground(QBrush(Qt::green));
+                        ui->SwcFileInfo->item(i, 4)->setBackground(QBrush(Qt::green));
+                    } else {
+                        ui->SwcFileInfo->item(i, 4)->setText("Create Swc Node failed!");
+                        ui->SwcFileInfo->item(i, 0)->setBackground(QBrush(Qt::red));
+                        ui->SwcFileInfo->item(i, 1)->setBackground(QBrush(Qt::red));
+                        ui->SwcFileInfo->item(i, 2)->setBackground(QBrush(Qt::red));
+                        ui->SwcFileInfo->item(i, 3)->setBackground(QBrush(Qt::red));
+                        ui->SwcFileInfo->item(i, 4)->setBackground(QBrush(Qt::red));
+                    }
+                } else {
+                    ui->SwcFileInfo->item(i, 4)->setText("Create Swc Meta Info failed!");
+                    ui->SwcFileInfo->item(i, 0)->setBackground(QBrush(Qt::red));
+                    ui->SwcFileInfo->item(i, 1)->setBackground(QBrush(Qt::red));
+                    ui->SwcFileInfo->item(i, 2)->setBackground(QBrush(Qt::red));
+                    ui->SwcFileInfo->item(i, 3)->setBackground(QBrush(Qt::red));
+                    ui->SwcFileInfo->item(i, 4)->setBackground(QBrush(Qt::red));
+                }
+                processedSwcNumber++;
+            } else if (ui->SwcFileInfo->item(i, 1)->text() == "eswc") {
+                auto swcName = ui->SwcFileInfo->item(i, 3)->text().toStdString();
+                std::string description = "Auto Generated By SwcManagerClient.";
+                proto::CreateSwcResponse response;
+                if (WrappedCall::createSwcMeta(swcName, description, response, this)) {
+                    proto::SwcDataV1 swcData;
+                    auto &newSwcRawData = m_ESwcList[processedESwcNumber].getNeuron();
+                    for (auto &j: newSwcRawData) {
+                        auto *newData = swcData.add_swcdata();
+                        auto internalData = newData->mutable_swcnodeinternaldata();
+                        internalData->set_n(j.n);
+                        internalData->set_type(j.type);
+                        internalData->set_x(j.x);
+                        internalData->set_y(j.y);
+                        internalData->set_z(j.z);
+                        internalData->set_radius(j.radius);
+                        internalData->set_parent(j.parent);
+                        internalData->set_seg_id(j.seg_id);
+                        internalData->set_level(j.level);
+                        internalData->set_mode(j.mode);
+                        internalData->set_timestamp(j.timestamp);
+                        internalData->set_feature_value(j.feature_value);
+                    }
+
+                    proto::CreateSwcNodeDataResponse response1;
+                    if (WrappedCall::addSwcNodeData(swcName, swcData, response1, this)) {
+                        ui->SwcFileInfo->item(i, 4)->setText("Import Success!");
+                        ui->SwcFileInfo->item(i, 0)->setBackground(QBrush(Qt::green));
+                        ui->SwcFileInfo->item(i, 1)->setBackground(QBrush(Qt::green));
+                        ui->SwcFileInfo->item(i, 2)->setBackground(QBrush(Qt::green));
+                        ui->SwcFileInfo->item(i, 3)->setBackground(QBrush(Qt::green));
+                        ui->SwcFileInfo->item(i, 4)->setBackground(QBrush(Qt::green));
+                    } else {
+                        ui->SwcFileInfo->item(i, 4)->setText("Create Swc Node failed!");
+                        ui->SwcFileInfo->item(i, 0)->setBackground(QBrush(Qt::red));
+                        ui->SwcFileInfo->item(i, 1)->setBackground(QBrush(Qt::red));
+                        ui->SwcFileInfo->item(i, 2)->setBackground(QBrush(Qt::red));
+                        ui->SwcFileInfo->item(i, 3)->setBackground(QBrush(Qt::red));
+                        ui->SwcFileInfo->item(i, 4)->setBackground(QBrush(Qt::red));
+                    }
+                } else {
+                    ui->SwcFileInfo->item(i, 4)->setText("Create Swc Meta Info failed!");
+                    ui->SwcFileInfo->item(i, 0)->setBackground(QBrush(Qt::red));
+                    ui->SwcFileInfo->item(i, 1)->setBackground(QBrush(Qt::red));
+                    ui->SwcFileInfo->item(i, 2)->setBackground(QBrush(Qt::red));
+                    ui->SwcFileInfo->item(i, 3)->setBackground(QBrush(Qt::red));
+                    ui->SwcFileInfo->item(i, 4)->setBackground(QBrush(Qt::red));
+                }
+                processedESwcNumber++;
+            }
+        }
+        m_ActionImportComplete = true;
+        QMessageBox::information(this, "Info",
+                                 "Import action has completed! Please check the <Import Status> in the table!");
+    });
+
+    connect(ui->CancelBtn, &QPushButton::clicked, this, [this]() {
+        reject();
+    });
+}
+
+ViewImportSwcFromFile::~ViewImportSwcFromFile() {
+    delete ui;
+}
