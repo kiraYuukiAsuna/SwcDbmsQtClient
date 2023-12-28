@@ -60,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent) :
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->UserOnlineHeartBeatNotifications(&context,notification,&response);
         if(status.ok()) {
+            CachedProtoData::getInstance().UserToken = response.usertoken();
             CachedProtoData::getInstance().OnlineStatus = true;
         }else {
             QMessageBox::critical(this,"Error",QString::fromStdString(status.error_message()));
