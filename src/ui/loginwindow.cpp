@@ -96,7 +96,8 @@ bool LoginWindow::doLogin(QString userName, QString password, bool slientMode) {
             AppConfig::getInstance().writeSecurityConfig();
 
             CachedProtoData::getInstance().CachedUserMetaInfo = response.userinfo();
-            CachedProtoData::getInstance().UserToken = response.usertoken();
+            CachedProtoData::getInstance().UserName = response.userverifyinfo().username();
+            CachedProtoData::getInstance().UserToken = response.userverifyinfo().usertoken();
             CachedProtoData::getInstance().OnlineStatus = true;
 
             accept();

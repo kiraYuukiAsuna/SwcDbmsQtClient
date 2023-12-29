@@ -198,7 +198,8 @@ public:
 
     static bool addSwcNodeData(const std::string& swcName, proto::SwcDataV1& swcData, proto::CreateSwcNodeDataResponse& response, QWidget* parent) {
         proto::CreateSwcNodeDataRequest request;
-        request.set_usertoken(CachedProtoData::getInstance().UserToken);
+        request.mutable_userverifyinfo()->set_username(CachedProtoData::getInstance().UserName);
+        request.mutable_userverifyinfo()->set_usertoken(CachedProtoData::getInstance().UserToken);
         request.mutable_swcinfo()->set_name(swcName);
         request.mutable_swcdata()->CopyFrom(swcData);
 
@@ -218,7 +219,8 @@ public:
 
     static bool modifySwcNodeData(const std::string& swcName, proto::SwcNodeDataV1& swcNodeData, proto::UpdateSwcNodeDataResponse & response, QWidget* parent) {
         proto::UpdateSwcNodeDataRequest request;
-        request.set_usertoken(CachedProtoData::getInstance().UserToken);
+        request.mutable_userverifyinfo()->set_username(CachedProtoData::getInstance().UserName);
+        request.mutable_userverifyinfo()->set_usertoken(CachedProtoData::getInstance().UserToken);
         request.mutable_swcinfo()->set_name(swcName);
         request.mutable_swcnodedata()->CopyFrom(swcNodeData);
 
@@ -238,7 +240,8 @@ public:
 
     static bool deleteSwcNodeData(const std::string& swcName, proto::SwcDataV1& swcData, proto::DeleteSwcNodeDataResponse& response, QWidget* parent) {
         proto::DeleteSwcNodeDataRequest request;
-        request.set_usertoken(CachedProtoData::getInstance().UserToken);
+        request.mutable_userverifyinfo()->set_username(CachedProtoData::getInstance().UserName);
+        request.mutable_userverifyinfo()->set_usertoken(CachedProtoData::getInstance().UserToken);
         request.mutable_swcinfo()->set_name(swcName);
         request.mutable_swcdata()->CopyFrom(swcData);
 

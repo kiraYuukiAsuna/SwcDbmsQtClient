@@ -10,6 +10,8 @@ public:
 
     proto::UserMetaInfoV1 CachedUserMetaInfo;
     bool OnlineStatus = false;
+
+    std::string UserName;
     std::string UserToken;
 
 private:
