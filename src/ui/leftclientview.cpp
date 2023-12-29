@@ -63,7 +63,8 @@ LeftClientView::LeftClientView(MainWindow* mainWindow) : QWidget(mainWindow), ui
                                             QMessageBox::StandardButton::Cancel);
         if (btn == QMessageBox::StandardButton::Ok) {
             proto::UserLogoutRequest request;
-            request.mutable_userinfo()->CopyFrom(CachedProtoData::getInstance().CachedUserMetaInfo);
+            request.mutable_userverifyinfo()->set_username(CachedProtoData::getInstance().UserName);
+            request.mutable_userverifyinfo()->set_usertoken(CachedProtoData::getInstance().UserToken);
             proto::UserLogoutResponse response;
 
             grpc::ClientContext context;
