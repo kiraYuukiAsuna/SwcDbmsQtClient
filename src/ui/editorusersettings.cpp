@@ -101,8 +101,6 @@ void EditorUserSettings::getUserMetaInfo() {
 
     auto result = RpcCall::getInstance().Stub()->GetUser(&context,request,&response);
     if(result.ok()) {
-        std::cout<<response.userinfo().DebugString();
-
         CachedProtoData::getInstance().CachedUserMetaInfo.CopyFrom(response.userinfo());
 
         ui->Id->setText(QString::fromStdString(response.userinfo().base()._id()));
