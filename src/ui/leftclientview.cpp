@@ -19,7 +19,7 @@
 #include "viewcreateswc.h"
 #include "src/framework/config/AppConfig.h"
 #include "viewimportswcfromfile.h"
-#include "vieweportswctofile.h"
+#include "ViewExportSwcToFile.h"
 
 LeftClientView::LeftClientView(MainWindow* mainWindow) : QWidget(mainWindow), ui(new Ui::LeftClientView) {
     ui->setupUi(this);
@@ -70,7 +70,7 @@ LeftClientView::LeftClientView(MainWindow* mainWindow) : QWidget(mainWindow), ui
             grpc::ClientContext context;
             auto status = RpcCall::getInstance().Stub()->UserLogout(&context,request,&response);
             if(status.ok()) {
-                if(response.status()) {
+                if(response.metainfo().status()) {
                     AppConfig::getInstance().setSecurityConfig(AppConfig::SecurityConfigItem::eCachedUserName, "");
                     AppConfig::getInstance().setSecurityConfig(AppConfig::SecurityConfigItem::eCachedPassword, "");
                     AppConfig::getInstance().setSecurityConfig(AppConfig::SecurityConfigItem::eAccountExpiredTime, "");
@@ -78,7 +78,7 @@ LeftClientView::LeftClientView(MainWindow* mainWindow) : QWidget(mainWindow), ui
 
                     qApp->exit(RestartCode);
                 }
-                QMessageBox::critical(this,"Error",QString::fromStdString(response.message()));
+                QMessageBox::critical(this,"Error",QString::fromStdString(response.metainfo().message()));
             }
             QMessageBox::critical(this,"Error",QString::fromStdString(status.error_message()));
         }
@@ -233,19 +233,21 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
         if(result == QMessageBox::StandardButton::Ok) {
             if(data.type == MetaInfoType::eProject) {
                 proto::DeleteProjectRequest request;
-                request.mutable_userinfo()->CopyFrom(CachedProtoData::getInstance().CachedUserMetaInfo);
-                request.mutable_projectinfo()->set_name(curItem->text(0).toStdString());
+                auto* userInfo = request.mutable_userverifyinfo();
+                userInfo->set_username(CachedProtoData::getInstance().UserName);
+                userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
+                request.set_projectname(curItem->text(0).toStdString());
 
                 proto::DeleteProjectResponse response;
                 grpc::ClientContext context;
                 auto status = RpcCall::getInstance().Stub()->DeleteProject(&context,request,&response);
                 if(status.ok()) {
-                    if(response.status()) {
+                    if(response.metainfo().status()) {
                         QMessageBox::information(this,"Info","Delete Project successfully!");
                         m_MainWindow->getRightClientView().closeWithoutSavingProject(data.name);
                         refreshTree();
                     }else {
-                        QMessageBox::critical(this,"Error",QString::fromStdString(response.message()));
+                        QMessageBox::critical(this,"Error",QString::fromStdString(response.metainfo().message()));
                     }
                 }else{
                     QMessageBox::critical(this,"Error",QString::fromStdString(status.error_message()));
@@ -294,7 +296,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
                 exportSwcData.swcMetaInfo = response1.swcinfo();
                 dataList.push_back(exportSwcData);
 
-                ViewEportSwcToFile view(dataList,false,this);
+                ViewExportSwcToFile view(dataList,false,this);
                 view.exec();
             }else if(data.type == MetaInfoType::eSwcContainer){
                 proto::GetAllSwcMetaInfoResponse response;
@@ -309,7 +311,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
                     dataList.push_back(exportSwcData);
                 }
 
-                ViewEportSwcToFile view(dataList,true,this);
+                ViewExportSwcToFile view(dataList,true,this);
                 view.exec();
             }else if(data.type == MetaInfoType::eProject){
                 proto::GetProjectResponse projectResponse;
@@ -342,7 +344,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
                     dataList.push_back(exportSwcData);
                 }
 
-                ViewEportSwcToFile view(dataList,true,this);
+                ViewExportSwcToFile view(dataList,true,this);
                 view.exec();
             }
         }
@@ -367,20 +369,22 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
                if(result == QMessageBox::StandardButton::Ok) {
                    if(data.type == MetaInfoType::eSwc) {
                        proto::DeleteSwcRequest request;
-                       request.mutable_userinfo()->CopyFrom(CachedProtoData::getInstance().CachedUserMetaInfo);
-                       request.mutable_swcinfo()->set_name(curItem->text(0).toStdString());
+                       auto* userInfo = request.mutable_userverifyinfo();
+                       userInfo->set_username(CachedProtoData::getInstance().UserName);
+                       userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
+                       request.set_swcname(curItem->text(0).toStdString());
 
                        proto::DeleteSwcResponse response;
                        grpc::ClientContext context;
                        auto status = RpcCall::getInstance().Stub()->DeleteSwc(&context,request,&response);
                        if(status.ok()) {
-                           if(response.status()) {
+                           if(response.metainfo().status()) {
                                QMessageBox::information(this,"Info","Delete Swc successfully!");
                                m_MainWindow->getRightClientView().closeWithoutSavingSwc(data.name);
                                m_MainWindow->getRightClientView().refreshAllOpenedProjectMetaInfo();
                                refreshTree();
                            }else {
-                               QMessageBox::critical(this,"Error",QString::fromStdString(response.message()));
+                               QMessageBox::critical(this,"Error",QString::fromStdString(response.metainfo().message()));
                            }
                        }else{
                            QMessageBox::critical(this,"Error",QString::fromStdString(status.error_message()));
@@ -412,19 +416,21 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
               if(result == QMessageBox::StandardButton::Ok) {
                   if(data.type == MetaInfoType::eDailyStatistics) {
                       proto::DeleteDailyStatisticsRequest request;
-                      request.mutable_userinfo()->CopyFrom(CachedProtoData::getInstance().CachedUserMetaInfo);
-                      request.mutable_dailystatisticsinfo()->set_name(curItem->text(0).toStdString());
+                      auto* userInfo = request.mutable_userverifyinfo();
+                      userInfo->set_username(CachedProtoData::getInstance().UserName);
+                      userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
+                      request.set_dailystatisticsname(curItem->text(0).toStdString());
 
                       proto::DeleteDailyStatisticsResponse response;
                       grpc::ClientContext context;
                       auto status = RpcCall::getInstance().Stub()->DeleteDailyStatistics(&context,request,&response);
                       if(status.ok()) {
-                          if(response.status()) {
+                          if(response.metainfo().status()) {
                               QMessageBox::information(this,"Info","Delete DailyStatistics successfully!");
                               m_MainWindow->getRightClientView().closeWithoutSavingDailyStatistics(data.name);
                               refreshTree();
                           }else {
-                              QMessageBox::critical(this,"Error",QString::fromStdString(response.message()));
+                              QMessageBox::critical(this,"Error",QString::fromStdString(response.metainfo().message()));
                           }
                       }else{
                           QMessageBox::critical(this,"Error",QString::fromStdString(status.error_message()));

@@ -54,7 +54,9 @@ MainWindow::MainWindow(QWidget *parent) :
     m_HeartBeatTimer->setInterval(15000);
     connect(m_HeartBeatTimer,&QTimer::timeout,this,[this]() {
         proto::UserOnlineHeartBeatNotification notification;
-        notification.mutable_userinfo()->CopyFrom(CachedProtoData::getInstance().CachedUserMetaInfo);
+        auto* userInfo = notification.mutable_userverifyinfo();
+        userInfo->set_username(CachedProtoData::getInstance().UserName);
+        userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
         notification.set_heartbeattime(std::chrono::system_clock::now().time_since_epoch().count());
         proto::UserOnlineHeartBeatResponse response;
         grpc::ClientContext context;

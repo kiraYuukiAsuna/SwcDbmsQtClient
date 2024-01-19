@@ -27,8 +27,9 @@ ViewCreateSwc::ViewCreateSwc(QWidget* parent) : QDialog(parent), ui(new Ui::View
 
         if(WrappedCall::createSwcMeta(ui->Name->text().trimmed().toStdString(),ui->Description->text().toStdString(),response,this)){
             accept();
+            return true;
         }
-
+        return false;
     });
 }
 

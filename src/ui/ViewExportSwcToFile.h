@@ -12,12 +12,12 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class ViewEportSwcToFile; }
 QT_END_NAMESPACE
 
-class ViewEportSwcToFile : public QDialog {
+class ViewExportSwcToFile : public QDialog {
 Q_OBJECT
 
 public:
-    explicit ViewEportSwcToFile(std::vector<ExportSwcData> exportSwcData, bool getDataFromServer, QWidget *parent = nullptr);
-    ~ViewEportSwcToFile() override;
+    explicit ViewExportSwcToFile(std::vector<ExportSwcData> exportSwcData, bool getDataFromServer, QWidget *parent = nullptr);
+    ~ViewExportSwcToFile() override;
 
 private:
     Ui::ViewEportSwcToFile *ui;

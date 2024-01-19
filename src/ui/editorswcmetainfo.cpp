@@ -34,7 +34,9 @@ bool EditorSwcMetaInfo::save() {
     proto::UpdateSwcResponse response;
     grpc::ClientContext context;
 
-    request.mutable_userinfo()->CopyFrom(CachedProtoData::getInstance().CachedUserMetaInfo);
+    auto* userInfo = request.mutable_userverifyinfo();
+    userInfo->set_username(CachedProtoData::getInstance().UserName);
+    userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
     request.mutable_swcinfo()->CopyFrom(m_SwcMetaInfo);
 
     if(ui->Description->text().isEmpty()) {
@@ -46,11 +48,11 @@ bool EditorSwcMetaInfo::save() {
 
     auto status = RpcCall::getInstance().Stub()->UpdateSwc(&context,request,&response);
     if(status.ok()) {
-        if(response.status()) {
+        if(response.metainfo().status()) {
             QMessageBox::information(this,"Info","Update Swc Successfully!");
             return true;
         }
-        QMessageBox::critical(this,"Error",QString::fromStdString(response.message()));
+        QMessageBox::critical(this,"Error",QString::fromStdString(response.metainfo().message()));
     }
     QMessageBox::critical(this,"Error",QString::fromStdString(status.error_message()));
     return false;

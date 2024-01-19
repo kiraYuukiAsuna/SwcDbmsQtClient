@@ -1,7 +1,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QMessageBox>
-#include "vieweportswctofile.h"
+#include "ViewExportSwcToFile.h"
 #include "ui_ViewEportSwcToFile.h"
 #include "src/framework/defination/ImageDefination.h"
 #include "src/swcio/SwcIO.h"
@@ -9,7 +9,7 @@
 #include "src/framework/service/WrappedCall.h"
 
 
-ViewEportSwcToFile::ViewEportSwcToFile(std::vector<ExportSwcData> exportSwcData, bool getDataFromServer, QWidget *parent) :
+ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData> exportSwcData, bool getDataFromServer, QWidget *parent) :
     QDialog(parent), ui(new Ui::ViewEportSwcToFile) {
     ui->setupUi(this);
     std::string stylesheet = std::string("QListWidget::indicator:checked{image:url(")
@@ -106,7 +106,7 @@ ViewEportSwcToFile::ViewEportSwcToFile(std::vector<ExportSwcData> exportSwcData,
                     if(m_GetDataFromServer){
                         proto::GetSwcFullNodeDataResponse response;
                         if(!WrappedCall::getSwcFullNodeData(m_ExportSwcData[i].swcMetaInfo.name(), response, this)){
-                            QMessageBox::critical(this,"Error",QString::fromStdString(response.message()));
+                            QMessageBox::critical(this,"Error",QString::fromStdString(response.metainfo().message()));
                             ui->ResultTable->setItem(i,3,
                                                      new QTableWidgetItem("Get Data From Server Failed"));
                             ui->ResultTable->setItem(i,4,
@@ -157,7 +157,7 @@ ViewEportSwcToFile::ViewEportSwcToFile(std::vector<ExportSwcData> exportSwcData,
                     if(m_GetDataFromServer){
                         proto::GetSwcFullNodeDataResponse response;
                         if(!WrappedCall::getSwcFullNodeData(m_ExportSwcData[i].swcMetaInfo.name(), response, this)){
-                            QMessageBox::critical(this,"Error",QString::fromStdString(response.message()));
+                            QMessageBox::critical(this,"Error",QString::fromStdString(response.metainfo().message()));
                             ui->ResultTable->setItem(i,3,
                                                      new QTableWidgetItem("Get Data From Server Failed"));
                             ui->ResultTable->setItem(i,4,
@@ -229,6 +229,6 @@ ViewEportSwcToFile::ViewEportSwcToFile(std::vector<ExportSwcData> exportSwcData,
 
 }
 
-ViewEportSwcToFile::~ViewEportSwcToFile() {
+ViewExportSwcToFile::~ViewExportSwcToFile() {
     delete ui;
 }

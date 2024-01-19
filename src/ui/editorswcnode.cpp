@@ -4,7 +4,7 @@
 #include "src/framework/service/WrappedCall.h"
 #include "src/framework/defination/ImageDefination.h"
 #include "viewswcnodedata.h"
-#include "vieweportswctofile.h"
+#include "ViewExportSwcToFile.h"
 
 EditorSwcNode::EditorSwcNode(const std::string &swcName, QWidget *parent) :
         QWidget(parent), ui(new Ui::EditorSwcNode) {
@@ -16,6 +16,9 @@ EditorSwcNode::EditorSwcNode(const std::string &swcName, QWidget *parent) :
     ui->UserList->setStyleSheet(QString::fromStdString(stylesheet));
 
     m_SwcName = swcName;
+
+    ui->StartTime->setDateTime(QDateTime(QDate::currentDate(),QTime::currentTime()));
+    ui->EndTime->setDateTime(QDateTime(QDate::currentDate(),QTime::currentTime()));
 
     connect(ui->AddData,&QPushButton::clicked,this,[this](){
         ViewSwcNodeData editor(this);
@@ -110,7 +113,7 @@ EditorSwcNode::EditorSwcNode(const std::string &swcName, QWidget *parent) :
         data.swcMetaInfo = response.swcinfo();
         dataList.push_back(data);
 
-        ViewEportSwcToFile view(dataList,false,this);
+        ViewExportSwcToFile view(dataList,false,this);
         view.exec();
     });
 

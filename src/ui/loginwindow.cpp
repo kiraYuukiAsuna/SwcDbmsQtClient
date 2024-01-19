@@ -79,7 +79,7 @@ bool LoginWindow::doLogin(QString userName, QString password, bool slientMode) {
     proto::UserLoginResponse response;
     auto status = rpcCall.Stub()->UserLogin(&context, request, &response);
     if(status.ok()){
-        if(response.status()) {
+        if(response.metainfo().status()) {
             if(!slientMode) {
                 QMessageBox::information(this,"Info","Login Successfully!");
             }
@@ -103,7 +103,7 @@ bool LoginWindow::doLogin(QString userName, QString password, bool slientMode) {
             accept();
             return true;
         }else {
-            QMessageBox::warning(this,"Info","Login Failed!" + QString::fromStdString(response.message()));
+            QMessageBox::warning(this,"Info","Login Failed!" + QString::fromStdString(response.metainfo().message()));
         }
 
     }else{

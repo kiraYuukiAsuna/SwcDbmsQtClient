@@ -83,7 +83,9 @@ ViewCreateProject::ViewCreateProject(QWidget* parent) : QDialog(parent), ui(new 
         }
 
         proto::CreateProjectRequest request;
-        request.mutable_userinfo()->CopyFrom(CachedProtoData::getInstance().CachedUserMetaInfo);
+        auto* userInfo = request.mutable_userverifyinfo();
+        userInfo->set_username(CachedProtoData::getInstance().UserName);
+        userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
         request.mutable_projectinfo()->set_name(ui->Name->text().trimmed().toStdString());
         request.mutable_projectinfo()->set_description(ui->Description->text().toStdString());
         request.mutable_projectinfo()->set_workmode(ui->WorkMode->text().toStdString());
@@ -116,11 +118,11 @@ ViewCreateProject::ViewCreateProject(QWidget* parent) : QDialog(parent), ui(new 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->CreateProject(&context,request,&response);
         if(status.ok()) {
-            if(response.status()) {
+            if(response.metainfo().status()) {
                 QMessageBox::information(parent,"Info","Create Project Successfully!");
                 accept();
             }else {
-                QMessageBox::critical(parent,"Error",QString::fromStdString(response.message()));
+                QMessageBox::critical(parent,"Error",QString::fromStdString(response.metainfo().message()));
             }
         }else{
             QMessageBox::critical(parent,"Error",QString::fromStdString(status.error_message()));

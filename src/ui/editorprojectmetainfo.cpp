@@ -28,8 +28,9 @@ bool EditorProjectMetaInfo::save() {
     proto::UpdateProjectRequest request;
     proto::UpdateProjectResponse response;
     grpc::ClientContext context;
-
-    request.mutable_userinfo()->CopyFrom(CachedProtoData::getInstance().CachedUserMetaInfo);
+    auto* userInfo = request.mutable_userverifyinfo();
+    userInfo->set_username(CachedProtoData::getInstance().UserName);
+    userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
     request.mutable_projectinfo()->CopyFrom(m_ProjectMetaInfo);
 
     if (ui->Dsecription->text().isEmpty()) {
@@ -72,11 +73,11 @@ bool EditorProjectMetaInfo::save() {
 
     auto status = RpcCall::getInstance().Stub()->UpdateProject(&context, request, &response);
     if (status.ok()) {
-        if (response.status()) {
+        if (response.metainfo().status()) {
             QMessageBox::information(this, "Info", "Update Project Successfully!");
             return true;
         }
-        QMessageBox::critical(this, "Error", QString::fromStdString(response.message()));
+        QMessageBox::critical(this, "Error", QString::fromStdString(response.metainfo().message()));
     }
     QMessageBox::critical(this, "Error", QString::fromStdString(status.error_message()));
     return false;

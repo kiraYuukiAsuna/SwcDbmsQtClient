@@ -65,13 +65,13 @@ EditorUserSettings::EditorUserSettings(LeftClientView *leftClientView) :
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->UpdateUser(&context,request,&response);
         if(status.ok()){
-            if(response.status()){
+            if(response.metainfo().status()){
                 CachedProtoData::getInstance().CachedUserMetaInfo.CopyFrom(response.userinfo());
                 QMessageBox::information(this,"Notice","Update user info success!");
                 m_LeftClientView->refreshTree();
                 accept();
             }else{
-                QMessageBox::critical(this,"Error",QString::fromStdString(response.message()));
+                QMessageBox::critical(this,"Error",QString::fromStdString(response.metainfo().message()));
             }
         }else{
             QMessageBox::critical(this,"Error",QString::fromStdString(status.error_message()));
@@ -86,7 +86,9 @@ EditorUserSettings::~EditorUserSettings() {
 
 void EditorUserSettings::getUserMetaInfo() {
     proto::GetUserRequest request;
-    request.mutable_userinfo()->set_name(CachedProtoData::getInstance().CachedUserMetaInfo.name());
+    auto* userInfo = request.mutable_userverifyinfo();
+    userInfo->set_username(CachedProtoData::getInstance().UserName);
+    userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
 
     proto::GetUserResponse response;
 

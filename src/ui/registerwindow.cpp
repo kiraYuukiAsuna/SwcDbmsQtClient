@@ -51,11 +51,11 @@ void RegisterWindow::onRegisterBtnClicked(bool checked) {
     proto::CreateUserResponse response;
     auto status = rpcCall.Stub()->CreateUser(&context, request, &response);
     if(status.ok()){
-        if(response.status()) {
+        if(response.metainfo().status()) {
             QMessageBox::information(this,"Info","Register Successfully!");
             accept();
         }else {
-            QMessageBox::warning(this,"Info","Register Failed!" + QString::fromStdString(response.message()));
+            QMessageBox::warning(this,"Info","Register Failed!" + QString::fromStdString(response.metainfo().message()));
         }
 
     }else{
