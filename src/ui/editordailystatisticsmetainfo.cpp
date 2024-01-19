@@ -29,7 +29,7 @@ void EditorDailyStatisticsMetaInfo::refresh(proto::GetDailyStatisticsResponse& r
     ui->Id->setReadOnly(true);
     ui->Uuid->setText(QString::fromStdString(m_DailyStatisticsMetaInfo.base().uuid()));
     ui->Uuid->setReadOnly(true);
-    ui->ApiVersion->setText(QString::fromStdString(m_DailyStatisticsMetaInfo.base().apiversion()));
+    ui->ApiVersion->setText(QString::fromStdString(m_DailyStatisticsMetaInfo.base().dataaccessmodelversion()));
     ui->ApiVersion->setReadOnly(true);
     ui->Name->setText(QString::fromStdString(m_DailyStatisticsMetaInfo.name()));
     ui->Name->setReadOnly(true);
@@ -66,6 +66,7 @@ void EditorDailyStatisticsMetaInfo::refresh(proto::GetDailyStatisticsResponse& r
 
 bool EditorDailyStatisticsMetaInfo::save() {
     proto::UpdateDailyStatisticsRequest request;
+    request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
     proto::UpdateDailyStatisticsResponse response;
     grpc::ClientContext context;
 

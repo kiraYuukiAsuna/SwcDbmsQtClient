@@ -41,7 +41,11 @@ EditorUserSettings::EditorUserSettings(LeftClientView *leftClientView) :
     });
     connect(ui->OKBtn,&QPushButton::clicked,this,[this](){
         proto::UpdateUserRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         proto::UpdateUserResponse response;
+        auto* userInfo = request.mutable_userverifyinfo();
+        userInfo->set_username(CachedProtoData::getInstance().UserName);
+        userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
         request.mutable_userinfo()->CopyFrom(CachedProtoData::getInstance().CachedUserMetaInfo);
 
         if(ui->Description->text().trimmed().isEmpty()){
@@ -86,9 +90,11 @@ EditorUserSettings::~EditorUserSettings() {
 
 void EditorUserSettings::getUserMetaInfo() {
     proto::GetUserRequest request;
+    request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
     auto* userInfo = request.mutable_userverifyinfo();
     userInfo->set_username(CachedProtoData::getInstance().UserName);
     userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
+    request.set_username(CachedProtoData::getInstance().UserName);
 
     proto::GetUserResponse response;
 
@@ -97,12 +103,13 @@ void EditorUserSettings::getUserMetaInfo() {
     auto result = RpcCall::getInstance().Stub()->GetUser(&context,request,&response);
     if(result.ok()) {
         CachedProtoData::getInstance().CachedUserMetaInfo.CopyFrom(response.userinfo());
+        std::cout<<response.userinfo().DebugString();
 
         ui->Id->setText(QString::fromStdString(response.userinfo().base()._id()));
         ui->Id->setReadOnly(true);
         ui->Uuid->setText(QString::fromStdString(response.userinfo().base().uuid()));
         ui->Uuid->setReadOnly(true);
-        ui->ApiVersion->setText(QString::fromStdString(response.userinfo().base().apiversion()));
+        ui->ApiVersion->setText(QString::fromStdString(response.userinfo().base().dataaccessmodelversion()));
         ui->ApiVersion->setReadOnly(true);
         ui->Name->setText(QString::fromStdString(response.userinfo().name()));
         ui->Name->setReadOnly(true);

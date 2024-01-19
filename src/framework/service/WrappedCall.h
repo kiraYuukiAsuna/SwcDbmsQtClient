@@ -12,6 +12,7 @@ public:
     static bool getAllProjectMetaInfo(proto::GetAllProjectResponse& response, QWidget* parent){
         grpc::ClientContext context;
         proto::GetAllProjectRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         auto* userInfo = request.mutable_userverifyinfo();
         userInfo->set_username(CachedProtoData::getInstance().UserName);
         userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
@@ -34,6 +35,7 @@ public:
     static bool getAllSwcMetaInfo(proto::GetAllSwcMetaInfoResponse& response, QWidget* parent){
         grpc::ClientContext context;
         proto::GetAllSwcMetaInfoRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         auto* userInfo = request.mutable_userverifyinfo();
         userInfo->set_username(CachedProtoData::getInstance().UserName);
         userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
@@ -56,6 +58,7 @@ public:
     static bool getAllDailyStatisticsMetaInfo(proto::GetAllDailyStatisticsResponse& response, QWidget* parent){
         grpc::ClientContext context;
         proto::GetAllDailyStatisticsRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         auto* userInfo = request.mutable_userverifyinfo();
         userInfo->set_username(CachedProtoData::getInstance().UserName);
         userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
@@ -78,6 +81,7 @@ public:
     static bool getAllUserMetaInfo(proto::GetAllUserResponse& response, QWidget* parent){
         grpc::ClientContext context;
         proto::GetAllUserRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         auto* userInfo = request.mutable_userverifyinfo();
         userInfo->set_username(CachedProtoData::getInstance().UserName);
         userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
@@ -99,6 +103,7 @@ public:
 
     static bool getProjectMetaInfoByName(const std::string& projectName, proto::GetProjectResponse& response, QWidget* parent) {
         proto::GetProjectRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         auto* userInfo = request.mutable_userverifyinfo();
         userInfo->set_username(CachedProtoData::getInstance().UserName);
         userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
@@ -120,6 +125,7 @@ public:
 
     static bool getSwcMetaInfoByName(const std::string& swcName, proto::GetSwcMetaInfoResponse& response, QWidget* parent){
         proto::GetSwcMetaInfoRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         auto* userInfo = request.mutable_userverifyinfo();
         userInfo->set_username(CachedProtoData::getInstance().UserName);
         userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
@@ -142,6 +148,7 @@ public:
 
     static bool getDailyStatisticsmMetaInfoByName(const std::string& dailyStatisticsName, proto::GetDailyStatisticsResponse& response, QWidget* parent) {
         proto::GetDailyStatisticsRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         auto* userInfo = request.mutable_userverifyinfo();
         userInfo->set_username(CachedProtoData::getInstance().UserName);
         userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
@@ -164,6 +171,7 @@ public:
 
     static bool getSwcFullNodeData(const std::string& swcName, proto::GetSwcFullNodeDataResponse& response, QWidget* parent) {
         proto::GetSwcFullNodeDataRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         auto* userInfo = request.mutable_userverifyinfo();
         userInfo->set_username(CachedProtoData::getInstance().UserName);
         userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
@@ -186,6 +194,7 @@ public:
 
     static bool getSwcNodeDataListByTimeAndUserResponse(const std::string& swcName, const std::string& userName, google::protobuf::Timestamp& startTime, google::protobuf::Timestamp& endTime, proto::GetSwcNodeDataListByTimeAndUserResponse& response, QWidget* parent) {
         proto::GetSwcNodeDataListByTimeAndUserRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         auto* userInfo = request.mutable_userverifyinfo();
         userInfo->set_username(CachedProtoData::getInstance().UserName);
         userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
@@ -211,6 +220,7 @@ public:
 
     static bool addSwcNodeData(const std::string& swcName, proto::SwcDataV1& swcData, proto::CreateSwcNodeDataResponse& response, QWidget* parent) {
         proto::CreateSwcNodeDataRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         auto* userInfo = request.mutable_userverifyinfo();
         userInfo->set_username(CachedProtoData::getInstance().UserName);
         userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
@@ -233,6 +243,7 @@ public:
 
     static bool modifySwcNodeData(const std::string& swcName, proto::SwcNodeDataV1& swcNodeData, proto::UpdateSwcNodeDataResponse & response, QWidget* parent) {
         proto::UpdateSwcNodeDataRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         auto* userInfo = request.mutable_userverifyinfo();
         userInfo->set_username(CachedProtoData::getInstance().UserName);
         userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
@@ -255,6 +266,7 @@ public:
 
     static bool deleteSwcNodeData(const std::string& swcName, proto::SwcDataV1& swcData, proto::DeleteSwcNodeDataResponse& response, QWidget* parent) {
         proto::DeleteSwcNodeDataRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         auto* userInfo = request.mutable_userverifyinfo();
         userInfo->set_username(CachedProtoData::getInstance().UserName);
         userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
@@ -277,6 +289,7 @@ public:
 
     static bool createSwcMeta(const std::string& name, const std::string& description , proto::CreateSwcResponse& response, QWidget* parent){
         proto::CreateSwcRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         grpc::ClientContext context;
         auto* userInfo = request.mutable_userverifyinfo();
         userInfo->set_username(CachedProtoData::getInstance().UserName);

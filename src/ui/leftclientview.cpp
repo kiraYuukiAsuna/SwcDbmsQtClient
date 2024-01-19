@@ -63,6 +63,7 @@ LeftClientView::LeftClientView(MainWindow* mainWindow) : QWidget(mainWindow), ui
                                             QMessageBox::StandardButton::Cancel);
         if (btn == QMessageBox::StandardButton::Ok) {
             proto::UserLogoutRequest request;
+            request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
             request.mutable_userverifyinfo()->set_username(CachedProtoData::getInstance().UserName);
             request.mutable_userverifyinfo()->set_usertoken(CachedProtoData::getInstance().UserToken);
             proto::UserLogoutResponse response;
@@ -233,6 +234,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
         if(result == QMessageBox::StandardButton::Ok) {
             if(data.type == MetaInfoType::eProject) {
                 proto::DeleteProjectRequest request;
+                request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
                 auto* userInfo = request.mutable_userverifyinfo();
                 userInfo->set_username(CachedProtoData::getInstance().UserName);
                 userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
@@ -369,6 +371,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
                if(result == QMessageBox::StandardButton::Ok) {
                    if(data.type == MetaInfoType::eSwc) {
                        proto::DeleteSwcRequest request;
+                       request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
                        auto* userInfo = request.mutable_userverifyinfo();
                        userInfo->set_username(CachedProtoData::getInstance().UserName);
                        userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
@@ -416,6 +419,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
               if(result == QMessageBox::StandardButton::Ok) {
                   if(data.type == MetaInfoType::eDailyStatistics) {
                       proto::DeleteDailyStatisticsRequest request;
+                      request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
                       auto* userInfo = request.mutable_userverifyinfo();
                       userInfo->set_username(CachedProtoData::getInstance().UserName);
                       userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);

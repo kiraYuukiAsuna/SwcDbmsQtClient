@@ -83,6 +83,7 @@ ViewCreateProject::ViewCreateProject(QWidget* parent) : QDialog(parent), ui(new 
         }
 
         proto::CreateProjectRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         auto* userInfo = request.mutable_userverifyinfo();
         userInfo->set_username(CachedProtoData::getInstance().UserName);
         userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);

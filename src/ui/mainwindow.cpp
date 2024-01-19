@@ -9,6 +9,7 @@
 #include <Message/Request.pb.h>
 #include <Message/Response.pb.h>
 
+#include "viewimportswcfromfile.h"
 #include "src/framework/service/CachedProtoData.h"
 #include "src/framework/service/RpcCall.h"
 
@@ -42,11 +43,11 @@ MainWindow::MainWindow(QWidget *parent) :
     menuImportSwcFile->setText("Import Swc File");
     menuImportSwcFile->setIcon(QIcon(Image::ImageImport));
     menuFile->addAction(menuImportSwcFile);
-
-    auto* menuExportToSwcFile = new QAction(menuFile);
-    menuExportToSwcFile->setText("Export Swc File");
-    menuExportToSwcFile->setIcon(QIcon(Image::ImageExport));
-    menuFile->addAction(menuExportToSwcFile);
+    connect(menuImportSwcFile,&QAction::triggered,this,[&]() {
+        ViewImportSwcFromFile view(this);
+        view.exec();
+        m_LeftClientView->refreshTree();
+    });
 
     setMenuBar(menuBar);
 

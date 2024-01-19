@@ -26,6 +26,7 @@ EditorProjectMetaInfo::~EditorProjectMetaInfo() {
 
 bool EditorProjectMetaInfo::save() {
     proto::UpdateProjectRequest request;
+    request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
     proto::UpdateProjectResponse response;
     grpc::ClientContext context;
     auto* userInfo = request.mutable_userverifyinfo();
@@ -90,7 +91,7 @@ void EditorProjectMetaInfo::refresh(proto::GetProjectResponse &response) {
     ui->Id->setReadOnly(true);
     ui->Uuid->setText(QString::fromStdString(m_ProjectMetaInfo.base().uuid()));
     ui->Uuid->setReadOnly(true);
-    ui->ApiVersion->setText(QString::fromStdString(m_ProjectMetaInfo.base().apiversion()));
+    ui->ApiVersion->setText(QString::fromStdString(m_ProjectMetaInfo.base().dataaccessmodelversion()));
     ui->ApiVersion->setReadOnly(true);
     ui->Name->setText(QString::fromStdString(m_ProjectMetaInfo.name()));
     ui->Name->setReadOnly(true);

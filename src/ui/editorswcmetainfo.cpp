@@ -31,6 +31,7 @@ EditorSwcMetaInfo::~EditorSwcMetaInfo() {
 
 bool EditorSwcMetaInfo::save() {
     proto::UpdateSwcRequest request;
+    request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
     proto::UpdateSwcResponse response;
     grpc::ClientContext context;
 
@@ -65,7 +66,7 @@ void EditorSwcMetaInfo::refresh(proto::GetSwcMetaInfoResponse& response) {
     ui->Id->setReadOnly(true);
     ui->Uuid->setText(QString::fromStdString(m_SwcMetaInfo.base().uuid()));
     ui->Uuid->setReadOnly(true);
-    ui->ApiVersion->setText(QString::fromStdString(m_SwcMetaInfo.base().apiversion()));
+    ui->ApiVersion->setText(QString::fromStdString(m_SwcMetaInfo.base().dataaccessmodelversion()));
     ui->ApiVersion->setReadOnly(true);
     ui->Name->setText(QString::fromStdString(m_SwcMetaInfo.name()));
     ui->Name->setReadOnly(true);

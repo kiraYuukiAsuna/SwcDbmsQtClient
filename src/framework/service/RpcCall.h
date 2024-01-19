@@ -11,6 +11,7 @@ public:
     void initialize(const std::string& endpoint) {
         m_Endpoint = endpoint;
         grpc::ChannelArguments channelArgs;
+        channelArgs.SetCompressionAlgorithm(GRPC_COMPRESS_GZIP);
         channelArgs.SetInt(GRPC_ARG_MAX_RECEIVE_MESSAGE_LENGTH, 256 * 1024 * 1024); // 256mb
         channelArgs.SetInt(GRPC_ARG_MAX_SEND_MESSAGE_LENGTH, 256 * 1024 * 1024); // 256mb
 
@@ -37,6 +38,8 @@ public:
     auto& Stub() {
         return m_Stub;
     }
+
+    inline static std::string ApiVersion = "2024.01.19";
 
 private:
     RpcCall() {

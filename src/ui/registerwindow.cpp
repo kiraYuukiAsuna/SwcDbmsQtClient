@@ -44,6 +44,7 @@ void RegisterWindow::onRegisterBtnClicked(bool checked) {
 
     grpc::ClientContext context;
     proto::CreateUserRequest request;
+    request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
     request.mutable_userinfo()->set_name(ui->userNameEditor->text().trimmed().toStdString());
     request.mutable_userinfo()->set_password(ui->repeatPasswordEditor->text().trimmed().toStdString());
 

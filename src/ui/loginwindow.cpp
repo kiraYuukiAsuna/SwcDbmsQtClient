@@ -72,6 +72,7 @@ void LoginWindow::onRegisterBtnClicked(bool checked) {
 bool LoginWindow::doLogin(QString userName, QString password, bool slientMode) {
     grpc::ClientContext context;
     proto::UserLoginRequest request;
+    request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
     request.set_username(userName.toStdString());
     request.set_password(password.toStdString());
 
