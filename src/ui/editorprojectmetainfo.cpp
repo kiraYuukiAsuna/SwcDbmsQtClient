@@ -91,8 +91,8 @@ void EditorProjectMetaInfo::refresh(proto::GetProjectResponse &response) {
     ui->Id->setReadOnly(true);
     ui->Uuid->setText(QString::fromStdString(m_ProjectMetaInfo.base().uuid()));
     ui->Uuid->setReadOnly(true);
-    ui->ApiVersion->setText(QString::fromStdString(m_ProjectMetaInfo.base().dataaccessmodelversion()));
-    ui->ApiVersion->setReadOnly(true);
+    ui->DataAccessModelVersion->setText(QString::fromStdString(m_ProjectMetaInfo.base().dataaccessmodelversion()));
+    ui->DataAccessModelVersion->setReadOnly(true);
     ui->Name->setText(QString::fromStdString(m_ProjectMetaInfo.name()));
     ui->Name->setReadOnly(true);
     ui->Creator->setText(QString::fromStdString(m_ProjectMetaInfo.creator()));

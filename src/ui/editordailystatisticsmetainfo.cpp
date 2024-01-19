@@ -29,8 +29,8 @@ void EditorDailyStatisticsMetaInfo::refresh(proto::GetDailyStatisticsResponse& r
     ui->Id->setReadOnly(true);
     ui->Uuid->setText(QString::fromStdString(m_DailyStatisticsMetaInfo.base().uuid()));
     ui->Uuid->setReadOnly(true);
-    ui->ApiVersion->setText(QString::fromStdString(m_DailyStatisticsMetaInfo.base().dataaccessmodelversion()));
-    ui->ApiVersion->setReadOnly(true);
+    ui->DataAccessModelVersion->setText(QString::fromStdString(m_DailyStatisticsMetaInfo.base().dataaccessmodelversion()));
+    ui->DataAccessModelVersion->setReadOnly(true);
     ui->Name->setText(QString::fromStdString(m_DailyStatisticsMetaInfo.name()));
     ui->Name->setReadOnly(true);
     ui->Description->setText(QString::fromStdString(m_DailyStatisticsMetaInfo.description()));

@@ -109,8 +109,8 @@ void EditorUserSettings::getUserMetaInfo() {
         ui->Id->setReadOnly(true);
         ui->Uuid->setText(QString::fromStdString(response.userinfo().base().uuid()));
         ui->Uuid->setReadOnly(true);
-        ui->ApiVersion->setText(QString::fromStdString(response.userinfo().base().dataaccessmodelversion()));
-        ui->ApiVersion->setReadOnly(true);
+        ui->DataAccessModelVersion->setText(QString::fromStdString(response.userinfo().base().dataaccessmodelversion()));
+        ui->DataAccessModelVersion->setReadOnly(true);
         ui->Name->setText(QString::fromStdString(response.userinfo().name()));
         ui->Name->setReadOnly(true);
         ui->Description->setText(QString::fromStdString(response.userinfo().description()));
