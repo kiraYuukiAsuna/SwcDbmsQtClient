@@ -97,13 +97,13 @@ void EditorUserSettings::getUserMetaInfo() {
     request.set_username(CachedProtoData::getInstance().UserName);
 
     proto::GetUserResponse response;
-
     grpc::ClientContext context;
 
     auto result = RpcCall::getInstance().Stub()->GetUser(&context,request,&response);
     if(result.ok()) {
-        CachedProtoData::getInstance().CachedUserMetaInfo.CopyFrom(response.userinfo());
         std::cout<<response.userinfo().DebugString();
+
+        CachedProtoData::getInstance().CachedUserMetaInfo.CopyFrom(response.userinfo());
 
         ui->Id->setText(QString::fromStdString(response.userinfo().base()._id()));
         ui->Id->setReadOnly(true);
