@@ -12,7 +12,7 @@
 #include "src/framework/config/AppConfig.h"
 #include "src/framework/defination/ImageDefination.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     setbuf(stdout, nullptr);
 
     QApplication a(argc, argv);
@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     const int loadedFontID = QFontDatabase::addApplicationFont(fontPath);
     if (const QStringList loadedFontFamilies = QFontDatabase::applicationFontFamilies(loadedFontID);
         !loadedFontFamilies.empty()) {
-        const QString& sansCNFamily = loadedFontFamilies.at(0);
+        const QString&sansCNFamily = loadedFontFamilies.at(0);
         QFont defaultFont = QApplication::font();
         defaultFont.setFamily(sansCNFamily);
         defaultFont.setPixelSize(14);
@@ -50,11 +50,11 @@ int main(int argc, char *argv[]) {
     auto serverIP = AppConfig::getInstance().getConfig(AppConfig::ConfigItem::eServerIP);
     auto serverPort = AppConfig::getInstance().getConfig(AppConfig::ConfigItem::eServerPort);
 
-    if(serverIP.empty()){
+    if (serverIP.empty()) {
         serverIP = "127.0.0.1";
     }
 
-    if(serverPort.empty()){
+    if (serverPort.empty()) {
         serverPort = "8088";
     }
 
@@ -62,16 +62,16 @@ int main(int argc, char *argv[]) {
 
     RpcCall::getInstance().initialize(endPoint);
 
-    if(LoginWindow loginWindow{}; loginWindow.exec() != QDialog::Accepted) {
+    if (LoginWindow loginWindow{}; loginWindow.exec() != QDialog::Accepted) {
         return -1;
     }
 
     MainWindow mainwindow{};
-    mainwindow.resize(1920/2, 1080/2);
+    mainwindow.resize(1920 / 2, 1080 / 2);
     mainwindow.show();
 
     auto exitCode = QApplication::exec();
-    if(exitCode == RestartCode) {
+    if (exitCode == RestartCode) {
         QProcess::startDetached(qApp->applicationFilePath(), QStringList());
     }
 }

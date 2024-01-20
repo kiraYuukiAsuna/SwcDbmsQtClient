@@ -143,7 +143,7 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <widget class="QTableWidget" name="SwcNodeDataTable"/>
+        <widget class="QTableView" name="SwcNodeDataTable"/>
        </item>
       </layout>
      </item>

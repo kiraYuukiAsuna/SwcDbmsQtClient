@@ -29,7 +29,14 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QSpinBox" name="N"/>
+        <widget class="QSpinBox" name="N">
+         <property name="minimum">
+          <number>-999999999</number>
+         </property>
+         <property name="maximum">
+          <number>999999999</number>
+         </property>
+        </widget>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_2">
@@ -39,7 +46,14 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QSpinBox" name="Type"/>
+        <widget class="QSpinBox" name="Type">
+         <property name="minimum">
+          <number>-999999999</number>
+         </property>
+         <property name="maximum">
+          <number>999999999</number>
+         </property>
+        </widget>
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="label_3">
@@ -49,7 +63,17 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QDoubleSpinBox" name="X"/>
+        <widget class="QDoubleSpinBox" name="X">
+         <property name="decimals">
+          <number>6</number>
+         </property>
+         <property name="minimum">
+          <double>-999999999.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>999999999.000000000000000</double>
+         </property>
+        </widget>
        </item>
        <item row="3" column="0">
         <widget class="QLabel" name="label_4">
@@ -59,7 +83,17 @@
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QDoubleSpinBox" name="Y"/>
+        <widget class="QDoubleSpinBox" name="Y">
+         <property name="decimals">
+          <number>6</number>
+         </property>
+         <property name="minimum">
+          <double>-999999999.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>999999999.000000000000000</double>
+         </property>
+        </widget>
        </item>
        <item row="4" column="0">
         <widget class="QLabel" name="label_5">
@@ -69,7 +103,17 @@
         </widget>
        </item>
        <item row="4" column="1">
-        <widget class="QDoubleSpinBox" name="Z"/>
+        <widget class="QDoubleSpinBox" name="Z">
+         <property name="decimals">
+          <number>6</number>
+         </property>
+         <property name="minimum">
+          <double>-999999999.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>999999999.000000000000000</double>
+         </property>
+        </widget>
        </item>
        <item row="5" column="0">
         <widget class="QLabel" name="label_6">
@@ -79,7 +123,17 @@
         </widget>
        </item>
        <item row="5" column="1">
-        <widget class="QDoubleSpinBox" name="Radius"/>
+        <widget class="QDoubleSpinBox" name="Radius">
+         <property name="decimals">
+          <number>6</number>
+         </property>
+         <property name="minimum">
+          <double>-999999999.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>999999999.000000000000000</double>
+         </property>
+        </widget>
        </item>
        <item row="6" column="0">
         <widget class="QLabel" name="label_7">
@@ -89,7 +143,14 @@
         </widget>
        </item>
        <item row="6" column="1">
-        <widget class="QSpinBox" name="Parent"/>
+        <widget class="QSpinBox" name="Parent">
+         <property name="minimum">
+          <number>-999999999</number>
+         </property>
+         <property name="maximum">
+          <number>999999999</number>
+         </property>
+        </widget>
        </item>
        <item row="7" column="0">
         <widget class="QLabel" name="label_8">
@@ -106,10 +167,24 @@
         </widget>
        </item>
        <item row="7" column="1">
-        <widget class="QSpinBox" name="Seg_id"/>
+        <widget class="QSpinBox" name="Seg_id">
+         <property name="minimum">
+          <number>-999999999</number>
+         </property>
+         <property name="maximum">
+          <number>999999999</number>
+         </property>
+        </widget>
        </item>
        <item row="8" column="1">
-        <widget class="QSpinBox" name="Level"/>
+        <widget class="QSpinBox" name="Level">
+         <property name="minimum">
+          <number>-999999999</number>
+         </property>
+         <property name="maximum">
+          <number>999999999</number>
+         </property>
+        </widget>
        </item>
        <item row="9" column="0">
         <widget class="QLabel" name="label_10">
@@ -133,13 +208,34 @@
         </widget>
        </item>
        <item row="9" column="1">
-        <widget class="QSpinBox" name="Mode"/>
+        <widget class="QSpinBox" name="Mode">
+         <property name="minimum">
+          <number>-999999999</number>
+         </property>
+         <property name="maximum">
+          <number>999999999</number>
+         </property>
+        </widget>
        </item>
        <item row="10" column="1">
-        <widget class="QSpinBox" name="Timestamp"/>
+        <widget class="QSpinBox" name="Timestamp">
+         <property name="minimum">
+          <number>-999999999</number>
+         </property>
+         <property name="maximum">
+          <number>999999999</number>
+         </property>
+        </widget>
        </item>
        <item row="11" column="1">
-        <widget class="QSpinBox" name="Feature_value"/>
+        <widget class="QSpinBox" name="Feature_value">
+         <property name="minimum">
+          <number>-999999999</number>
+         </property>
+         <property name="maximum">
+          <number>999999999</number>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>

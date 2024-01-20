@@ -39,16 +39,17 @@ EditorSwcNode::EditorSwcNode(const std::string &swcName, QWidget *parent) :
     connect(ui->ModifyData,&QPushButton::clicked,this,[this](){
         ViewSwcNodeData editor(true,this);
 
-        int currectRow = ui->SwcNodeDataTable->currentRow();
-        if(currectRow<0){
+        QModelIndex currentIndex = ui->SwcNodeDataTable->selectionModel()->currentIndex();
+        int currentRow = currentIndex.row();
+        if(currentRow<0){
             QMessageBox::information(this,"Info","You need to select one row first!");
             return;
         }
 
-        if(m_SwcData.swcdata_size() <= currectRow){
+        if(m_SwcData.swcdata_size() <= currentRow){
             QMessageBox::critical(this,"Error","Swc Data outdated! Please refresh query result!");
         }
-        auto InitSwcNodeData = m_SwcData.swcdata().Get(currectRow);
+        auto InitSwcNodeData = m_SwcData.swcdata().Get(currentRow);
         auto* InitSwcNodeInternalData= InitSwcNodeData.mutable_swcnodeinternaldata();
         editor.setSwcNodeInternalData(*InitSwcNodeInternalData);
         if(editor.exec() == QDialog::Accepted){
@@ -66,16 +67,17 @@ EditorSwcNode::EditorSwcNode(const std::string &swcName, QWidget *parent) :
     });
 
     connect(ui->DeleteData,&QPushButton::clicked,this,[this](){
-        int currectRow = ui->SwcNodeDataTable->currentRow();
-        if(currectRow<0){
+        QModelIndex currentIndex = ui->SwcNodeDataTable->selectionModel()->currentIndex();
+        int currentRow = currentIndex.row();
+        if(currentRow<0){
             QMessageBox::information(this,"Info","You need to select one row first!");
             return;
         }
 
-        if(m_SwcData.swcdata_size() <= currectRow){
+        if(m_SwcData.swcdata_size() <= currentRow){
             QMessageBox::critical(this,"Error","Swc Data outdated! Please refresh query result!");
         }
-        auto InitSwcNodeData = m_SwcData.swcdata().Get(currectRow);
+        auto InitSwcNodeData = m_SwcData.swcdata().Get(currentRow);
 
         auto result = QMessageBox::information(this,"Info","Are your sure to delete this swc node?",
                                                QMessageBox::StandardButton::Ok,QMessageBox::StandardButton::Cancel);
@@ -117,7 +119,6 @@ EditorSwcNode::EditorSwcNode(const std::string &swcName, QWidget *parent) :
         view.exec();
     });
 
-
     refreshUserArea();
 }
 
@@ -137,34 +138,11 @@ void EditorSwcNode::refreshUserArea() {
     }
 }
 
-void EditorSwcNode::refreshTable(){
-    ui->SwcNodeDataTable->clear();
-    ui->SwcNodeDataTable->setColumnCount(12);
-    QStringList headerLabels;
-    headerLabels
-            << "n"
-            << "type"
-            << "x"
-            << "y"
-            << "z"
-            << "radius"
-            << "parent"
-            << "seg_id"
-            << "level"
-            << "mode"
-            << "timestamp"
-            << "feature_value";
-    ui->SwcNodeDataTable->setHorizontalHeaderLabels(headerLabels);
-}
-
 void EditorSwcNode::refreshAll() {
     proto::GetSwcFullNodeDataResponse response;
     if(!WrappedCall::getSwcFullNodeData(m_SwcName, response, this)){
         QMessageBox::critical(this,"Error","Get Swc Node Data Failed!");
     }
-
-    refreshTable();
-    ui->SwcNodeDataTable->setRowCount(response.swcnodedata().swcdata_size());
 
     auto swcData = response.swcnodedata();
     loadSwcData(swcData);
@@ -199,66 +177,14 @@ void EditorSwcNode::refreshByQueryOption() {
 
     WrappedCall::getSwcNodeDataListByTimeAndUserResponse(m_SwcName, userName, startTime, endTime, response, this);
 
-    refreshTable();
-    ui->SwcNodeDataTable->setRowCount(response.swcnodedata().swcdata_size());
-
     auto swcData = response.swcnodedata();
     loadSwcData(swcData);
 }
 
 void EditorSwcNode::loadSwcData(proto::SwcDataV1& swcData) {
-    for (int i = 0; i < swcData.swcdata_size(); i++) {
-        auto info = swcData.swcdata().Get(i);
-        ui->SwcNodeDataTable->setItem(i, 0,
-                                      new QTableWidgetItem(QString::fromStdString(
-                                              std::to_string(info.mutable_swcnodeinternaldata()->n()))));
-        ui->SwcNodeDataTable->setItem(i, 1,
-                                      new QTableWidgetItem(
-                                              QString::fromStdString(
-                                                      std::to_string(info.mutable_swcnodeinternaldata()->type()))));
-        ui->SwcNodeDataTable->setItem(i, 2,
-                                      new QTableWidgetItem(
-                                              QString::fromStdString(
-                                                      std::to_string(info.mutable_swcnodeinternaldata()->x()))));
-        ui->SwcNodeDataTable->setItem(i, 3,
-                                      new QTableWidgetItem(
-                                              QString::fromStdString(
-                                                      std::to_string(info.mutable_swcnodeinternaldata()->y()))));
-        ui->SwcNodeDataTable->setItem(i, 4,
-                                      new QTableWidgetItem(
-                                              QString::fromStdString(
-                                                      std::to_string(info.mutable_swcnodeinternaldata()->z()))));
-        ui->SwcNodeDataTable->setItem(i, 5,
-                                      new QTableWidgetItem(
-                                              QString::fromStdString(
-                                                      std::to_string(info.mutable_swcnodeinternaldata()->radius()))));
-        ui->SwcNodeDataTable->setItem(i, 6,
-                                      new QTableWidgetItem(
-                                              QString::fromStdString(
-                                                      std::to_string(info.mutable_swcnodeinternaldata()->parent()))));
-        ui->SwcNodeDataTable->setItem(i, 7,
-                                      new QTableWidgetItem(
-                                              QString::fromStdString(
-                                                      std::to_string(info.mutable_swcnodeinternaldata()->seg_id()))));
-        ui->SwcNodeDataTable->setItem(i, 8,
-                                      new QTableWidgetItem(
-                                              QString::fromStdString(
-                                                      std::to_string(info.mutable_swcnodeinternaldata()->level()))));
-        ui->SwcNodeDataTable->setItem(i, 9,
-                                      new QTableWidgetItem(
-                                              QString::fromStdString(
-                                                      std::to_string(info.mutable_swcnodeinternaldata()->mode()))));
-        ui->SwcNodeDataTable->setItem(i, 10,
-                                      new QTableWidgetItem(
-                                              QString::fromStdString(std::to_string(
-                                                      info.mutable_swcnodeinternaldata()->timestamp()))));
-        ui->SwcNodeDataTable->setItem(i, 11,
-                                      new QTableWidgetItem(
-                                              QString::fromStdString(std::to_string(
-                                                      info.mutable_swcnodeinternaldata()->feature_value()))));
-    }
-
     m_SwcData.CopyFrom(swcData);
 
+    auto *model = new SwcTableModel(m_SwcData, this);
+    ui->SwcNodeDataTable->setModel(model);
     ui->SwcNodeDataTable->resizeColumnsToContents();
 }
