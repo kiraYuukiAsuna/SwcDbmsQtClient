@@ -123,6 +123,18 @@ set(PROJECT_SOURCES
         src/ui/viewimportswcfromfile.ui
 
         app_win32.rc
+        src/ui/editorswcsnapshot.cpp
+        src/ui/editorswcsnapshot.h
+        src/ui/editorswcsnapshot.ui
+        src/ui/editorswcincrementrecord.cpp
+        src/ui/editorswcincrementrecord.h
+        src/ui/editorswcincrementrecord.ui
+        src/ui/editorswcversioncontrol.cpp
+        src/ui/editorswcversioncontrol.h
+        src/ui/editorswcversioncontrol.ui
+        src/ui/createswcsnapshotview.cpp
+        src/ui/createswcsnapshotview.h
+        src/ui/createswcsnapshotview.ui
 )
 
 add_executable(${PROJECT_NAME} ${QRESOURCE} ${PROJECT_HEADERS} ${PROJECT_SOURCES})

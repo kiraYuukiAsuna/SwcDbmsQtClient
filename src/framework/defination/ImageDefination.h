@@ -19,5 +19,7 @@ namespace Image {
     inline const char* ImageFileOpen = ":/images/file-open.png";
     inline const char* ImageCheckBoxUnchecked = ":/images/checkbox-unchecked.png";
     inline const char* ImageCheckBoxChecked = ":/images/checkbox-checked.png";
-
+    inline const char* ImageSnapshot = ":/images/snapshot.png";
+    inline const char* ImageIncrement = ":/images/increment.png";
+    inline const char* ImageVersionControl = ":/images/version_control.png";
 }

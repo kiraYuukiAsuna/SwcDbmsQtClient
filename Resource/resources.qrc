@@ -107,6 +107,8 @@
         <file>images/file-open.png</file>
         <file>images/checkbox-unchecked.png</file>
         <file>images/checkbox-checked.png</file>
-
+        <file>images/increment.png</file>
+        <file>images/snapshot.png</file>
+        <file>images/version_control.png</file>
     </qresource>
 </RCC>

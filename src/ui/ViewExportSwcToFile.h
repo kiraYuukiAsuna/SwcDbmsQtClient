@@ -6,6 +6,8 @@
 struct ExportSwcData{
     proto::SwcMetaInfoV1 swcMetaInfo;
     proto::SwcDataV1 swcData;
+    bool isSnapshot{false};
+    std::string swcSnapshotCollectionName;
 };
 
 QT_BEGIN_NAMESPACE

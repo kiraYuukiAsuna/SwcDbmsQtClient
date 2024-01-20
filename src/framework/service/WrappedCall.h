@@ -192,6 +192,26 @@ public:
         return false;
     }
 
+    static bool getSwcSnapshot(const std::string& swcSnapshotCollectioNname, proto::GetSnapshotResponse& response, QWidget* parent) {
+        proto::GetSnapshotRequest request;
+        setCommonRequestField(request);
+        request.set_swcsnapshotcollectionname(swcSnapshotCollectioNname);
+
+        grpc::ClientContext context;
+        auto result = RpcCall::getInstance().Stub()->GetSnapshot(&context, request,&response);
+        if(result.ok()){
+            if(response.metainfo().status()) {
+                return true;
+            }else {
+                QMessageBox::critical(parent,"Info","GetSnapshot Failed!" + QString::fromStdString(response.metainfo().message()));
+            }
+
+        }else{
+            QMessageBox::critical(parent,"Error",QString::fromStdString(result.error_message()));
+        }
+        return false;
+    }
+
     static bool getSwcNodeDataListByTimeAndUserResponse(const std::string& swcName, const std::string& userName, google::protobuf::Timestamp& startTime, google::protobuf::Timestamp& endTime, proto::GetSwcNodeDataListByTimeAndUserResponse& response, QWidget* parent) {
         proto::GetSwcNodeDataListByTimeAndUserRequest request;
         request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
@@ -309,4 +329,11 @@ public:
         return false;
     }
 
+    template<typename T>
+    static void setCommonRequestField(T& type) {
+        type.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
+        auto* userInfo = type.mutable_userverifyinfo();
+        userInfo->set_username(CachedProtoData::getInstance().UserName);
+        userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
+    }
 };

@@ -1,10 +1,6 @@
 #include "leftclientview.h"
 
-#include <QMessageBox>
-
 #include "MainWindow.h"
-#include "MainWindow.h"
-#include "mainwindow.h"
 #include "ui_LeftClientView.h"
 #include "src/framework/service/CachedProtoData.h"
 #include "src/framework/service/RpcCall.h"
@@ -15,11 +11,15 @@
 #include <QMenu>
 #include <ui_ViewCreateSwc.h>
 
+#include "createswcsnapshotview.h"
 #include "viewcreateproject.h"
 #include "viewcreateswc.h"
 #include "src/framework/config/AppConfig.h"
 #include "viewimportswcfromfile.h"
 #include "ViewExportSwcToFile.h"
+#include "editorswcsnapshot.h"
+#include "editorswcincrementrecord.h"
+#include "editorswcversioncontrol.h"
 
 LeftClientView::LeftClientView(MainWindow* mainWindow) : QWidget(mainWindow), ui(new Ui::LeftClientView) {
     ui->setupUi(this);
@@ -371,10 +371,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
                if(result == QMessageBox::StandardButton::Ok) {
                    if(data.type == MetaInfoType::eSwc) {
                        proto::DeleteSwcRequest request;
-                       request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
-                       auto* userInfo = request.mutable_userverifyinfo();
-                       userInfo->set_username(CachedProtoData::getInstance().UserName);
-                       userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
+                       WrappedCall::setCommonRequestField(request);
                        request.set_swcname(curItem->text(0).toStdString());
 
                        proto::DeleteSwcResponse response;
@@ -419,10 +416,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
               if(result == QMessageBox::StandardButton::Ok) {
                   if(data.type == MetaInfoType::eDailyStatistics) {
                       proto::DeleteDailyStatisticsRequest request;
-                      request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
-                      auto* userInfo = request.mutable_userverifyinfo();
-                      userInfo->set_username(CachedProtoData::getInstance().UserName);
-                      userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
+                      WrappedCall::setCommonRequestField(request);
                       request.set_dailystatisticsname(curItem->text(0).toStdString());
 
                       proto::DeleteDailyStatisticsResponse response;
@@ -450,6 +444,38 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
         m_MainWindow->getRightClientView().openDailyStatisticsMetaInfo(data.name);
     });
 
+    auto* MenuCreateSnapshot = new QAction(this);
+    MenuCreateSnapshot->setText("Create Snapshot");
+    MenuCreateSnapshot->setIcon(QIcon(Image::ImageSnapshot));
+    connect(MenuCreateSnapshot,&QAction::triggered,this,[this,data](bool checked) {
+        CreateSwcSnapshotView view(data.name, this);
+        view.exec();
+    });
+
+    auto* MenuEditorSwcSnapshot = new QAction(this);
+    MenuEditorSwcSnapshot->setText("View Snapshot");
+    MenuEditorSwcSnapshot->setIcon(QIcon(Image::ImageSnapshot));
+    connect(MenuEditorSwcSnapshot,&QAction::triggered,this,[this,data](bool checked) {
+        EditorSwcSnapshot view(data.name,this);
+        view.exec();
+    });
+
+    auto* MenuEditorSwcIncrement = new QAction(this);
+    MenuEditorSwcIncrement->setText("View Increment Record");
+    MenuEditorSwcIncrement->setIcon(QIcon(Image::ImageIncrement));
+    connect(MenuEditorSwcIncrement,&QAction::triggered,this,[this,data](bool checked) {
+        EditorSwcIncrementRecord view(data.name,this);
+        view.exec();
+    });
+
+    auto* MenuEditorVersionControl = new QAction(this);
+    MenuEditorVersionControl->setText("Version Control");
+    MenuEditorVersionControl->setIcon(QIcon(Image::ImageVersionControl));
+    connect(MenuEditorVersionControl,&QAction::triggered,this,[this,data](bool checked) {
+        EditorSwcVersionControl view(data.name,this);
+        view.exec();
+    });
+
     switch (data.type) {
         case MetaInfoType::eProjectContainer: {
             popMenu->addAction(MenuCreateProject);
@@ -475,6 +501,11 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
             popMenu->addAction(MenuEditSwcNodeData);
             popMenu->addSeparator();
             popMenu->addAction(MenuExportToSwcFile);
+            popMenu->addSeparator();
+            popMenu->addAction(MenuCreateSnapshot);
+            popMenu->addAction(MenuEditorSwcSnapshot);
+            popMenu->addAction(MenuEditorSwcIncrement);
+            popMenu->addAction(MenuEditorVersionControl);
             popMenu->addSeparator();
             popMenu->addAction(MenuDeleteSwc);
             break;
