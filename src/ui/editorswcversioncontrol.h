@@ -21,7 +21,9 @@ private:
     std::string m_SwcName;
 
     void getSwcLastSnapshot();
-    void getSwcIncrementRecord(proto::SwcSnapshotMetaInfoV1 snapshot);
+    void getSwcIncrementRecord(proto::SwcSnapshotMetaInfoV1 snapshot, int64_t endTime);
+
+    void promoteOperation(std::vector<proto::SwcNodeDataV1>& nodeData, const proto::SwcIncrementOperationV1& op,int64_t endTime);
 
 };
 

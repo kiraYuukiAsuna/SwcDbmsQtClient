@@ -2,7 +2,7 @@
 
 #include <QMessageBox>
 #include <QString>
-#include "grpcpp/client_context.h"
+#include <grpcpp/client_context.h>
 #include "Message/Request.pb.h"
 #include "RpcCall.h"
 #include "CachedProtoData.h"
@@ -32,15 +32,11 @@ public:
     }
 
     static bool getAllProjectMetaInfo(proto::GetAllProjectResponse&response, QWidget* parent) {
-        grpc::ClientContext context;
         proto::GetAllProjectRequest request;
         setCommonRequestField(request);
 
-        auto&rpcCall = RpcCall::getInstance();
-
-
-
-        if (auto status = rpcCall.Stub()->GetAllProject(&context, request, &response); status.ok()) {
+        grpc::ClientContext context;
+        if (auto status = RpcCall::getInstance().Stub()->GetAllProject(&context, request, &response); status.ok()) {
             if (response.metainfo().status()) {
                 return true;
             }
@@ -55,12 +51,11 @@ public:
     }
 
     static bool getAllSwcMetaInfo(proto::GetAllSwcMetaInfoResponse&response, QWidget* parent) {
-        grpc::ClientContext context;
         proto::GetAllSwcMetaInfoRequest request;
         setCommonRequestField(request);
 
-        auto&rpcCall = RpcCall::getInstance();
-        if (auto status = rpcCall.Stub()->GetAllSwcMetaInfo(&context, request, &response); status.ok()) {
+        grpc::ClientContext context;
+        if (auto status = RpcCall::getInstance().Stub()->GetAllSwcMetaInfo(&context, request, &response); status.ok()) {
             if (response.metainfo().status()) {
                 return true;
             }
@@ -74,12 +69,11 @@ public:
     }
 
     static bool getAllDailyStatisticsMetaInfo(proto::GetAllDailyStatisticsResponse&response, QWidget* parent) {
-        grpc::ClientContext context;
         proto::GetAllDailyStatisticsRequest request;
         setCommonRequestField(request);
 
-        auto&rpcCall = RpcCall::getInstance();
-        if (auto status = rpcCall.Stub()->GetAllDailyStatistics(&context, request, &response); status.ok()) {
+        grpc::ClientContext context;
+        if (auto status = RpcCall::getInstance().Stub()->GetAllDailyStatistics(&context, request, &response); status.ok()) {
             if (response.metainfo().status()) {
                 return true;
             }
@@ -94,12 +88,11 @@ public:
     }
 
     static bool getAllUserMetaInfo(proto::GetAllUserResponse&response, QWidget* parent) {
-        grpc::ClientContext context;
         proto::GetAllUserRequest request;
         setCommonRequestField(request);
 
-        auto&rpcCall = RpcCall::getInstance();
-        if (auto status = rpcCall.Stub()->GetAllUser(&context, request, &response); status.ok()) {
+        grpc::ClientContext context;
+        if (auto status = RpcCall::getInstance().Stub()->GetAllUser(&context, request, &response); status.ok()) {
             if (response.metainfo().status()) {
                 return true;
             }
@@ -347,4 +340,28 @@ public:
             return false;
         }
     }
+
+    static bool getSwcIncrementRecord(const std::string&name,
+                                     proto::GetIncrementOperationResponse&response,
+                                     QWidget* parent) {
+        proto::GetIncrementOperationRequest request;
+        setCommonRequestField(request);
+        request.set_incrementoperationcollectionname(name);
+
+        grpc::ClientContext context;
+        if (auto status = RpcCall::getInstance().Stub()->GetIncrementOperation(&context, request, &response);
+            status.ok()) {
+            if (response.has_metainfo() && response.metainfo().status() == true) {
+                return true;
+            }
+            QMessageBox::critical(parent, "Error", QString::fromStdString(response.metainfo().message()));
+            return false;
+            }
+        else {
+            QMessageBox::critical(parent, "Error", QString::fromStdString(status.error_message()));
+            return false;
+        }
+    }
+
+
 };

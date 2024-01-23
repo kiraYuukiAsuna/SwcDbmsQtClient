@@ -17,6 +17,7 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData> exportSwcDat
                              "QListWidget::indicator:unchecked{image:url(" +
                              Image::ImageCheckBoxUnchecked + ");}";
     ui->SwcList->setStyleSheet(QString::fromStdString(stylesheet));
+    ui->SavePath->setReadOnly(true);
 
     m_ExportSwcData = exportSwcData;
     m_GetDataFromServer = getDataFromServer;
