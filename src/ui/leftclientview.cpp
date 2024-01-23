@@ -12,6 +12,7 @@
 #include <ui_ViewCreateSwc.h>
 
 #include "createswcsnapshotview.h"
+#include "editorattachmentview.h"
 #include "viewcreateproject.h"
 #include "viewcreateswc.h"
 #include "src/framework/config/AppConfig.h"
@@ -444,6 +445,14 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
         m_MainWindow->getRightClientView().openDailyStatisticsMetaInfo(data.name);
     });
 
+    auto* MenuEditorAttachment = new QAction(this);
+    MenuEditorAttachment->setText("Edit Attachment");
+    MenuEditorAttachment->setIcon(QIcon(Image::ImageAttachment));
+    connect(MenuEditorAttachment,&QAction::triggered,this,[this,data](bool checked) {
+        EditorAttachmentView view(data.name,this);
+        view.exec();
+    });
+
     auto* MenuCreateSnapshot = new QAction(this);
     MenuCreateSnapshot->setText("Create Snapshot");
     MenuCreateSnapshot->setIcon(QIcon(Image::ImageSnapshot));
@@ -499,6 +508,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
         case MetaInfoType::eSwc: {
             popMenu->addAction(MenuEditSwc);
             popMenu->addAction(MenuEditSwcNodeData);
+            popMenu->addAction(MenuEditorAttachment);
             popMenu->addSeparator();
             popMenu->addAction(MenuExportToSwcFile);
             popMenu->addSeparator();

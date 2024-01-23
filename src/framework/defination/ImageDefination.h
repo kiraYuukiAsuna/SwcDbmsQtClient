@@ -22,4 +22,5 @@ namespace Image {
     inline const char* ImageSnapshot = ":/images/snapshot.png";
     inline const char* ImageIncrement = ":/images/increment.png";
     inline const char* ImageVersionControl = ":/images/version_control.png";
+    inline const char* ImageAttachment = ":/images/attachment.png";
 }

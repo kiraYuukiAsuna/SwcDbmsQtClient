@@ -135,6 +135,18 @@ set(PROJECT_SOURCES
         src/ui/createswcsnapshotview.cpp
         src/ui/createswcsnapshotview.h
         src/ui/createswcsnapshotview.ui
+        src/ui/editorattachmentview.cpp
+        src/ui/editorattachmentview.h
+        src/ui/editorattachmentview.ui
+        src/ui/editoranoattachment.cpp
+        src/ui/editoranoattachment.h
+        src/ui/editoranoattachment.ui
+        src/ui/editorapoattachment.cpp
+        src/ui/editorapoattachment.h
+        src/ui/editorapoattachment.ui
+        src/ui/viewincrementrecord.cpp
+        src/ui/viewincrementrecord.h
+        src/ui/viewincrementrecord.ui
 )
 
 add_executable(${PROJECT_NAME} ${QRESOURCE} ${PROJECT_HEADERS} ${PROJECT_SOURCES})

@@ -110,5 +110,6 @@
         <file>images/increment.png</file>
         <file>images/snapshot.png</file>
         <file>images/version_control.png</file>
+        <file>images/attachment.png</file>
     </qresource>
 </RCC>

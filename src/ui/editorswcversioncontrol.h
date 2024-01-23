@@ -2,6 +2,8 @@
 
 #include <QDialog>
 
+#include "ViewExportSwcToFile.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class EditorSwcVersionControl; }
 QT_END_NAMESPACE
@@ -15,5 +17,11 @@ public:
 
 private:
     Ui::EditorSwcVersionControl *ui;
+
+    std::string m_SwcName;
+
+    void getSwcLastSnapshot();
+    void getSwcIncrementRecord(proto::SwcSnapshotMetaInfoV1 snapshot);
+
 };
 
