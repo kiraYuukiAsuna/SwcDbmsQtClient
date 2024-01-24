@@ -8,7 +8,7 @@
 #include "src/framework/defination/ImageDefination.h"
 #include "src/framework/service/CachedProtoData.h"
 #include "src/framework/service/RpcCall.h"
-
+#include <filesystem>
 
 EditorDailyStatisticsMetaInfo::EditorDailyStatisticsMetaInfo(proto::GetDailyStatisticsResponse& response, QWidget *parent) :
     QWidget(parent), ui(new Ui::EditorDailyStatisticsMetaInfo) {
