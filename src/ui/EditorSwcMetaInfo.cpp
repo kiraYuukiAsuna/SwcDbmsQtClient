@@ -1,11 +1,5 @@
-//
-// Created by KiraY on 2023/11/22.
-//
-
-// You may need to build the project (run Qt uic code generator) to get "ui_EditorSwcMetaInfo.h" resolved
-
 #include "EditorSwcMetaInfo.h"
-
+#include <QIcon>
 #include <QMessageBox>
 #include <grpcpp/client_context.h>
 #include <Message/Request.pb.h>
