@@ -7,6 +7,7 @@
 #include "src/framework/service/WrappedCall.h"
 #include "src/FileIo/AnoIo.hpp"
 #include "src/FileIo/ApoIo.hpp"
+#include <filesystem>
 
 EditorAnoAttachment::EditorAnoAttachment(const std::string&swcName, QWidget* parent) : QDialog(parent),
     ui(new Ui::EditorAnoAttachment), m_SwcName(swcName) {
