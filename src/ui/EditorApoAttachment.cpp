@@ -7,7 +7,7 @@
 #include "ViewSwcApoData.h"
 #include "src/FileIo/ApoIo.hpp"
 #include "src/framework/service/WrappedCall.h"
-
+#include <filesystem>
 
 EditorApoAttachment::EditorApoAttachment(const std::string&swcName, QWidget* parent) : QDialog(parent),
     ui(new Ui::EditorApoAttachment), m_SwcName(swcName) {
