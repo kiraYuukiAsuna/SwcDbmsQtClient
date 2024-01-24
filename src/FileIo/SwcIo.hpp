@@ -67,22 +67,60 @@ public:
                 continue;
             }
 
-            if (splitResult.size() < 12) {
-                continue;
-            }
             NeuronUnit unit;
-            unit.n = std::stoi(splitResult[0]);
-            unit.type = std::stoi(splitResult[1]);
-            unit.x = std::stof(splitResult[2]);
-            unit.y = std::stof(splitResult[3]);
-            unit.z = std::stof(splitResult[4]);
-            unit.radius = std::stof(splitResult[5]);
-            unit.parent = std::stoi(splitResult[6]);
-            unit.seg_id = std::stoi(splitResult[7]);
-            unit.level = std::stoi(splitResult[8]);
-            unit.mode = std::stoi(splitResult[9]);
-            unit.timestamp = std::stoi(splitResult[10]);
-            unit.feature_value = std::stoi(splitResult[11]);
+            for (int i = 0; i < splitResult.size(); i++) {
+                switch (i) {
+                    case 0: {
+                        unit.n = std::stoi(splitResult[0]);
+                        break;
+                    }
+                    case 1: {
+                        unit.type = std::stoi(splitResult[1]);
+                        break;
+                    }
+                    case 2: {
+                        unit.x = std::stof(splitResult[2]);
+                        break;
+                    }
+                    case 3: {
+                        unit.y = std::stof(splitResult[3]);
+                        break;
+                    }
+                    case 4: {
+                        unit.z = std::stof(splitResult[4]);
+                        break;
+                    }
+                    case 5: {
+                        unit.radius = std::stof(splitResult[5]);
+                        break;
+                    }
+                    case 6: {
+                        unit.parent = std::stoi(splitResult[6]);
+                        break;
+                    }
+                    case 7: {
+                        unit.seg_id = std::stoi(splitResult[7]);
+                        break;
+                    }
+                    case 8: {
+                        unit.level = std::stoi(splitResult[8]);
+                        break;
+                    }
+                    case 9: {
+                        unit.mode = std::stoi(splitResult[9]);
+                        break;
+                    }
+                    case 10: {
+                        unit.timestamp = std::stoi(splitResult[10]);
+                        break;
+                    }
+                    case 11: {
+                        unit.feature_value = std::stoi(splitResult[11]);
+                        break;
+                    }
+                    default: ;
+                }
+            }
 
             m_Neuron.push_back(unit);
 
