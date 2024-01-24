@@ -6,6 +6,7 @@
 #include "Message/Request.pb.h"
 #include "src/framework/service/WrappedCall.h"
 #include "MainWindow.h"
+#include <filesystem>
 
 ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
         QDialog(mainWindow), ui(new Ui::ViewImportSwcFromFile) {
