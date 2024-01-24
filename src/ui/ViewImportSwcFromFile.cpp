@@ -1,11 +1,11 @@
-#include "viewimportswcfromfile.h"
+#include "ViewImportSwcFromFile.h"
 #include "ui_ViewImportSwcFromFile.h"
 #include <QFileDialog>
 #include <QStandardPaths>
 #include "src/FileIo/SwcIo.hpp"
 #include "Message/Request.pb.h"
 #include "src/framework/service/WrappedCall.h"
-#include "mainwindow.h"
+#include "MainWindow.h"
 
 ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
         QDialog(mainWindow), ui(new Ui::ViewImportSwcFromFile) {

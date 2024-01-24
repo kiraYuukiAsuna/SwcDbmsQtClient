@@ -1,14 +1,14 @@
-#include "rightclientview.h"
+#include "RightClientView.h"
 
-#include "editordailystatisticsmetainfo.h"
+#include "EditorDailyStatisticsMetaInfo.h"
 #include "ui_RightClientView.h"
-#include "mainwindow.h"
+#include "MainWindow.h"
 #include "src/framework/service/WrappedCall.h"
-#include "editorprojectmetainfo.h"
-#include "editorswcmetainfo.h"
+#include "EditorProjectMetaInfo.h"
+#include "EditorSwcMetaInfo.h"
 #include "src/framework/defination/ImageDefination.h"
-#include "viewswcnodedata.h"
-#include "editorswcnode.h"
+#include "ViewSwcNodeData.h"
+#include "EditorSwcNode.h"
 
 RightClientView::RightClientView(MainWindow* mainWindow) : QWidget(mainWindow), ui(new Ui::RightClientView) {
     ui->setupUi(this);

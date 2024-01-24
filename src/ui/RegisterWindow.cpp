@@ -1,4 +1,4 @@
-#include "registerwindow.h"
+#include "RegisterWindow.h"
 
 #include <QMessageBox>
 #include <grpcpp/client_context.h>

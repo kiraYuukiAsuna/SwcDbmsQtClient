@@ -37,10 +37,16 @@ set(QRESOURCE
         Resource/resources.qrc
 )
 
+file(GLOB_RECURSE SRC_LIST
+        "${PROJECT_SOURCE_DIR}/src/*.cpp"
+        "${PROJECT_SOURCE_DIR}/src/*.ui"
+        "${PROJECT_SOURCE_DIR}/src/*.h"
+        "${PROJECT_SOURCE_DIR}/src/*.hpp"
+)
+
 set(PROJECT_HEADERS
         src/styles/acss_globals.h
         src/styles/QtAdvancedStylesheet.h
-
 )
 
 set(PROJECT_SOURCES
@@ -57,106 +63,12 @@ set(PROJECT_SOURCES
         SwcDbmsCommon/Generated/cpp/Service/Service.grpc.pb.cc
         SwcDbmsCommon/Generated/cpp/Service/Service.pb.cc
 
-        src/ui/mainwindow.h
-        src/ui/mainwindow.ui
-        src/ui/mainwindow.cpp
-        src/framework/service/RpcCall.cpp
-        src/framework/service/RpcCall.h
-        src/ui/registerwindow.cpp
-        src/ui/registerwindow.h
-        src/ui/registerwindow.ui
-        src/ui/loginwindow.cpp
-        src/ui/loginwindow.h
-        src/ui/loginwindow.ui
-        src/framework/config/AppConfig.cpp
-        src/framework/config/AppConfig.h
-        src/ui/leftclientview.cpp
-        src/ui/leftclientview.h
-        src/ui/leftclientview.ui
-        src/ui/rightclientview.cpp
-        src/ui/rightclientview.h
-        src/ui/rightclientview.ui
-        src/framework/service/CachedProtoData.cpp
-        src/framework/service/CachedProtoData.h
-        src/framework/defination/TypeDef.cpp
-        src/framework/defination/TypeDef.h
-        src/framework/service/WrappedCall.cpp
-        src/framework/service/WrappedCall.h
-        src/ui/editorprojectmetainfo.cpp
-        src/ui/editorprojectmetainfo.h
-        src/ui/editorprojectmetainfo.ui
-        src/ui/editorswcmetainfo.cpp
-        src/ui/editorswcmetainfo.h
-        src/ui/editorswcmetainfo.ui
-        src/ui/editordailystatisticsmetainfo.cpp
-        src/ui/editordailystatisticsmetainfo.h
-        src/ui/editordailystatisticsmetainfo.ui
-        src/ui/viewswcnodedata.cpp
-        src/ui/viewswcnodedata.h
-        src/ui/viewswcnodedata.ui
-        src/ui/editorusersettings.cpp
-        src/ui/editorusersettings.h
-        src/ui/editorusersettings.ui
-        src/ui/editoradminusermanager.cpp
-        src/ui/editoradminusermanager.h
-        src/ui/editoradminusermanager.ui
-        src/ui/editorpermissiongroup.cpp
-        src/ui/editorpermissiongroup.h
-        src/ui/editorpermissiongroup.ui
-        src/ui/EditorBase.cpp
-        src/ui/EditorBase.h
-        src/framework/defination/ImageDefination.h
-        src/ui/viewcreateproject.cpp
-        src/ui/viewcreateproject.h
-        src/ui/viewcreateproject.ui
-        src/ui/viewcreateswc.cpp
-        src/ui/viewcreateswc.h
-        src/ui/viewcreateswc.ui
-        src/ui/editorswcnode.cpp
-        src/ui/editorswcnode.h
-        src/ui/editorswcnode.ui
-        src/ui/viewexportswctofile.cpp
-        src/ui/viewexportswctofile.h
-        src/ui/viewexportswctofile.ui
-        src/ui/viewimportswcfromfile.cpp
-        src/ui/viewimportswcfromfile.h
-        src/ui/viewimportswcfromfile.ui
+
 
         app_win32.rc
-        src/ui/editorswcsnapshot.cpp
-        src/ui/editorswcsnapshot.h
-        src/ui/editorswcsnapshot.ui
-        src/ui/editorswcincrementrecord.cpp
-        src/ui/editorswcincrementrecord.h
-        src/ui/editorswcincrementrecord.ui
-        src/ui/editorswcversioncontrol.cpp
-        src/ui/editorswcversioncontrol.h
-        src/ui/editorswcversioncontrol.ui
-        src/ui/createswcsnapshotview.cpp
-        src/ui/createswcsnapshotview.h
-        src/ui/createswcsnapshotview.ui
-        src/ui/editorattachmentview.cpp
-        src/ui/editorattachmentview.h
-        src/ui/editorattachmentview.ui
-        src/ui/editoranoattachment.cpp
-        src/ui/editoranoattachment.h
-        src/ui/editoranoattachment.ui
-        src/ui/editorapoattachment.cpp
-        src/ui/editorapoattachment.h
-        src/ui/editorapoattachment.ui
-        src/ui/viewincrementrecord.cpp
-        src/ui/viewincrementrecord.h
-        src/ui/viewincrementrecord.ui
-        src/FileIo/AnoIo.hpp
-        src/FileIo/ApoIo.hpp
-        src/util/util.hpp
-        src/FileIo/FileIoInterface.hpp
-        src/ui/viewswcapodata.cpp
-        src/ui/viewswcapodata.h
-        src/ui/viewswcapodata.ui
 )
 
-add_executable(${PROJECT_NAME} ${QRESOURCE} ${PROJECT_HEADERS} ${PROJECT_SOURCES})
+add_executable(${PROJECT_NAME} ${QRESOURCE} ${PROJECT_HEADERS} ${PROJECT_SOURCES} ${SRC_LIST})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
         Qt::Core

@@ -1,4 +1,4 @@
-#include "editorswcsnapshot.h"
+#include "EditorSwcSnapshot.h"
 #include <Message/Request.pb.h>
 #include "ui_EditorSwcSnapshot.h"
 #include "ViewExportSwcToFile.h"

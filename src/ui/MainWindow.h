@@ -2,8 +2,8 @@
 
 #include <QMainWindow>
 #include <QSplitter>
-#include "leftclientview.h"
-#include "rightclientview.h"
+#include "LeftClientView.h"
+#include "RightClientView.h"
 #include <QTimer>
 
 QT_BEGIN_NAMESPACE

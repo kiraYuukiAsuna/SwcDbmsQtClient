@@ -1,7 +1,7 @@
-#include "editorattachmentview.h"
+#include "EditorAttachmentView.h"
 
-#include "editoranoattachment.h"
-#include "editorapoattachment.h"
+#include "EditorAnoAttachment.h"
+#include "EditorApoAttachment.h"
 #include "ui_EditorAttachmentView.h"
 
 

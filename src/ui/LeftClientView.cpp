@@ -1,4 +1,4 @@
-#include "leftclientview.h"
+#include "LeftClientView.h"
 
 #include "MainWindow.h"
 #include "ui_LeftClientView.h"
@@ -7,20 +7,20 @@
 #include "src/framework/defination/TypeDef.h"
 #include "src/framework/defination/ImageDefination.h"
 #include "src/framework/service/WrappedCall.h"
-#include "src/ui/editorusersettings.h"
+#include "src/ui/EditorUserSettings.h"
 #include <QMenu>
 #include <ui_ViewCreateSwc.h>
 
-#include "createswcsnapshotview.h"
-#include "editorattachmentview.h"
-#include "viewcreateproject.h"
-#include "viewcreateswc.h"
+#include "CreateSwcSnapshotView.h"
+#include "EditorAttachmentView.h"
+#include "ViewCreateProject.h"
+#include "ViewCreateSwc.h"
 #include "src/framework/config/AppConfig.h"
-#include "viewimportswcfromfile.h"
+#include "ViewImportSwcFromFile.h"
 #include "ViewExportSwcToFile.h"
-#include "editorswcsnapshot.h"
-#include "editorswcincrementrecord.h"
-#include "editorswcversioncontrol.h"
+#include "EditorSwcSnapshot.h"
+#include "EditorSwcIncrementRecord.h"
+#include "EditorSwcVersionControl.h"
 
 LeftClientView::LeftClientView(MainWindow* mainWindow) : QWidget(mainWindow), ui(new Ui::LeftClientView) {
     ui->setupUi(this);

@@ -1,4 +1,4 @@
-#include "viewcreateswc.h"
+#include "ViewCreateSwc.h"
 
 #include <QMessageBox>
 #include <Message/Request.pb.h>

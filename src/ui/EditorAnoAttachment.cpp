@@ -1,4 +1,4 @@
-#include "editoranoattachment.h"
+#include "EditorAnoAttachment.h"
 
 #include <QFileDialog>
 #include <QStandardPaths>

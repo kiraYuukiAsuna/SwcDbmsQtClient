@@ -4,7 +4,7 @@
 
 // You may need to build the project (run Qt uic code generator) to get "ui_EditorSwcMetaInfo.h" resolved
 
-#include "editorswcmetainfo.h"
+#include "EditorSwcMetaInfo.h"
 
 #include <QMessageBox>
 #include <grpcpp/client_context.h>

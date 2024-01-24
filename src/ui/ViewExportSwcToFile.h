@@ -11,7 +11,7 @@ struct ExportSwcData{
 };
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class ViewEportSwcToFile; }
+namespace Ui { class ViewExportSwcToFile; }
 QT_END_NAMESPACE
 
 class ViewExportSwcToFile : public QDialog {
@@ -22,7 +22,7 @@ public:
     ~ViewExportSwcToFile() override;
 
 private:
-    Ui::ViewEportSwcToFile *ui;
+    Ui::ViewExportSwcToFile *ui;
     bool m_GetDataFromServer = false;
     std::vector<ExportSwcData>  m_ExportSwcData;
 

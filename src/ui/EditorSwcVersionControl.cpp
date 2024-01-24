@@ -1,4 +1,4 @@
-#include "editorswcversioncontrol.h"
+#include "EditorSwcVersionControl.h"
 
 #include <Message/Request.pb.h>
 #include <Message/Response.pb.h>

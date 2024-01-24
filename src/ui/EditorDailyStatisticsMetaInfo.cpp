@@ -1,4 +1,4 @@
-#include "editordailystatisticsmetainfo.h"
+#include "EditorDailyStatisticsMetaInfo.h"
 
 #include <QMessageBox>
 #include <grpcpp/client_context.h>

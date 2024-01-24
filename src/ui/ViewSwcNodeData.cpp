@@ -1,4 +1,4 @@
-#include "viewswcnodedata.h"
+#include "ViewSwcNodeData.h"
 #include "ui_ViewSwcNodeData.h"
 #include "Message/Response.pb.h"
 #include "src/framework/service/WrappedCall.h"

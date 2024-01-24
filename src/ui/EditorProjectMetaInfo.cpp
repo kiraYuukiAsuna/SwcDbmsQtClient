@@ -1,4 +1,4 @@
-#include "editorprojectmetainfo.h"
+#include "EditorProjectMetaInfo.h"
 #include "ui_EditorProjectMetaInfo.h"
 #include <QDateTime>
 

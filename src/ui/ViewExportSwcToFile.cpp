@@ -9,7 +9,7 @@
 
 
 ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcData, bool getDataFromServer,
-                                         QWidget* parent) : QDialog(parent), ui(new Ui::ViewEportSwcToFile) {
+                                         QWidget* parent) : QDialog(parent), ui(new Ui::ViewExportSwcToFile) {
     ui->setupUi(this);
     std::string stylesheet = std::string("QListWidget::indicator:checked{image:url(")
                              + Image::ImageCheckBoxChecked + ");}" +

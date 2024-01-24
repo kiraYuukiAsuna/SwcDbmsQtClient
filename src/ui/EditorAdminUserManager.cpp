@@ -4,7 +4,7 @@
 
 // You may need to build the project (run Qt uic code generator) to get "ui_EditorAdminUserManager.h" resolved
 
-#include "editoradminusermanager.h"
+#include "EditorAdminUserManager.h"
 #include "ui_EditorAdminUserManager.h"
 
 

@@ -1,9 +1,9 @@
 #include <QListWidgetItem>
-#include "editorswcnode.h"
+#include "EditorSwcNode.h"
 #include "ui_EditorSwcNode.h"
 #include "src/framework/service/WrappedCall.h"
 #include "src/framework/defination/ImageDefination.h"
-#include "viewswcnodedata.h"
+#include "ViewSwcNodeData.h"
 #include "ViewExportSwcToFile.h"
 
 EditorSwcNode::EditorSwcNode(const std::string &swcName, QWidget *parent) :

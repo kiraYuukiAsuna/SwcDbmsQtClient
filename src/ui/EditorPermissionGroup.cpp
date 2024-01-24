@@ -4,7 +4,7 @@
 
 // You may need to build the project (run Qt uic code generator) to get "ui_EditorPermissionGroup.h" resolved
 
-#include "editorpermissiongroup.h"
+#include "EditorPermissionGroup.h"
 #include "ui_EditorPermissionGroup.h"
 
 

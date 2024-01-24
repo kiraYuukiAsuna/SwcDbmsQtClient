@@ -1,4 +1,4 @@
-#include "viewincrementrecord.h"
+#include "ViewIncrementRecord.h"
 #include "ui_ViewIncrementRecord.h"
 
 

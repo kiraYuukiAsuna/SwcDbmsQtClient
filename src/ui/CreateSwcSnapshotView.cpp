@@ -1,4 +1,4 @@
-#include "createswcsnapshotview.h"
+#include "CreateSwcSnapshotView.h"
 
 #include <QMessageBox>
 #include <grpcpp/client_context.h>

@@ -2,14 +2,14 @@
 #include <QBuffer>
 #include <QFileDialog>
 #include <QStandardPaths>
-#include "editorusersettings.h"
+#include "EditorUserSettings.h"
 #include "ui_EditorUserSettings.h"
 #include "Service//Service.pb.h"
 #include "Service/Service.grpc.pb.h"
 #include "src/framework/service/RpcCall.h"
 #include "src/framework/service/CachedProtoData.h"
 #include "src/framework/defination/ImageDefination.h"
-#include "leftclientview.h"
+#include "LeftClientView.h"
 
 EditorUserSettings::EditorUserSettings(LeftClientView *leftClientView) :
         QDialog(leftClientView), ui(new Ui::EditorUserSettings) {

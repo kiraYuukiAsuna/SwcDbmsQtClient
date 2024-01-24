@@ -9,7 +9,7 @@
 #include <Message/Request.pb.h>
 #include <Message/Response.pb.h>
 
-#include "viewimportswcfromfile.h"
+#include "ViewImportSwcFromFile.h"
 #include "src/framework/service/CachedProtoData.h"
 #include "src/framework/service/RpcCall.h"
 

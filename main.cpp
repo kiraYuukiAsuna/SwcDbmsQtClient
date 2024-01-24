@@ -6,7 +6,7 @@
 #include "grpcpp/grpcpp.h"
 #include "Service/Service.grpc.pb.h"
 #include "src/styles/QtAdvancedStylesheet.h"
-#include "src/ui/mainwindow.h"
+#include "src/ui/MainWindow.h"
 #include "src/ui/LoginWindow.h"
 #include "src/framework/service/RpcCall.h"
 #include "src/framework/config/AppConfig.h"

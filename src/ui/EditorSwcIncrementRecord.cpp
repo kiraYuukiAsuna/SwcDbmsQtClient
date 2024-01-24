@@ -1,4 +1,4 @@
-#include "editorswcincrementrecord.h"
+#include "EditorSwcIncrementRecord.h"
 
 #include <Message/Request.pb.h>
 #include <Message/Response.pb.h>
