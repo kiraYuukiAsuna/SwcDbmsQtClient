@@ -18,5 +18,10 @@ private:
     Ui::EditorAnoAttachment *ui;
 
     std::string m_SwcName;
+    std::string m_AttachmentUuid;
+
+    bool m_IsAnoAttachmentExist{false};
+
+    void getSwcAnoAttachment();
 };
 

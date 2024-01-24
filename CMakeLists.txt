@@ -147,6 +147,13 @@ set(PROJECT_SOURCES
         src/ui/viewincrementrecord.cpp
         src/ui/viewincrementrecord.h
         src/ui/viewincrementrecord.ui
+        src/FileIo/AnoIo.hpp
+        src/FileIo/ApoIo.hpp
+        src/util/util.hpp
+        src/FileIo/FileIoInterface.hpp
+        src/ui/viewswcapodata.cpp
+        src/ui/viewswcapodata.h
+        src/ui/viewswcapodata.ui
 )
 
 add_executable(${PROJECT_NAME} ${QRESOURCE} ${PROJECT_HEADERS} ${PROJECT_SOURCES})

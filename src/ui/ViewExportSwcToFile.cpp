@@ -1,15 +1,14 @@
 #include <QFileDialog>
 #include <QStandardPaths>
-#include <QMessageBox>
 #include "ViewExportSwcToFile.h"
 #include "ui_ViewEportSwcToFile.h"
 #include "src/framework/defination/ImageDefination.h"
-#include "src/swcio/SwcIO.h"
+#include "src/FileIo/SwcIo.hpp"
 #include "Message/Response.pb.h"
 #include "src/framework/service/WrappedCall.h"
 
 
-ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData> exportSwcData, bool getDataFromServer,
+ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>& exportSwcData, bool getDataFromServer,
                                          QWidget* parent) : QDialog(parent), ui(new Ui::ViewEportSwcToFile) {
     ui->setupUi(this);
     std::string stylesheet = std::string("QListWidget::indicator:checked{image:url(")
@@ -167,7 +166,7 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData> exportSwcDat
                     }
 
                     Swc swc(savePath.string());
-                    swc.setNeuron(neurons);
+                    swc.setValue(neurons);
                     if (swc.WriteToFile()) {
                         ui->ResultTable->setItem(i, 3,
                                                  new QTableWidgetItem("Successfully"));
@@ -250,7 +249,7 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData> exportSwcDat
                     }
 
                     ESwc eSwc(savePath.string());
-                    eSwc.setNeuron(neurons);
+                    eSwc.setValue(neurons);
                     if (eSwc.WriteToFile()) {
                         ui->ResultTable->setItem(i, 3,
                                                  new QTableWidgetItem("Successfully"));

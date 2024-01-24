@@ -34,7 +34,6 @@ public:
         if (parent.isValid())
             return 0;
 
-        // Assuming there are 12 columns according to your code
         return 12;
     }
 

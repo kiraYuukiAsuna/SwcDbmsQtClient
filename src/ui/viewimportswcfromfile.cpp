@@ -2,7 +2,7 @@
 #include "ui_ViewImportSwcFromFile.h"
 #include <QFileDialog>
 #include <QStandardPaths>
-#include "src/swcio/SwcIO.h"
+#include "src/FileIo/SwcIo.hpp"
 #include "Message/Request.pb.h"
 #include "src/framework/service/WrappedCall.h"
 #include "mainwindow.h"
@@ -45,7 +45,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                 if (filePath.extension() == ".swc") {
                     Swc swc(filePath.string());
                     swc.ReadFromFile();
-                    auto neuron = swc.getNeuron();
+                    auto neuron = swc.getValue();
                     m_SwcList.emplace_back(swc);
 
                     ui->SwcFileInfo->setItem(i, 0,
@@ -64,7 +64,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                 } else if (filePath.extension() == ".eswc") {
                     ESwc eSwc(filePath.string());
                     eSwc.ReadFromFile();
-                    auto neuron = eSwc.getNeuron();
+                    auto neuron = eSwc.getValue();
                     m_ESwcList.emplace_back(eSwc);
 
                     ui->SwcFileInfo->setItem(i, 0,
@@ -86,7 +86,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
 
     });
 
-    connect(ui->ImportBtn, &QPushButton::clicked, this, [this, &mainWindow]() {
+    connect(ui->ImportBtn, &QPushButton::clicked, this, [this]() {
         if (ui->SwcFileInfo->rowCount() != m_SwcList.size() + m_ESwcList.size()) {
             QMessageBox::critical(this, "Error", "Data outdated! Please reopen this import window!");
             return;
@@ -107,7 +107,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                 proto::CreateSwcResponse response;
                 if (WrappedCall::createSwcMeta(swcName, description, response, this)) {
                     proto::SwcDataV1 swcData;
-                    auto &newSwcRawData = m_SwcList[processedSwcNumber].getNeuron();
+                    auto &newSwcRawData = m_SwcList[processedSwcNumber].getValue();
                     for (auto &val: newSwcRawData) {
                         auto *newData = swcData.add_swcdata();
                         auto internalData = newData->mutable_swcnodeinternaldata();
@@ -156,7 +156,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                 proto::CreateSwcResponse response;
                 if (WrappedCall::createSwcMeta(swcName, description, response, this)) {
                     proto::SwcDataV1 swcData;
-                    auto &newSwcRawData = m_ESwcList[processedESwcNumber].getNeuron();
+                    auto &newSwcRawData = m_ESwcList[processedESwcNumber].getValue();
                     for (auto &j: newSwcRawData) {
                         auto *newData = swcData.add_swcdata();
                         auto internalData = newData->mutable_swcnodeinternaldata();

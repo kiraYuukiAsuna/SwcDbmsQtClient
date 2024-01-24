@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QDialog>
-#include "src/swcio/SwcIO.h"
+#include "src/FileIo/SwcIo.hpp"
 
 
 QT_BEGIN_NAMESPACE

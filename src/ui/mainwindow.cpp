@@ -34,7 +34,6 @@ MainWindow::MainWindow(QWidget *parent) :
     auto menuBar = new QMenuBar(this);
 
     auto* menuFile = new QMenu(menuBar);
-    // icon
     menuFile->setTitle("File");
     menuFile->setIcon(QIcon(Image::ImageFileOpen));
     menuBar->addMenu(menuFile);
@@ -47,6 +46,27 @@ MainWindow::MainWindow(QWidget *parent) :
         ViewImportSwcFromFile view(this);
         view.exec();
         m_LeftClientView->refreshTree();
+    });
+
+    auto* menuHelp = new QMenu(menuBar);
+    menuHelp->setTitle("Help");
+    menuHelp->setIcon(QIcon(Image::ImageHelp));
+    menuBar->addMenu(menuHelp);
+
+    auto* menuAbout = new QAction(menuHelp);
+    menuAbout->setText("About");
+    menuAbout->setIcon(QIcon(Image::ImageHelp));
+    menuHelp->addAction(menuAbout);
+    connect(menuAbout,&QAction::triggered,this,[&]() {
+
+    });
+
+    auto* menuOnlineHelp = new QAction(menuHelp);
+    menuOnlineHelp->setText("Online Help");
+    menuOnlineHelp->setIcon(QIcon(Image::ImageHelp));
+    menuHelp->addAction(menuOnlineHelp);
+    connect(menuOnlineHelp,&QAction::triggered,this,[&]() {
+
     });
 
     setMenuBar(menuBar);

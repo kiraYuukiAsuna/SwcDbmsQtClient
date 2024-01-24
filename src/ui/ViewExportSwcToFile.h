@@ -18,7 +18,7 @@ class ViewExportSwcToFile : public QDialog {
 Q_OBJECT
 
 public:
-    explicit ViewExportSwcToFile(std::vector<ExportSwcData> exportSwcData, bool getDataFromServer, QWidget *parent = nullptr);
+    explicit ViewExportSwcToFile(std::vector<ExportSwcData>& exportSwcData, bool getDataFromServer, QWidget *parent = nullptr);
     ~ViewExportSwcToFile() override;
 
 private:

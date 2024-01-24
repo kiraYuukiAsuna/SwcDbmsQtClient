@@ -17,15 +17,14 @@ public:
         userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
     }
 
-    static bool defaultErrorHandler(const grpc::Status&status, const proto::ResponseMetaInfoV1&rspMeta,
+    static bool defaultErrorHandler(const std::string&actionName, const grpc::Status&status,
+                                    const proto::ResponseMetaInfoV1&rspMeta,
                                     QWidget* parent) {
         if (status.ok()) {
             if (rspMeta.status()) {
                 return true;
             }
-            QMessageBox::critical(parent, "Info",
-                                  "GetAllProjectMetaInfo Failed!" + QString::fromStdString(
-                                      rspMeta.message()));
+            QMessageBox::critical(parent, "Info", QString::fromStdString(actionName + " Failed!" + rspMeta.message()));
         }
         QMessageBox::critical(parent, "Error", QString::fromStdString(status.error_message()));
         return false;
@@ -36,18 +35,8 @@ public:
         setCommonRequestField(request);
 
         grpc::ClientContext context;
-        if (auto status = RpcCall::getInstance().Stub()->GetAllProject(&context, request, &response); status.ok()) {
-            if (response.metainfo().status()) {
-                return true;
-            }
-            QMessageBox::critical(parent, "Info",
-                                  "GetAllProjectMetaInfo Failed!" + QString::fromStdString(
-                                      response.metainfo().message()));
-        }
-        else {
-            QMessageBox::critical(parent, "Error", QString::fromStdString(status.error_message()));
-        }
-        return false;
+        auto status = RpcCall::getInstance().Stub()->GetAllProject(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
     static bool getAllSwcMetaInfo(proto::GetAllSwcMetaInfoResponse&response, QWidget* parent) {
@@ -55,17 +44,8 @@ public:
         setCommonRequestField(request);
 
         grpc::ClientContext context;
-        if (auto status = RpcCall::getInstance().Stub()->GetAllSwcMetaInfo(&context, request, &response); status.ok()) {
-            if (response.metainfo().status()) {
-                return true;
-            }
-            QMessageBox::critical(parent, "Error",
-                                  "GetAllSwcMetaInfo Failed!" + QString::fromStdString(response.metainfo().message()));
-        }
-        else {
-            QMessageBox::critical(parent, "Error", QString::fromStdString(status.error_message()));
-        }
-        return false;
+        auto status = RpcCall::getInstance().Stub()->GetAllSwcMetaInfo(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
     static bool getAllDailyStatisticsMetaInfo(proto::GetAllDailyStatisticsResponse&response, QWidget* parent) {
@@ -73,18 +53,8 @@ public:
         setCommonRequestField(request);
 
         grpc::ClientContext context;
-        if (auto status = RpcCall::getInstance().Stub()->GetAllDailyStatistics(&context, request, &response); status.ok()) {
-            if (response.metainfo().status()) {
-                return true;
-            }
-            QMessageBox::critical(parent, "Info",
-                                  "GetAllDailyStatistics Failed!" + QString::fromStdString(
-                                      response.metainfo().message()));
-        }
-        else {
-            QMessageBox::critical(parent, "Error", QString::fromStdString(status.error_message()));
-        }
-        return false;
+        auto status = RpcCall::getInstance().Stub()->GetAllDailyStatistics(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
     static bool getAllUserMetaInfo(proto::GetAllUserResponse&response, QWidget* parent) {
@@ -92,17 +62,8 @@ public:
         setCommonRequestField(request);
 
         grpc::ClientContext context;
-        if (auto status = RpcCall::getInstance().Stub()->GetAllUser(&context, request, &response); status.ok()) {
-            if (response.metainfo().status()) {
-                return true;
-            }
-            QMessageBox::critical(parent, "Info",
-                                  "GetAllUserMetaInfo Failed!" + QString::fromStdString(response.metainfo().message()));
-        }
-        else {
-            QMessageBox::critical(parent, "Error", QString::fromStdString(status.error_message()));
-        }
-        return false;
+        auto status = RpcCall::getInstance().Stub()->GetAllUser(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
     static bool getProjectMetaInfoByName(const std::string&projectName, proto::GetProjectResponse&response,
@@ -112,17 +73,8 @@ public:
         request.set_projectname(projectName);
 
         grpc::ClientContext context;
-        if (auto result = RpcCall::getInstance().Stub()->GetProject(&context, request, &response); result.ok()) {
-            if (response.metainfo().status()) {
-                return true;
-            }
-            QMessageBox::critical(parent, "Info",
-                                  "GetProjectMetaInfo Failed!" + QString::fromStdString(response.metainfo().message()));
-        }
-        else {
-            QMessageBox::critical(parent, "Error", QString::fromStdString(result.error_message()));
-        }
-        return false;
+        auto status = RpcCall::getInstance().Stub()->GetProject(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
     static bool getSwcMetaInfoByName(const std::string&swcName, proto::GetSwcMetaInfoResponse&response,
@@ -132,17 +84,8 @@ public:
         request.set_swcname(swcName);
 
         grpc::ClientContext context;
-        if (auto result = RpcCall::getInstance().Stub()->GetSwcMetaInfo(&context, request, &response); result.ok()) {
-            if (response.metainfo().status()) {
-                return true;
-            }
-            QMessageBox::critical(parent, "Info",
-                                  "GetSwcMetaInfo Failed!" + QString::fromStdString(response.metainfo().message()));
-        }
-        else {
-            QMessageBox::critical(parent, "Error", QString::fromStdString(result.error_message()));
-        }
-        return false;
+        auto status = RpcCall::getInstance().Stub()->GetSwcMetaInfo(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
     static bool getDailyStatisticsmMetaInfoByName(const std::string&dailyStatisticsName,
@@ -152,18 +95,8 @@ public:
         request.set_dailystatisticsname(dailyStatisticsName);
 
         grpc::ClientContext context;
-        if (auto result = RpcCall::getInstance().Stub()->GetDailyStatistics(&context, request, &response); result.
-            ok()) {
-            if (response.metainfo().status()) {
-                return true;
-            }
-            QMessageBox::critical(parent, "Info",
-                                  "GetSwcMetaInfo Failed!" + QString::fromStdString(response.metainfo().message()));
-        }
-        else {
-            QMessageBox::critical(parent, "Error", QString::fromStdString(result.error_message()));
-        }
-        return false;
+        auto status = RpcCall::getInstance().Stub()->GetDailyStatistics(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
     static bool getSwcFullNodeData(const std::string&swcName, proto::GetSwcFullNodeDataResponse&response,
@@ -173,18 +106,8 @@ public:
         request.set_swcname(swcName);
 
         grpc::ClientContext context;
-        if (auto result = RpcCall::getInstance().Stub()->GetSwcFullNodeData(&context, request, &response); result.
-            ok()) {
-            if (response.metainfo().status()) {
-                return true;
-            }
-            QMessageBox::critical(parent, "Info",
-                                  "GetSwcFullNodeData Failed!" + QString::fromStdString(response.metainfo().message()));
-        }
-        else {
-            QMessageBox::critical(parent, "Error", QString::fromStdString(result.error_message()));
-        }
-        return false;
+        auto status = RpcCall::getInstance().Stub()->GetSwcFullNodeData(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
     static bool getSwcSnapshot(const std::string&swcSnapshotCollectioNname, proto::GetSnapshotResponse&response,
@@ -194,17 +117,8 @@ public:
         request.set_swcsnapshotcollectionname(swcSnapshotCollectioNname);
 
         grpc::ClientContext context;
-        if (auto result = RpcCall::getInstance().Stub()->GetSnapshot(&context, request, &response); result.ok()) {
-            if (response.metainfo().status()) {
-                return true;
-            }
-            QMessageBox::critical(parent, "Info",
-                                  "GetSnapshot Failed!" + QString::fromStdString(response.metainfo().message()));
-        }
-        else {
-            QMessageBox::critical(parent, "Error", QString::fromStdString(result.error_message()));
-        }
-        return false;
+        auto status = RpcCall::getInstance().Stub()->GetSnapshot(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
     static bool getSwcNodeDataListByTimeAndUserResponse(const std::string&swcName, const std::string&userName,
@@ -220,19 +134,8 @@ public:
         request.mutable_endtime()->CopyFrom(endTime);
 
         grpc::ClientContext context;
-        if (auto result = RpcCall::getInstance().Stub()->GetSwcNodeDataListByTimeAndUser(&context, request, &response);
-            result.ok()) {
-            if (response.metainfo().status()) {
-                return true;
-            }
-            QMessageBox::critical(parent, "Info",
-                                  "GetSwcNodeDataListByTimeAndUser Failed!" + QString::fromStdString(
-                                      response.metainfo().message()));
-        }
-        else {
-            QMessageBox::critical(parent, "Error", QString::fromStdString(result.error_message()));
-        }
-        return false;
+        auto status = RpcCall::getInstance().Stub()->GetSwcNodeDataListByTimeAndUser(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
     static bool addSwcNodeData(const std::string&swcName, proto::SwcDataV1&swcData,
@@ -243,17 +146,8 @@ public:
         request.mutable_swcdata()->CopyFrom(swcData);
 
         grpc::ClientContext context;
-        if (auto result = RpcCall::getInstance().Stub()->CreateSwcNodeData(&context, request, &response); result.ok()) {
-            if (response.metainfo().status()) {
-                return true;
-            }
-            QMessageBox::critical(parent, "Info",
-                                  "CreateSwcNodeData Failed!" + QString::fromStdString(response.metainfo().message()));
-        }
-        else {
-            QMessageBox::critical(parent, "Error", QString::fromStdString(result.error_message()));
-        }
-        return false;
+        auto status = RpcCall::getInstance().Stub()->CreateSwcNodeData(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
     static bool modifySwcNodeData(const std::string&swcName, proto::SwcNodeDataV1&swcNodeData,
@@ -264,17 +158,8 @@ public:
         request.mutable_swcnodedata()->CopyFrom(swcNodeData);
 
         grpc::ClientContext context;
-        if (auto result = RpcCall::getInstance().Stub()->UpdateSwcNodeData(&context, request, &response); result.ok()) {
-            if (response.metainfo().status()) {
-                return true;
-            }
-            QMessageBox::critical(parent, "Info",
-                                  "UpdateSwcNodeData Failed!" + QString::fromStdString(response.metainfo().message()));
-        }
-        else {
-            QMessageBox::critical(parent, "Error", QString::fromStdString(result.error_message()));
-        }
-        return false;
+        auto status = RpcCall::getInstance().Stub()->UpdateSwcNodeData(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
     static bool deleteSwcNodeData(const std::string&swcName, proto::SwcDataV1&swcData,
@@ -285,17 +170,8 @@ public:
         request.mutable_swcdata()->CopyFrom(swcData);
 
         grpc::ClientContext context;
-        if (auto result = RpcCall::getInstance().Stub()->DeleteSwcNodeData(&context, request, &response); result.ok()) {
-            if (response.metainfo().status()) {
-                return true;
-            }
-            QMessageBox::critical(parent, "Info",
-                                  "DeleteSwcNodeData Failed!" + QString::fromStdString(response.metainfo().message()));
-        }
-        else {
-            QMessageBox::critical(parent, "Error", QString::fromStdString(result.error_message()));
-        }
-        return false;
+        auto status = RpcCall::getInstance().Stub()->DeleteSwcNodeData(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
     static bool createSwcMeta(const std::string&name, const std::string&description, proto::CreateSwcResponse&response,
@@ -307,16 +183,8 @@ public:
         request.mutable_swcinfo()->set_swctype("eswc"); // by default when creating new swc using eswc type
 
         grpc::ClientContext context;
-        if (auto status = RpcCall::getInstance().Stub()->CreateSwc(&context, request, &response); status.ok()) {
-            if (response.metainfo().status()) {
-                return true;
-            }
-            QMessageBox::critical(parent, "Error", QString::fromStdString(response.metainfo().message()));
-        }
-        else {
-            QMessageBox::critical(parent, "Error", QString::fromStdString(status.error_message()));
-        }
-        return false;
+        auto status = RpcCall::getInstance().Stub()->CreateSwc(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
     static bool getAllSwcIncrementRecord(const std::string&name,
@@ -327,41 +195,134 @@ public:
         request.set_swcname(name);
 
         grpc::ClientContext context;
-        if (auto status = RpcCall::getInstance().Stub()->GetAllIncrementOperationMetaInfo(&context, request, &response);
-            status.ok()) {
-            if (response.has_metainfo() && response.metainfo().status() == true) {
-                return true;
-            }
-            QMessageBox::critical(parent, "Error", QString::fromStdString(response.metainfo().message()));
-            return false;
-        }
-        else {
-            QMessageBox::critical(parent, "Error", QString::fromStdString(status.error_message()));
-            return false;
-        }
+        auto status = RpcCall::getInstance().Stub()->GetAllIncrementOperationMetaInfo(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
     static bool getSwcIncrementRecord(const std::string&name,
-                                     proto::GetIncrementOperationResponse&response,
-                                     QWidget* parent) {
+                                      proto::GetIncrementOperationResponse&response,
+                                      QWidget* parent) {
         proto::GetIncrementOperationRequest request;
         setCommonRequestField(request);
         request.set_incrementoperationcollectionname(name);
 
         grpc::ClientContext context;
-        if (auto status = RpcCall::getInstance().Stub()->GetIncrementOperation(&context, request, &response);
-            status.ok()) {
-            if (response.has_metainfo() && response.metainfo().status() == true) {
-                return true;
-            }
-            QMessageBox::critical(parent, "Error", QString::fromStdString(response.metainfo().message()));
-            return false;
-            }
-        else {
-            QMessageBox::critical(parent, "Error", QString::fromStdString(status.error_message()));
-            return false;
-        }
+        auto status = RpcCall::getInstance().Stub()->GetIncrementOperation(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
+    static bool getSwcAttachmentAno(const std::string&swcName, const std::string&attachmentUuid,
+                                    proto::GetSwcAttachmentAnoResponse&response,
+                                    QWidget* parent) {
+        proto::GetSwcAttachmentAnoRequest request;
+        setCommonRequestField(request);
+        request.set_swcname(swcName);
+        request.set_anoattachmentuuid(attachmentUuid);
 
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->GetSwcAttachmentAno(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool createSwcAttachmentAno(const std::string&name, const std::string&apoFileName,
+                                       const std::string&swcFileName,
+                                       proto::CreateSwcAttachmentAnoResponse&response,
+                                       QWidget* parent) {
+        proto::CreateSwcAttachmentAnoRequest request;
+        setCommonRequestField(request);
+        request.set_swcname(name);
+        request.mutable_swcattachmentano()->set_apofile(apoFileName);
+        request.mutable_swcattachmentano()->set_swcfile(swcFileName);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->CreateSwcAttachmentAno(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool updateSwcAttachmentAno(const std::string&name, const std::string&attachmentUuid,
+                                       const std::string&apoFileName, const std::string&swcFileName,
+                                       proto::UpdateSwcAttachmentAnoResponse&response,
+                                       QWidget* parent) {
+        proto::UpdateSwcAttachmentAnoRequest request;
+        setCommonRequestField(request);
+        request.set_swcname(name);
+        request.set_anoattachmentuuid(attachmentUuid);
+        request.mutable_newswcattachmentano()->set_apofile(apoFileName);
+        request.mutable_newswcattachmentano()->set_swcfile(swcFileName);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->UpdateSwcAttachmentAno(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool deleteSwcAttachmentAno(const std::string&name, const std::string&attachmentUuid,
+                                       proto::DeleteSwcAttachmentAnoResponse&response,
+                                       QWidget* parent) {
+        proto::DeleteSwcAttachmentAnoRequest request;
+        setCommonRequestField(request);
+        request.set_swcname(name);
+        request.set_anoattachmentuuid(attachmentUuid);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->DeleteSwcAttachmentAno(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool getSwcAttachmentApo(const std::string&swcName, const std::string&attachmentUuid,
+                                    proto::GetSwcAttachmentApoResponse&response,
+                                    QWidget* parent) {
+        proto::GetSwcAttachmentApoRequest request;
+        setCommonRequestField(request);
+        request.set_swcname(swcName);
+        request.set_apoattachmentuuid(attachmentUuid);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->GetSwcAttachmentApo(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool createSwcAttachmentApo(const std::string&name, std::vector<proto::SwcAttachmentApoV1> attachments,
+                                       proto::CreateSwcAttachmentApoResponse&response,
+                                       QWidget* parent) {
+        proto::CreateSwcAttachmentApoRequest request;
+        setCommonRequestField(request);
+        request.set_swcname(name);
+        for (auto&attachment: attachments) {
+            request.add_swcattachmentapo()->CopyFrom(attachment);
+        }
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->CreateSwcAttachmentApo(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool updateSwcAttachmentApo(const std::string&name, const std::string&attachmentUuid,
+                                       std::vector<proto::SwcAttachmentApoV1> attachments,
+                                       proto::UpdateSwcAttachmentApoResponse&response,
+                                       QWidget* parent) {
+        proto::UpdateSwcAttachmentApoRequest request;
+        setCommonRequestField(request);
+        request.set_swcname(name);
+        request.set_apoattachmentuuid(attachmentUuid);
+        for (auto&attachment: attachments) {
+            request.add_newswcattachmentapo()->CopyFrom(attachment);
+        }
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->UpdateSwcAttachmentApo(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool deleteSwcAttachmentApo(const std::string&name, const std::string&attachmentUuid,
+                                       proto::DeleteSwcAttachmentApoResponse&response,
+                                       QWidget* parent) {
+        proto::DeleteSwcAttachmentApoRequest request;
+        setCommonRequestField(request);
+        request.set_swcname(name);
+        request.set_apoattachmentuuid(attachmentUuid);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->DeleteSwcAttachmentApo(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
 };

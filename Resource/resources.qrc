@@ -111,5 +111,6 @@
         <file>images/snapshot.png</file>
         <file>images/version_control.png</file>
         <file>images/attachment.png</file>
+        <file>images/help.png</file>
     </qresource>
 </RCC>

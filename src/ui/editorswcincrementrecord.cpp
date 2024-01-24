@@ -9,6 +9,10 @@ EditorSwcIncrementRecord::EditorSwcIncrementRecord(const std::string&swcName, QW
     ui(new Ui::EditorSwcIncrementRecord), m_SwcName(swcName) {
     ui->setupUi(this);
 
+    connect(ui->DetailBtn,&QPushButton::clicked,this,[&]() {
+        QMessageBox::information(this, "Info", "Using [Version Control] To Access History Swc Version at AnyTime!");
+    });
+
     getAllSnapshot();
     refreshTableView();
 }
