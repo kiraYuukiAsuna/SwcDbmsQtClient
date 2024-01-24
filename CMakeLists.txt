@@ -115,9 +115,9 @@ set(PROJECT_SOURCES
         src/ui/editorswcnode.cpp
         src/ui/editorswcnode.h
         src/ui/editorswcnode.ui
-        src/ui/ViewExportSwcToFile.cpp
-        src/ui/ViewExportSwcToFile.h
-        src/ui/vieweportswctofile.ui
+        src/ui/viewexportswctofile.cpp
+        src/ui/viewexportswctofile.h
+        src/ui/viewexportswctofile.ui
         src/ui/viewimportswcfromfile.cpp
         src/ui/viewimportswcfromfile.h
         src/ui/viewimportswcfromfile.ui

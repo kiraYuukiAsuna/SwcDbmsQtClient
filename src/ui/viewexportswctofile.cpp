@@ -1,14 +1,14 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include "ViewExportSwcToFile.h"
-#include "ui_ViewEportSwcToFile.h"
+#include "ui_ViewExportSwcToFile.h"
 #include "src/framework/defination/ImageDefination.h"
 #include "src/FileIo/SwcIo.hpp"
 #include "Message/Response.pb.h"
 #include "src/framework/service/WrappedCall.h"
 
 
-ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>& exportSwcData, bool getDataFromServer,
+ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcData, bool getDataFromServer,
                                          QWidget* parent) : QDialog(parent), ui(new Ui::ViewEportSwcToFile) {
     ui->setupUi(this);
     std::string stylesheet = std::string("QListWidget::indicator:checked{image:url(")
