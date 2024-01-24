@@ -2,7 +2,7 @@
 #include <QTimer>
 
 #include "MainWindow.h"
-#include "ui_mainwindow.h"
+#include "ui_MainWindow.h"
 #include "src/framework/defination/ImageDefination.h"
 #include <QTimer>
 #include <grpcpp/client_context.h>
