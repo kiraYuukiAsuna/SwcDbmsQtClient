@@ -6,7 +6,7 @@
 #include "src/FileIo/SwcIo.hpp"
 #include "Message/Response.pb.h"
 #include "src/framework/service/WrappedCall.h"
-
+#include <filesystem>
 
 ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcData, bool getDataFromServer,
                                          QWidget* parent) : QDialog(parent), ui(new Ui::ViewExportSwcToFile) {
