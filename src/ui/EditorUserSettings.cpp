@@ -123,7 +123,8 @@ void EditorUserSettings::getUserMetaInfo() {
         ui->HeadPhoto->setPixmap(pixmap);
         ui->PermissionGroup->setText(QString::fromStdString(response.userinfo().userpermissiongroup()));
         ui->PermissionGroup->setReadOnly(true);
-
+        ui->UserId->setText(QString::fromStdString(std::to_string(response.userinfo().userid())));
+        ui->UserId->setReadOnly(true);
     }else{
         QMessageBox::critical(this,"Error",QString::fromStdString(result.error_message()));
     }
