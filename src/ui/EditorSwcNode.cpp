@@ -58,8 +58,11 @@ EditorSwcNode::EditorSwcNode(const std::string &swcName, QWidget *parent) :
             swcNodeData.CopyFrom(InitSwcNodeData);
             swcNodeData.mutable_swcnodeinternaldata()->CopyFrom(swcNodeInternalData);
 
+            proto::SwcDataV1 swcData;
+            swcData.add_swcdata()->CopyFrom(swcNodeData);
+
             proto::UpdateSwcNodeDataResponse response;
-            if(WrappedCall::modifySwcNodeData(m_SwcName, swcNodeData, response, this)){
+            if(WrappedCall::modifySwcNodeData(m_SwcName, swcData, response, this)){
                 QMessageBox::information(this,"Info","Modify Swc node successfully!");
                 refreshAll();
             }

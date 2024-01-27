@@ -150,12 +150,12 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool modifySwcNodeData(const std::string&swcName, proto::SwcNodeDataV1&swcNodeData,
+    static bool modifySwcNodeData(const std::string&swcName, proto::SwcDataV1&swcData,
                                   proto::UpdateSwcNodeDataResponse&response, QWidget* parent) {
         proto::UpdateSwcNodeDataRequest request;
         setCommonRequestField(request);
         request.set_swcname(swcName);
-        request.mutable_swcnodedata()->CopyFrom(swcNodeData);
+        request.mutable_swcdata()->CopyFrom(swcData);
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->UpdateSwcNodeData(&context, request, &response);
