@@ -27,9 +27,9 @@ CreateSwcSnapshotView::CreateSwcSnapshotView(const std::string&swcName, QWidget*
 
             auto status = RpcCall::getInstance().Stub()->CreateSwcSnapshot(&context,request,&response);
             if(status.ok()) {
-                if(response.has_metainfo()&&response.metainfo().status() == true) {
-                    QMessageBox::information(this, "Warning","Create Snapshot successfully!",
-                    QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::Cancel);
+                if(response.has_metainfo() && response.metainfo().status()) {
+                    QMessageBox::information(this, "Info","Create Snapshot successfully!");
+                    accept();
                 }else {
                     QMessageBox::critical(this,"Error",QString::fromStdString(response.metainfo().message()));
                 }

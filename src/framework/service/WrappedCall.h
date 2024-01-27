@@ -325,4 +325,17 @@ public:
         auto status = RpcCall::getInstance().Stub()->DeleteSwcAttachmentApo(&context, request, &response);
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
+
+    static bool RevertSwcVersion(const std::string&name, google::protobuf::Timestamp& endTime,
+                                 proto::RevertSwcVersionResponse&response,
+                                 QWidget* parent) {
+        proto::RevertSwcVersionRequest request;
+        setCommonRequestField(request);
+        request.set_swcname(name);
+        request.mutable_versionendtime()->CopyFrom(endTime);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->RevertSwcVersion(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
 };

@@ -20,6 +20,11 @@ private:
 
     std::string m_SwcName;
 
+    bool m_HasExportedStatus{false};
+    int64_t m_EndTime;
+    std::string m_SnapshotName;
+    std::string m_IncremrntOpName;
+
     void getSwcLastSnapshot();
     void getSwcIncrementRecord(proto::SwcSnapshotMetaInfoV1 snapshot, int64_t endTime);
 
