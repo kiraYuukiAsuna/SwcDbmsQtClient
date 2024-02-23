@@ -11,7 +11,7 @@ using QtNodes::GraphicsViewStyle;
 
 inline void initResources()
 {
-    Q_INIT_RESOURCE(resources);
+    Q_INIT_RESOURCE(nodeeditorresources);
 }
 
 GraphicsViewStyle::GraphicsViewStyle()

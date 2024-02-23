@@ -14,7 +14,7 @@ using QtNodes::NodeStyle;
 
 inline void initResources()
 {
-    Q_INIT_RESOURCE(resources);
+    Q_INIT_RESOURCE(nodeeditorresources);
 }
 
 NodeStyle::NodeStyle()
