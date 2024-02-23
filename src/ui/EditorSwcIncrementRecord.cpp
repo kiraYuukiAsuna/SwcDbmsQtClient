@@ -13,7 +13,7 @@ EditorSwcIncrementRecord::EditorSwcIncrementRecord(const std::string&swcName, QW
         QMessageBox::information(this, "Info", "Using [Version Control] To Access History Swc Version at AnyTime!");
     });
 
-    getAllSnapshot();
+    getAllSwcIncrementRecord();
     refreshTableView();
 }
 
@@ -21,7 +21,7 @@ EditorSwcIncrementRecord::~EditorSwcIncrementRecord() {
     delete ui;
 }
 
-void EditorSwcIncrementRecord::getAllSnapshot() {
+void EditorSwcIncrementRecord::getAllSwcIncrementRecord() {
     proto::GetAllIncrementOperationMetaInfoResponse response;
 
     if (WrappedCall::getAllSwcIncrementRecord(m_SwcName, response, this)) {

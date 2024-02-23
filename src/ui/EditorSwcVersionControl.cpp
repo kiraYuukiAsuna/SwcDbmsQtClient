@@ -4,12 +4,20 @@
 #include <Message/Response.pb.h>
 #include "ui_EditorSwcVersionControl.h"
 #include "src/framework/service/WrappedCall.h"
-
+#include "src/GraphModel/Registry.hpp"
+#include <QAction>
 
 EditorSwcVersionControl::EditorSwcVersionControl(const std::string &swcName, QWidget *parent) : QDialog(parent),
                                                                                                 ui(new Ui::EditorSwcVersionControl),
-                                                                                                m_SwcName(swcName) {
+                                                                                                m_SwcName(swcName),
+                                                                                                m_DataFlowGraphModel(
+                                                                                                        registerDataModels()) {
     ui->setupUi(this);
+
+    m_DataFlowGraphicsScene = new QtNodes::DataFlowGraphicsScene(m_DataFlowGraphModel, this);
+    m_GraphicsView.setScene(m_DataFlowGraphicsScene);
+
+    ui->GraphicsViewLayout->addWidget(&m_GraphicsView);
 
     ui->dateTimeEdit->setDateTime(QDateTime::currentDateTime());
 
@@ -17,13 +25,7 @@ EditorSwcVersionControl::EditorSwcVersionControl(const std::string &swcName, QWi
         getSwcLastSnapshot();
     });
 
-    connect(ui->OKBtn, &QPushButton::clicked, this, [&]() {
-        accept();
-    });
-
-    connect(ui->CancelBtn, &QPushButton::clicked, this, [&]() {
-        reject();
-    });
+    m_GraphicsView.setContextMenuPolicy(Qt::NoContextMenu);
 
     connect(ui->Revert, &QPushButton::clicked, this, [&]() {
         m_EndTime = ui->dateTimeEdit->dateTime().toSecsSinceEpoch();
@@ -51,6 +53,28 @@ EditorSwcVersionControl::EditorSwcVersionControl(const std::string &swcName, QWi
 
             QMessageBox::information(this, "Info", "Revert Swc Version Successfully!");
         }
+    });
+
+    connect(ui->Refresh, &QPushButton::clicked, this, [&]() {
+        getAllSnapshot();
+        getAllSwcIncrementRecord();
+
+        for (auto &nodeId: m_DataFlowGraphModel.allNodeIds()) {
+            m_DataFlowGraphModel.deleteNode(nodeId);
+        }
+
+        for (int idx = 0; idx < m_SwcSnapshots.size(); idx++) {
+            QtNodes::NodeId const newId = m_DataFlowGraphModel.addNode("SnapshotDelegateModel");
+            m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::Position,
+                                             QPointF{static_cast<qreal>(idx * 600), 0});
+        }
+
+        for (int idx = 0; idx < m_SwcIncrements.size(); idx++) {
+            QtNodes::NodeId const newId = m_DataFlowGraphModel.addNode("IncrementOperationDelegateModel");
+            m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::Position,
+                                             QPointF{static_cast<qreal>(300 + idx * 600), 300});
+        }
+
     });
 }
 
@@ -182,7 +206,6 @@ void EditorSwcVersionControl::getSwcIncrementRecord(proto::SwcSnapshotMetaInfoV1
 
 void EditorSwcVersionControl::promoteOperation(std::vector<proto::SwcNodeDataV1> &nodeData,
                                                const proto::SwcIncrementOperationV1 &op, int64_t endTime) {
-    int a = op.createtime().seconds();
     if (op.createtime().seconds() <= endTime) {
         switch (op.incrementoperation()) {
             case proto::Unknown:
@@ -216,6 +239,39 @@ void EditorSwcVersionControl::promoteOperation(std::vector<proto::SwcNodeDataV1>
                 break;
             }
             default:;
+        }
+    }
+}
+
+void EditorSwcVersionControl::getAllSnapshot() {
+    grpc::ClientContext context;
+    proto::GetAllSnapshotMetaInfoRequest request;
+    proto::GetAllSnapshotMetaInfoResponse response;
+    WrappedCall::setCommonRequestField(request);
+    request.set_swcname(m_SwcName);
+
+    auto status = RpcCall::getInstance().Stub()->GetAllSnapshotMetaInfo(&context, request, &response);
+    if (status.ok()) {
+        if (response.has_metainfo() && response.metainfo().status() == true) {
+            m_SwcSnapshots.clear();
+            for (auto &snapshot: response.swcsnapshotlist()) {
+                m_SwcSnapshots.push_back(snapshot);
+            }
+        } else {
+            QMessageBox::critical(this, "Error", QString::fromStdString(response.metainfo().message()));
+        }
+    } else {
+        QMessageBox::critical(this, "Error", QString::fromStdString(status.error_message()));
+    }
+}
+
+void EditorSwcVersionControl::getAllSwcIncrementRecord() {
+    proto::GetAllIncrementOperationMetaInfoResponse response;
+
+    if (WrappedCall::getAllSwcIncrementRecord(m_SwcName, response, this)) {
+        m_SwcIncrements.clear();
+        for (auto &incrementRecordCollection: response.swcincrementoperationmetainfo()) {
+            m_SwcIncrements.push_back(incrementRecordCollection);
         }
     }
 }

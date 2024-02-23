@@ -88,6 +88,6 @@ private:
 
     std::string m_SwcName;
     std::vector<proto::SwcIncrementOperationMetaInfoV1> m_SwcIncrements;
-    void getAllSnapshot();
+    void getAllSwcIncrementRecord();
     void refreshTableView();
 };
