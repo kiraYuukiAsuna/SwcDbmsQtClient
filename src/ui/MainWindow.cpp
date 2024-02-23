@@ -16,6 +16,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
+    setWindowIcon(QIcon(Image::ImageAppIcon));
     setWindowState(Qt::WindowMaximized);
 
     m_Splitter = new QSplitter(this);
