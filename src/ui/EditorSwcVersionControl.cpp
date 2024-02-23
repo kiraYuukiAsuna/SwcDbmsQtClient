@@ -11,18 +11,14 @@ EditorSwcVersionControl::EditorSwcVersionControl(const std::string &swcName, QWi
                                                                                                 m_SwcName(swcName) {
     ui->setupUi(this);
 
+    m_DataFlowGraphModel.add
+    m_GraphicsView.setScene(&m_DataFlowGraphicsScene);
+    ui->GraphicsViewLayout->addWidget(&m_GraphicsView);
+
     ui->dateTimeEdit->setDateTime(QDateTime::currentDateTime());
 
     connect(ui->ExportBtn, &QPushButton::clicked, this, [&]() {
         getSwcLastSnapshot();
-    });
-
-    connect(ui->OKBtn, &QPushButton::clicked, this, [&]() {
-        accept();
-    });
-
-    connect(ui->CancelBtn, &QPushButton::clicked, this, [&]() {
-        reject();
     });
 
     connect(ui->Revert, &QPushButton::clicked, this, [&]() {

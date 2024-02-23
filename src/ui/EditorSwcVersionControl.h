@@ -3,6 +3,8 @@
 #include <QDialog>
 
 #include "ViewExportSwcToFile.h"
+#include "GraphicsView.hpp"
+#include "DataFlowGraphicsScene.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class EditorSwcVersionControl; }
@@ -30,5 +32,8 @@ private:
 
     void promoteOperation(std::vector<proto::SwcNodeDataV1>& nodeData, const proto::SwcIncrementOperationV1& op,int64_t endTime);
 
+    QtNodes::GraphicsView m_GraphicsView;
+    QtNodes::DataFlowGraphicsScene m_DataFlowGraphicsScene;
+    QtNodes::DataFlowGraphModel m_DataFlowGraphModel;
 };
 

@@ -17,6 +17,7 @@ find_package(Qt6 COMPONENTS
         Gui
         Widgets
         Svg
+        OpenGL
         REQUIRED)
 find_package(protobuf CONFIG REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
@@ -26,6 +27,10 @@ include_directories(
         SwcDbmsCommon/Generated/cpp
         src/styles
         ThirdParty/nlohmann_json
+        ThirdParty/nodeeditor-3.0.10/src
+        ThirdParty/nodeeditor-3.0.10/include
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal
 )
 
 link_directories(
@@ -33,8 +38,74 @@ link_directories(
 
 )
 
+set(NODEEDITOR_SOURCE_FILES
+        ThirdParty/nodeeditor-3.0.10/src/AbstractGraphModel.cpp
+        ThirdParty/nodeeditor-3.0.10/src/AbstractNodeGeometry.cpp
+        ThirdParty/nodeeditor-3.0.10/src/BasicGraphicsScene.cpp
+        ThirdParty/nodeeditor-3.0.10/src/ConnectionGraphicsObject.cpp
+        ThirdParty/nodeeditor-3.0.10/src/ConnectionPainter.cpp
+        ThirdParty/nodeeditor-3.0.10/src/ConnectionState.cpp
+        ThirdParty/nodeeditor-3.0.10/src/ConnectionStyle.cpp
+        ThirdParty/nodeeditor-3.0.10/src/DataFlowGraphModel.cpp
+        ThirdParty/nodeeditor-3.0.10/src/DataFlowGraphicsScene.cpp
+        ThirdParty/nodeeditor-3.0.10/src/DefaultHorizontalNodeGeometry.cpp
+        ThirdParty/nodeeditor-3.0.10/src/DefaultVerticalNodeGeometry.cpp
+        ThirdParty/nodeeditor-3.0.10/src/Definitions.cpp
+        ThirdParty/nodeeditor-3.0.10/src/GraphicsView.cpp
+        ThirdParty/nodeeditor-3.0.10/src/GraphicsViewStyle.cpp
+        ThirdParty/nodeeditor-3.0.10/src/NodeDelegateModelRegistry.cpp
+        ThirdParty/nodeeditor-3.0.10/src/NodeConnectionInteraction.cpp
+        ThirdParty/nodeeditor-3.0.10/src/NodeDelegateModel.cpp
+        ThirdParty/nodeeditor-3.0.10/src/NodeGraphicsObject.cpp
+        ThirdParty/nodeeditor-3.0.10/src/DefaultNodePainter.cpp
+        ThirdParty/nodeeditor-3.0.10/src/NodeState.cpp
+        ThirdParty/nodeeditor-3.0.10/src/NodeStyle.cpp
+        ThirdParty/nodeeditor-3.0.10/src/StyleCollection.cpp
+        ThirdParty/nodeeditor-3.0.10/src/UndoCommands.cpp
+        ThirdParty/nodeeditor-3.0.10/src/locateNode.cpp
+)
+
+set(NODEEDITOR_HEADER_FILES
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/AbstractGraphModel.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/AbstractNodeGeometry.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/AbstractNodePainter.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/BasicGraphicsScene.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/Compiler.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/ConnectionGraphicsObject.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/ConnectionIdHash.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/ConnectionIdUtils.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/ConnectionState.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/ConnectionStyle.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/DataFlowGraphicsScene.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/DataFlowGraphModel.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/DefaultNodePainter.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/Definitions.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/Export.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/GraphicsView.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/GraphicsViewStyle.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/locateNode.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/NodeData.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/NodeDelegateModel.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/NodeDelegateModelRegistry.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/NodeGraphicsObject.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/NodeState.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/NodeStyle.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/OperatingSystem.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/QStringStdHash.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/QUuidStdHash.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/Serializable.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/Style.hpp
+        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/StyleCollection.hpp
+        ThirdParty/nodeeditor-3.0.10/src/ConnectionPainter.hpp
+        ThirdParty/nodeeditor-3.0.10/src/DefaultHorizontalNodeGeometry.hpp
+        ThirdParty/nodeeditor-3.0.10/src/DefaultVerticalNodeGeometry.hpp
+        ThirdParty/nodeeditor-3.0.10/src/NodeConnectionInteraction.hpp
+        ThirdParty/nodeeditor-3.0.10/src/UndoCommands.hpp
+)
+
 set(QRESOURCE
-        Resource/resources.qrc
+        ThirdParty/nodeeditor-3.0.10/resources/nodeeditorresources.qrc
+        Resource/swcdbmsclientresources.qrc
 )
 
 file(GLOB_RECURSE SRC_LIST
@@ -68,17 +139,25 @@ set(PROJECT_SOURCES
         app_win32.rc
 )
 
-add_executable(${PROJECT_NAME} ${QRESOURCE} ${PROJECT_HEADERS} ${PROJECT_SOURCES} ${SRC_LIST})
+add_executable(${PROJECT_NAME} ${NODEEDITOR_SOURCE_FILES} ${NODEEDITOR_HEADER_FILES} ${QRESOURCE} ${PROJECT_HEADERS} ${PROJECT_SOURCES} ${SRC_LIST})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
         Qt::Core
         Qt::Gui
         Qt::Widgets
         Qt::Svg
+        Qt::OpenGL
         PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
         PRIVATE spdlog::spdlog
         PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts
 )
+
+target_compile_definitions(${PROJECT_NAME}
+        PUBLIC
+        NODE_EDITOR_STATIC
+        NODE_EDITOR_EXPORTS
+)
+
 
 if (WIN32)
     Set_Target_Properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
