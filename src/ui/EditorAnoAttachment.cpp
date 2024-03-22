@@ -153,3 +153,4 @@ void EditorAnoAttachment::getSwcAnoAttachment() {
     ui->ApoFileName->setText(QString::fromStdString(get_swc_attachment_ano_response.swcattachmentano().apofile()));
     ui->SwcFileName->setText(QString::fromStdString(get_swc_attachment_ano_response.swcattachmentano().swcfile()));
 }
+

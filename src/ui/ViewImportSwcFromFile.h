@@ -4,6 +4,11 @@
 #include "src/FileIo/SwcIo.hpp"
 
 
+struct ExtraSwcImportAttribute {
+    std::string m_AnoPath;
+    std::string m_ApoPath;
+};
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class ViewImportSwcFromFile; }
 QT_END_NAMESPACE
@@ -15,14 +20,17 @@ Q_OBJECT
 
 public:
     explicit ViewImportSwcFromFile(MainWindow *mainWindow);
+
     ~ViewImportSwcFromFile() override;
 
 private:
     Ui::ViewImportSwcFromFile *ui;
-    MainWindow* m_MainWindow;
+    MainWindow *m_MainWindow;
 
-    std::vector<Swc> m_SwcList;
-    std::vector<ESwc> m_ESwcList;
-    bool m_ActionImportComplete= false;
+    std::vector<std::pair<Swc, ExtraSwcImportAttribute>> m_SwcList;
+    std::vector<std::pair<ESwc, ExtraSwcImportAttribute>> m_ESwcList;
+    bool m_ActionImportComplete = false;
+
+    void setAllGridColor(int row, const QColor &color);
 
 };

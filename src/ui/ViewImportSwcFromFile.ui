@@ -39,9 +39,16 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="SelectBtn">
+        <widget class="QPushButton" name="SelectFilesBtn">
          <property name="text">
           <string>Select Import Files</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="SelectFolderBtn">
+         <property name="text">
+          <string>Select Import Folder</string>
          </property>
         </widget>
        </item>

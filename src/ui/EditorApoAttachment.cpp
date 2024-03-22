@@ -9,8 +9,9 @@
 #include "src/framework/service/WrappedCall.h"
 #include <filesystem>
 
-EditorApoAttachment::EditorApoAttachment(const std::string&swcName, QWidget* parent) : QDialog(parent),
-    ui(new Ui::EditorApoAttachment), m_SwcName(swcName) {
+EditorApoAttachment::EditorApoAttachment(const std::string &swcName, QWidget *parent) : QDialog(parent),
+                                                                                        ui(new Ui::EditorApoAttachment),
+                                                                                        m_SwcName(swcName) {
     ui->setupUi(this);
 
     connect(ui->OKBtn, &QPushButton::clicked, this, [&]() {
@@ -20,24 +21,21 @@ EditorApoAttachment::EditorApoAttachment(const std::string&swcName, QWidget* par
                                                     this)) {
                 QMessageBox::information(this, "Info", "Update Swc Ano attachment successfully!");
                 accept();
-            }
-            else {
+            } else {
                 QMessageBox::critical(this, "Error",
                                       "Update Swc Apo attachment Failed! " + QString::fromStdString(
-                                          response.metainfo().message()));
+                                              response.metainfo().message()));
             }
-        }
-        else {
+        } else {
             proto::CreateSwcAttachmentApoResponse response;
             if (WrappedCall::createSwcAttachmentApo(m_SwcName, m_SwcAttachmentApoData, response,
                                                     this)) {
                 QMessageBox::information(this, "Info", "Create Swc Ano attachment successfully!");
                 accept();
-            }
-            else {
+            } else {
                 QMessageBox::critical(this, "Error",
                                       "Create Swc Apo attachment Failed! " + QString::fromStdString(
-                                          response.metainfo().message()));
+                                              response.metainfo().message()));
             }
         }
     });
@@ -99,11 +97,10 @@ EditorApoAttachment::EditorApoAttachment(const std::string&swcName, QWidget* par
                                                 this)) {
             QMessageBox::information(this, "Info", "Delete Swc Ano attachment successfully!");
             accept();
-        }
-        else {
+        } else {
             QMessageBox::critical(this, "Error",
                                   "Delete Swc Apo attachment Failed! " + QString::fromStdString(
-                                      response.metainfo().message()));
+                                          response.metainfo().message()));
         }
     });
 
@@ -125,10 +122,10 @@ EditorApoAttachment::EditorApoAttachment(const std::string&swcName, QWidget* par
 
                 try {
                     io.ReadFromFile();
-                    auto&value = io.getValue();
+                    auto &value = io.getValue();
 
                     std::vector<proto::SwcAttachmentApoV1> modelData;
-                    std::for_each(value.begin(), value.end(), [&](ApoUnit&val) {
+                    std::for_each(value.begin(), value.end(), [&](ApoUnit &val) {
                         proto::SwcAttachmentApoV1 data;
                         data.set_n(val.n);
                         data.set_orderinfo(val.orderinfo);
@@ -153,11 +150,10 @@ EditorApoAttachment::EditorApoAttachment(const std::string&swcName, QWidget* par
 
                     QMessageBox::information(this, "Info", "Import Successfully!");
                 }
-                catch (std::exception&e) {
+                catch (std::exception &e) {
                     QMessageBox::critical(this, "Error", e.what());
                 }
-            }
-            else {
+            } else {
                 QMessageBox::critical(this, "Error", "Selected Ano File Not Exists!");
             }
         }
@@ -182,7 +178,7 @@ EditorApoAttachment::EditorApoAttachment(const std::string&swcName, QWidget* par
             ApoIo io(filePath.string());
             std::vector<ApoUnit> units;
             std::for_each(m_SwcAttachmentApoData.begin(), m_SwcAttachmentApoData.end(),
-                          [&](proto::SwcAttachmentApoV1&val) {
+                          [&](proto::SwcAttachmentApoV1 &val) {
                               ApoUnit unit;
                               unit.n = val.n();
                               unit.orderinfo = val.orderinfo();
@@ -206,8 +202,7 @@ EditorApoAttachment::EditorApoAttachment(const std::string&swcName, QWidget* par
             io.WriteToFile();
 
             QMessageBox::information(this, "Info", "Export Successfully!");
-        }
-        else {
+        } else {
             QMessageBox::critical(this, "Error", "Selected Ano File Not Exists!");
         }
     });
@@ -228,8 +223,7 @@ void EditorApoAttachment::getSwcApoAttachment() {
 
     if (!get_swc_meta_info_response.swcinfo().swcattachmentapometainfo().attachmentuuid().empty()) {
         m_IsAnoAttachmentExist = true;
-    }
-    else {
+    } else {
         QMessageBox::critical(this, "Error", "No Apo Attachment found! You can create a new apo attchment!");
         return;
     }
@@ -240,13 +234,13 @@ void EditorApoAttachment::getSwcApoAttachment() {
         return;
     }
 
-    for (auto&data: response.swcattachmentapo()) {
+    for (auto &data: response.swcattachmentapo()) {
         m_SwcAttachmentApoData.push_back(data);
     }
 }
 
 void EditorApoAttachment::loadSwcAttachmentApoData() {
-    auto* model = new SwcAttachmentApoTableModel(m_SwcAttachmentApoData, this);
+    auto *model = new SwcAttachmentApoTableModel(m_SwcAttachmentApoData, this);
     ui->tableView->setModel(model);
     ui->tableView->resizeColumnsToContents();
 }
