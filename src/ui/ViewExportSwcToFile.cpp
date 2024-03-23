@@ -6,10 +6,12 @@
 #include "src/FileIo/SwcIo.hpp"
 #include "Message/Response.pb.h"
 #include "src/framework/service/WrappedCall.h"
+#include "src/FileIo/ApoIo.hpp"
+#include "src/FileIo/AnoIo.hpp"
 #include <filesystem>
 
-ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcData, bool getDataFromServer,
-                                         QWidget* parent) : QDialog(parent), ui(new Ui::ViewExportSwcToFile) {
+ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData> &exportSwcData, bool getDataFromServer,
+                                         QWidget *parent) : QDialog(parent), ui(new Ui::ViewExportSwcToFile) {
     ui->setupUi(this);
     std::string stylesheet = std::string("QListWidget::indicator:checked{image:url(")
                              + Image::ImageCheckBoxChecked + ");}" +
@@ -21,9 +23,9 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcDat
     m_ExportSwcData = exportSwcData;
     m_GetDataFromServer = getDataFromServer;
 
-    for (auto&val: m_ExportSwcData) {
+    for (auto &val: m_ExportSwcData) {
         auto userInfo = val;
-        auto* item = new QListWidgetItem;
+        auto *item = new QListWidgetItem;
         item->setText(QString::fromStdString(val.swcMetaInfo.name()));
         item->setCheckState(Qt::Checked);
         ui->SwcList->addItem(item);
@@ -46,7 +48,6 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcDat
         QFileDialog fileDialog(this);
         fileDialog.setWindowTitle("Select Swc Files");
         fileDialog.setDirectory(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
-        fileDialog.setNameFilter(tr("File(*.swc *.eswc)"));
         fileDialog.setFileMode(QFileDialog::Directory);
         fileDialog.setViewMode(QFileDialog::Detail);
 
@@ -60,7 +61,7 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcDat
                 saveDir = saveDir / "ExportSwc";
                 if (std::filesystem::exists(saveDir)) {
                     QMessageBox::information(this, "Warning",
-                                             "Selected directoty contains <ExportSwc> folder! Please remove it first!");
+                                             "Selected directory contains <ExportSwc> folder! Please remove it first!");
                     m_SavePath = "";
                     return;
                 }
@@ -86,29 +87,99 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcDat
 
         if (m_ActionExportComplete) {
             QMessageBox::information(this, "Warning",
-                                     "Export action complete! Please reopen this export window if you want export again!");
+                                     "Export action has completed! Please reopen this export window if you want export more data again!");
             return;
         }
 
         for (int i = 0; i < m_ExportSwcData.size(); i++) {
             ui->ResultTable->setItem(i, 0,
                                      new QTableWidgetItem(
-                                         QString::fromStdString(m_ExportSwcData[i].swcMetaInfo.name())));
+                                             QString::fromStdString(m_ExportSwcData[i].swcMetaInfo.name())));
             ui->ResultTable->setItem(i, 1,
                                      new QTableWidgetItem(
-                                         QString::fromStdString(m_ExportSwcData[i].swcMetaInfo.swctype())));
+                                             QString::fromStdString(m_ExportSwcData[i].swcMetaInfo.swctype())));
             ui->ResultTable->setItem(i, 2,
                                      new QTableWidgetItem(
-                                         QString::fromStdString(
-                                             std::to_string(m_ExportSwcData[i].swcData.swcdata_size()))));
+                                             QString::fromStdString(
+                                                     std::to_string(m_ExportSwcData[i].swcData.swcdata_size()))));
 
             QString statusMessage = "Ignored";
             QString fileSavePath = "";
             if (ui->SwcList->item(i)->checkState() == Qt::Checked) {
-                std::filesystem::path savePath = m_SavePath;
+                if (!m_ExportSwcData[i].swcMetaInfo.swcattachmentapometainfo().attachmentuuid().empty()) {
+                    std::filesystem::path apoSavePath = m_SavePath;
+                    apoSavePath = apoSavePath / (m_ExportSwcData[i].swcMetaInfo.name() + ".ano.apo");
+                    proto::GetSwcAttachmentApoResponse response;
+                    auto attachmentUuid = m_ExportSwcData[i].swcMetaInfo.swcattachmentapometainfo().attachmentuuid();
+                    if (!WrappedCall::getSwcAttachmentApo(m_ExportSwcData[i].swcMetaInfo.name(), attachmentUuid,
+                                                          response, this)) {
+                        QMessageBox::critical(this, "Error",
+                                              QString::fromStdString(response.metainfo().message()));
+                        ui->ResultTable->setItem(i, 3,
+                                                 new QTableWidgetItem("Get Swc Attachment Apo Data Failed"));
+                        ui->ResultTable->setItem(i, 4,
+                                                 new QTableWidgetItem(fileSavePath));
+                        setAllGridColor(i, Qt::red);
+                    }
+
+                    std::vector<proto::SwcAttachmentApoV1> swcAttachmentApoData;
+                    for (auto &data: response.swcattachmentapo()) {
+                        swcAttachmentApoData.push_back(data);
+                    }
+
+                    ApoIo io(apoSavePath.string());
+                    std::vector<ApoUnit> units;
+                    std::for_each(swcAttachmentApoData.begin(), swcAttachmentApoData.end(),
+                                  [&](proto::SwcAttachmentApoV1 &val) {
+                                      ApoUnit unit;
+                                      unit.n = val.n();
+                                      unit.orderinfo = val.orderinfo();
+                                      unit.name = val.name();
+                                      unit.comment = val.comment();
+                                      unit.z = val.z();
+                                      unit.x = val.x();
+                                      unit.y = val.y();
+                                      unit.pixmax = val.pixmax();
+                                      unit.intensity = val.intensity();
+                                      unit.sdev = val.sdev();
+                                      unit.volsize = val.volsize();
+                                      unit.mass = val.mass();
+                                      unit.color_r = val.colorr();
+                                      unit.color_g = val.colorg();
+                                      unit.color_b = val.colorb();
+                                      units.push_back(unit);
+                                  });
+
+                    io.setValue(units);
+                    io.WriteToFile();
+                }
+
+                if (!m_ExportSwcData[i].swcMetaInfo.swcattachmentanometainfo().attachmentuuid().empty()) {
+                    proto::GetSwcAttachmentAnoResponse get_swc_attachment_ano_response;
+                    auto anoAttachmentUuid = m_ExportSwcData[i].swcMetaInfo.swcattachmentanometainfo().attachmentuuid();
+                    if (!WrappedCall::getSwcAttachmentAno(m_ExportSwcData[i].swcMetaInfo.name(), anoAttachmentUuid,
+                                                          get_swc_attachment_ano_response,
+                                                          this)) {
+                        return;
+                    }
+
+                    auto apoData = get_swc_attachment_ano_response.swcattachmentano().apofile();
+                    auto anoData = get_swc_attachment_ano_response.swcattachmentano().swcfile();
+
+                    std::filesystem::path anoSavePath(m_SavePath);
+                    anoSavePath = anoSavePath / (m_ExportSwcData[i].swcMetaInfo.name() + ".ano");
+
+                    AnoIo io(anoSavePath.string());
+                    AnoUnit unit;
+                    unit.APOFILE = apoData;
+                    unit.SWCFILE = anoData;
+                    io.setValue(unit);
+                    io.WriteToFile();
+                }
 
                 if (m_ExportSwcData[i].swcMetaInfo.swctype() == "swc") {
-                    savePath = savePath / (m_ExportSwcData[i].swcMetaInfo.name() + ".swc");
+                    std::filesystem::path savePath(m_SavePath);
+                    savePath = savePath / (m_ExportSwcData[i].swcMetaInfo.name() + ".ano.swc");
 
                     if (m_GetDataFromServer) {
                         if (!m_ExportSwcData[i].isSnapshot) {
@@ -121,16 +192,11 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcDat
                                                          new QTableWidgetItem("Get Data From Server Failed"));
                                 ui->ResultTable->setItem(i, 4,
                                                          new QTableWidgetItem(fileSavePath));
-                                ui->ResultTable->item(i, 0)->setBackground(QBrush(Qt::red));
-                                ui->ResultTable->item(i, 1)->setBackground(QBrush(Qt::red));
-                                ui->ResultTable->item(i, 2)->setBackground(QBrush(Qt::red));
-                                ui->ResultTable->item(i, 3)->setBackground(QBrush(Qt::red));
-                                ui->ResultTable->item(i, 4)->setBackground(QBrush(Qt::red));
+                                setAllGridColor(i, Qt::red);
                                 continue;
                             }
                             m_ExportSwcData[i].swcData = response.swcnodedata();
-                        }
-                        else {
+                        } else {
                             proto::GetSnapshotResponse response;
                             if (!WrappedCall::getSwcSnapshot(m_ExportSwcData[i].swcMetaInfo.name(), response,
                                                              this)) {
@@ -140,11 +206,7 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcDat
                                                          new QTableWidgetItem("Get Data From Server Failed"));
                                 ui->ResultTable->setItem(i, 4,
                                                          new QTableWidgetItem(fileSavePath));
-                                ui->ResultTable->item(i, 0)->setBackground(QBrush(Qt::red));
-                                ui->ResultTable->item(i, 1)->setBackground(QBrush(Qt::red));
-                                ui->ResultTable->item(i, 2)->setBackground(QBrush(Qt::red));
-                                ui->ResultTable->item(i, 3)->setBackground(QBrush(Qt::red));
-                                ui->ResultTable->item(i, 4)->setBackground(QBrush(Qt::red));
+                                setAllGridColor(i, Qt::red);
                                 continue;
                             }
                             m_ExportSwcData[i].swcData = response.swcnodedata();
@@ -172,21 +234,16 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcDat
                                                  new QTableWidgetItem("Successfully"));
                         ui->ResultTable->setItem(i, 4,
                                                  new QTableWidgetItem(QString::fromStdString(savePath.string())));
-                        ui->ResultTable->item(i, 0)->setBackground(QBrush(Qt::green));
-                        ui->ResultTable->item(i, 1)->setBackground(QBrush(Qt::green));
-                        ui->ResultTable->item(i, 2)->setBackground(QBrush(Qt::green));
-                        ui->ResultTable->item(i, 3)->setBackground(QBrush(Qt::green));
-                        ui->ResultTable->item(i, 4)->setBackground(QBrush(Qt::green));
+                        setAllGridColor(i, Qt::green);
                         ui->ResultTable->item(i, 2)->setText(QString::fromStdString(
-                            std::to_string(m_ExportSwcData[i].swcData.swcdata_size())));
-                    }
-                    else {
+                                std::to_string(m_ExportSwcData[i].swcData.swcdata_size())));
+                    } else {
                         statusMessage = "Write Swc File Failed!";
                         fileSavePath = "";
                     }
-                }
-                else if (m_ExportSwcData[i].swcMetaInfo.swctype() == "eswc") {
-                    savePath = savePath / (m_ExportSwcData[i].swcMetaInfo.name() + ".eswc");
+                } else if (m_ExportSwcData[i].swcMetaInfo.swctype() == "eswc") {
+                    std::filesystem::path savePath(m_SavePath);
+                    savePath = savePath / (m_ExportSwcData[i].swcMetaInfo.name() + ".ano.eswc");
 
                     if (m_GetDataFromServer) {
                         if (!m_ExportSwcData[i].isSnapshot) {
@@ -199,16 +256,11 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcDat
                                                          new QTableWidgetItem("Get Data From Server Failed"));
                                 ui->ResultTable->setItem(i, 4,
                                                          new QTableWidgetItem(fileSavePath));
-                                ui->ResultTable->item(i, 0)->setBackground(QBrush(Qt::red));
-                                ui->ResultTable->item(i, 1)->setBackground(QBrush(Qt::red));
-                                ui->ResultTable->item(i, 2)->setBackground(QBrush(Qt::red));
-                                ui->ResultTable->item(i, 3)->setBackground(QBrush(Qt::red));
-                                ui->ResultTable->item(i, 4)->setBackground(QBrush(Qt::red));
+                                setAllGridColor(i, Qt::red);
                                 continue;
                             }
                             m_ExportSwcData[i].swcData = response.swcnodedata();
-                        }
-                        else {
+                        } else {
                             proto::GetSnapshotResponse response;
                             if (!WrappedCall::getSwcSnapshot(m_ExportSwcData[i].swcSnapshotCollectionName, response,
                                                              this)) {
@@ -218,11 +270,7 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcDat
                                                          new QTableWidgetItem("Get Data From Server Failed"));
                                 ui->ResultTable->setItem(i, 4,
                                                          new QTableWidgetItem(fileSavePath));
-                                ui->ResultTable->item(i, 0)->setBackground(QBrush(Qt::red));
-                                ui->ResultTable->item(i, 1)->setBackground(QBrush(Qt::red));
-                                ui->ResultTable->item(i, 2)->setBackground(QBrush(Qt::red));
-                                ui->ResultTable->item(i, 3)->setBackground(QBrush(Qt::red));
-                                ui->ResultTable->item(i, 4)->setBackground(QBrush(Qt::red));
+                                setAllGridColor(i, Qt::red);
                                 continue;
                             }
                             m_ExportSwcData[i].swcData = response.swcnodedata();
@@ -255,21 +303,15 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcDat
                                                  new QTableWidgetItem("Successfully"));
                         ui->ResultTable->setItem(i, 4,
                                                  new QTableWidgetItem(QString::fromStdString(savePath.string())));
-                        ui->ResultTable->item(i, 0)->setBackground(QBrush(Qt::green));
-                        ui->ResultTable->item(i, 1)->setBackground(QBrush(Qt::green));
-                        ui->ResultTable->item(i, 2)->setBackground(QBrush(Qt::green));
-                        ui->ResultTable->item(i, 3)->setBackground(QBrush(Qt::green));
-                        ui->ResultTable->item(i, 4)->setBackground(QBrush(Qt::green));
+                        setAllGridColor(i, Qt::green);
                         ui->ResultTable->item(i, 2)->setText(QString::fromStdString(
-                            std::to_string(m_ExportSwcData[i].swcData.swcdata_size())));
+                                std::to_string(m_ExportSwcData[i].swcData.swcdata_size())));
                         continue;
-                    }
-                    else {
+                    } else {
                         statusMessage = "Write Swc File Failed!";
                         fileSavePath = "";
                     }
-                }
-                else {
+                } else {
                     statusMessage = "Ignored, Unknown Swc Type";
                     fileSavePath = "";
                 }
@@ -278,11 +320,8 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcDat
                                      new QTableWidgetItem(statusMessage));
             ui->ResultTable->setItem(i, 4,
                                      new QTableWidgetItem(fileSavePath));
-            ui->ResultTable->item(i, 0)->setBackground(QBrush(Qt::red));
-            ui->ResultTable->item(i, 1)->setBackground(QBrush(Qt::red));
-            ui->ResultTable->item(i, 2)->setBackground(QBrush(Qt::red));
-            ui->ResultTable->item(i, 3)->setBackground(QBrush(Qt::red));
-            ui->ResultTable->item(i, 4)->setBackground(QBrush(Qt::red));
+            setAllGridColor(i, Qt::red);
+
         }
         m_ActionExportComplete = true;
         ui->ResultTable->resizeColumnsToContents();
@@ -291,4 +330,12 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcDat
 
 ViewExportSwcToFile::~ViewExportSwcToFile() {
     delete ui;
+}
+
+void ViewExportSwcToFile::setAllGridColor(int row, QColor color) {
+    ui->ResultTable->item(row, 0)->setBackground(QBrush(color));
+    ui->ResultTable->item(row, 1)->setBackground(QBrush(color));
+    ui->ResultTable->item(row, 2)->setBackground(QBrush(color));
+    ui->ResultTable->item(row, 3)->setBackground(QBrush(color));
+    ui->ResultTable->item(row, 4)->setBackground(QBrush(color));
 }

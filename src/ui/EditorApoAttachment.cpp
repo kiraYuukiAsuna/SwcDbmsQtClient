@@ -203,7 +203,7 @@ EditorApoAttachment::EditorApoAttachment(const std::string &swcName, QWidget *pa
 
             QMessageBox::information(this, "Info", "Export Successfully!");
         } else {
-            QMessageBox::critical(this, "Error", "Selected Ano File Not Exists!");
+            QMessageBox::critical(this, "Error", "Selected Ano File Save Path Not Exists!");
         }
     });
 

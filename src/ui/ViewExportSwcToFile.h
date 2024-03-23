@@ -28,4 +28,6 @@ private:
 
     std::string m_SavePath;
     bool m_ActionExportComplete = false;
+
+    void setAllGridColor(int row, QColor color);
 };
