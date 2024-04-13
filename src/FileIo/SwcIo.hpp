@@ -43,8 +43,8 @@ struct NeuronUnit {
     int seg_id = 0;
     int level = 0;
     int mode = 0;
-    int timestamp = 0;
-    int feature_value = 0;
+    int64_t timestamp = 0;
+    int64_t feature_value = 0;
 
     // swcdbms feature
     std::string uuid;
@@ -82,8 +82,8 @@ struct NeuronUnitHashContent {
         res = res * 31 + std::hash<int>()(k.seg_id);
         res = res * 31 + std::hash<int>()(k.level);
         res = res * 31 + std::hash<int>()(k.mode);
-        res = res * 31 + std::hash<int>()(k.timestamp);
-        res = res * 31 + std::hash<int>()(k.feature_value);
+        res = res * 31 + std::hash<int64_t>()(k.timestamp);
+        res = res * 31 + std::hash<int64_t>()(k.feature_value);
 
         res = res * 31 + std::hash<std::string>()(k.uuid);
 
@@ -192,15 +192,15 @@ public:
                         break;
                     }
                     case 9: {
-                        unit.mode = std::stoi(splitResult[9]);
+                        unit.mode = std::stol(splitResult[9]);
                         break;
                     }
                     case 10: {
-                        unit.timestamp = std::stoi(splitResult[10]);
+                        unit.timestamp = std::stoll(splitResult[10]);
                         break;
                     }
                     case 11: {
-                        unit.feature_value = std::stoi(splitResult[11]);
+                        unit.feature_value = std::stoll(splitResult[11]);
                         break;
                     }
                     default: ;

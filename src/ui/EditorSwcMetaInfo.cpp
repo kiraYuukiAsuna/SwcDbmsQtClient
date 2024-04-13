@@ -39,6 +39,9 @@ bool EditorSwcMetaInfo::save() {
         return false;
     }
 
+    std::cout<<m_SwcMetaInfo.DebugString()<<std::endl;
+
+
     request.mutable_swcinfo()->set_description(ui->Description->text().toStdString());
 
     auto status = RpcCall::getInstance().Stub()->UpdateSwc(&context,request,&response);
@@ -71,4 +74,6 @@ void EditorSwcMetaInfo::refresh(proto::GetSwcMetaInfoResponse& response) {
     ui->CreateTime->setReadOnly(true);
     ui->LastModifiedTime->setDateTime(QDateTime::fromSecsSinceEpoch(m_SwcMetaInfo.lastmodifiedtime().seconds()));
     ui->LastModifiedTime->setReadOnly(true);
+
+    std::cout<<m_SwcMetaInfo.DebugString()<<std::endl;
 }

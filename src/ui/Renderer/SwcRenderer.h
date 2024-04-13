@@ -27,6 +27,7 @@ struct SwcStyle {
     float lineWidth = 2.0f;
     float pointSize = 3.0f;
 
+    float boundingBoxLineColor[4] = {0.6f, 0.6f, 0.6f, 1.0f};
     float lineColor[4] = {0.0f, 0.0f, 1.0f, 1.0f};
     float pointColor[4] = {0.0f, 0.0f, 1.0f, 1.0f};
 

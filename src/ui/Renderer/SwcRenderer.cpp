@@ -492,7 +492,7 @@ void SwcRenderer::renderBoundingBox(float minX, float minY, float minZ, float ma
     // Draw bounding box
     glLineWidth(2.0f);
     glBegin(GL_LINES);
-    glColor4f(0.0f, 0.0f, 1.0f, 0.5f);
+    glColor4f(m_CreateInfo.style.boundingBoxLineColor[0], m_CreateInfo.style.boundingBoxLineColor[1], m_CreateInfo.style.boundingBoxLineColor[2], m_CreateInfo.style.boundingBoxLineColor[3]);
     // Bottom square
     glVertex3f(2.0f * (minX - minX) / (maxX - minX) - 1.0f, 2.0f * (minY - minY) / (maxY - minY) - 1.0f,
                2.0f * (minZ - minZ) / (maxZ - minZ) - 1.0f);
