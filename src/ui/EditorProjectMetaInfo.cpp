@@ -160,7 +160,7 @@ void EditorProjectMetaInfo::refresh(proto::GetProjectResponse &response) {
         proto::UserPermissionOverrideMetaInfoV1 permissionOverride;
         bool bFind = false;
         for (int j = 0; j < m_ProjectMetaInfo.userpermissionoverride().size(); j++) {
-            permissionOverride = m_ProjectMetaInfo.userpermissionoverride().Get(i);
+            permissionOverride = m_ProjectMetaInfo.userpermissionoverride().Get(j);
             if (permissionOverride.username() == userInfo.name()) {
                 bFind = true;
             }
