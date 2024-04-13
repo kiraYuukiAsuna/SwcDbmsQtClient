@@ -91,6 +91,20 @@
         </spacer>
        </item>
        <item>
+        <widget class="QPushButton" name="VisualizeDiffBtn">
+         <property name="text">
+          <string>Visual Diff</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="VisualizeBtn">
+         <property name="text">
+          <string>Visualize</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="ExportSelectedVersion">
          <property name="text">
           <string>Export Selected Version</string>

@@ -5,6 +5,8 @@
 #include <vector>
 #include <fstream>
 #include <ranges>
+#include <unordered_set>
+
 #include "FileIoInterface.hpp"
 #include "src/util/util.hpp"
 
@@ -43,12 +45,95 @@ struct NeuronUnit {
     int mode = 0;
     int timestamp = 0;
     int feature_value = 0;
+
+    // swcdbms feature
+    std::string uuid;
 };
+
+struct NeuronUnitEqual {
+    bool operator()(const NeuronUnit&a, const NeuronUnit&b) const {
+        return a.uuid == b.uuid;
+    }
+};
+
+struct NeuronUnitHash {
+    std::size_t operator()(const NeuronUnit&k) const {
+        // Compute individual hash values for first, second and third
+        // http://stackoverflow.com/a/1646913/126995
+        std::size_t res = 17;
+
+        res = res * 31 + std::hash<std::string>()(k.uuid);
+
+        return res;
+    }
+};
+
+
+struct NeuronUnitHashContent {
+    std::size_t operator()(const NeuronUnit&k) const {
+        // Compute individual hash values for first, second and third
+        // http://stackoverflow.com/a/1646913/126995
+        std::size_t res = 17;
+        res = res * 31 + std::hash<int>()(k.type);
+        res = res * 31 + std::hash<int>()(static_cast<int>(k.x));
+        res = res * 31 + std::hash<int>()(static_cast<int>(k.y));
+        res = res * 31 + std::hash<int>()(static_cast<int>(k.z));
+        res = res * 31 + std::hash<int>()(static_cast<int>(k.radius));
+        res = res * 31 + std::hash<int>()(k.seg_id);
+        res = res * 31 + std::hash<int>()(k.level);
+        res = res * 31 + std::hash<int>()(k.mode);
+        res = res * 31 + std::hash<int>()(k.timestamp);
+        res = res * 31 + std::hash<int>()(k.feature_value);
+
+        res = res * 31 + std::hash<std::string>()(k.uuid);
+
+        return res;
+    }
+};
+
+inline void compareNeuronUnits(const std::vector<NeuronUnit>&oldUnits, const std::vector<NeuronUnit>&newUnits,
+                        std::vector<NeuronUnit>&deletedUnits, std::vector<NeuronUnit>&addedUnits,
+                        std::vector<NeuronUnit>&modifiedUnits, std::vector<NeuronUnit>&unchangedUnits) {
+    std::unordered_set<NeuronUnit, NeuronUnitHash, NeuronUnitEqual> oldSet(oldUnits.begin(), oldUnits.end());
+    std::unordered_set<NeuronUnit, NeuronUnitHash, NeuronUnitEqual> newSet(newUnits.begin(), newUnits.end());
+
+    for (const auto&unit: oldUnits) {
+        if (newSet.find(unit) == newSet.end()) {
+            // unit 在 oldUnits 中，但不在 newUnits 中，说明它被删除了
+            // std::cout << "Deleted: " << unit.getString() << std::endl;
+            deletedUnits.push_back(unit);
+        }
+    }
+
+    for (const auto&unit: newUnits) {
+        if (oldSet.find(unit) == oldSet.end()) {
+            // unit 在 newUnits 中，但不在 oldUnits 中，说明它是新添加的
+            // std::cout << "Added: " << unit.getString() << std::endl;
+            addedUnits.push_back(unit);
+        }
+    }
+
+    for (const auto&unit: newUnits) {
+        auto oldUnit = oldSet.find(unit);
+        if (oldUnit != oldSet.end()) {
+            if (NeuronUnitHashContent()(*oldUnit) != NeuronUnitHashContent()(unit)) {
+                // unit 在 newUnits 中，也在 oldUnits 中，但是它的值发生了变化
+                // std::cout << "Modified: " << unit.getString() << std::endl;
+                modifiedUnits.push_back(unit);
+            }
+            else {
+                // unit 在 newUnits 中，也在 oldUnits 中，但是它的值没有发生变化
+                // std::cout << "Unchanged: " << unit.getString() << std::endl;
+                unchangedUnits.push_back(unit);
+            }
+        }
+    }
+}
 
 class ESwc final : public FileIoInterface<std::vector<NeuronUnit>> {
 public:
     explicit ESwc(std::string filePath)
-            : m_FilePath(std::move(filePath)) {
+        : m_FilePath(std::move(filePath)) {
     }
 
     void ReadFromFile() override {
@@ -118,7 +203,7 @@ public:
                         unit.feature_value = std::stoi(splitResult[11]);
                         break;
                     }
-                    default:;
+                    default: ;
                 }
             }
 
@@ -139,7 +224,7 @@ public:
                 << "# Source File(s):\n"
                 << "##n,type,x,y,z,radius,parent,seg_id,level,mode,timestamp,feature_value\n";
 
-        for (auto &neuron: m_Neuron) {
+        for (auto&neuron: m_Neuron) {
             outfile << std::to_string(neuron.n) << " " <<
                     std::to_string(neuron.type) + " " <<
                     std::fixed << std::setprecision(3) << neuron.x << " " <<
@@ -157,11 +242,11 @@ public:
         return true;
     }
 
-    std::vector<NeuronUnit> &getValue() override {
+    std::vector<NeuronUnit>& getValue() override {
         return m_Neuron;
     }
 
-    void setValue(std::vector<NeuronUnit> &neuron) override {
+    void setValue(std::vector<NeuronUnit>&neuron) override {
         m_Neuron = neuron;
     }
 
@@ -174,7 +259,7 @@ private:
 class Swc final : public FileIoInterface<std::vector<NeuronUnit>> {
 public:
     explicit Swc(std::string filePath)
-            : m_FilePath(std::move(filePath)) {
+        : m_FilePath(std::move(filePath)) {
     }
 
     void ReadFromFile() override {
@@ -224,7 +309,7 @@ public:
                         unit.parent = std::stoi(splitResult[6]);
                         break;
                     }
-                    default:;
+                    default: ;
                 }
             }
 
@@ -245,7 +330,7 @@ public:
                 << "#Generated by SwcManagerClient\n"
                 << "##n,type,x,y,z,radius,parent\n";
 
-        for (const auto &neuron: m_Neuron) {
+        for (const auto&neuron: m_Neuron) {
             outfile << std::setprecision(3) << std::to_string(neuron.n) << " " <<
                     std::to_string(neuron.type) << " " <<
                     std::fixed << std::setprecision(3) << neuron.x << " " <<
@@ -258,11 +343,11 @@ public:
         return true;
     }
 
-    std::vector<NeuronUnit> &getValue() override {
+    std::vector<NeuronUnit>& getValue() override {
         return m_Neuron;
     }
 
-    void setValue(std::vector<NeuronUnit> &neuron) override {
+    void setValue(std::vector<NeuronUnit>&neuron) override {
         m_Neuron = neuron;
     }
 

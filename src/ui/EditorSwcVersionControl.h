@@ -18,6 +18,8 @@ public:
 
     ~EditorSwcVersionControl() override;
 
+    void refreshVersionGraph();
+
 private:
     Ui::EditorSwcVersionControl *ui;
 

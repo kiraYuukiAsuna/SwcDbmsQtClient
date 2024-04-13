@@ -44,7 +44,7 @@ bool EditorSwcMetaInfo::save() {
     auto status = RpcCall::getInstance().Stub()->UpdateSwc(&context,request,&response);
     if(status.ok()) {
         if(response.metainfo().status()) {
-            QMessageBox::information(this,"Info","Update Swc Successfully!");
+            // QMessageBox::information(this,"Info","Update Swc Successfully!");
             return true;
         }
         QMessageBox::critical(this,"Error",QString::fromStdString(response.metainfo().message()));

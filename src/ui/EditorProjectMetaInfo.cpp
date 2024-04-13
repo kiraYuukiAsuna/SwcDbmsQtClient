@@ -75,7 +75,7 @@ bool EditorProjectMetaInfo::save() {
     auto status = RpcCall::getInstance().Stub()->UpdateProject(&context, request, &response);
     if (status.ok()) {
         if (response.metainfo().status()) {
-            QMessageBox::information(this, "Info", "Update Project Successfully!");
+            // QMessageBox::information(this, "Info", "Update Project Successfully!");
             return true;
         }
         QMessageBox::critical(this, "Error", QString::fromStdString(response.metainfo().message()));

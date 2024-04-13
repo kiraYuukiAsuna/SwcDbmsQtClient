@@ -174,6 +174,7 @@ void NodeGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent *event)
     AbstractNodeGeometry &geometry = nodeScene()->nodeGeometry();
 
     for (PortType portToCheck : {PortType::In, PortType::Out}) {
+        return; // Disable connection
         QPointF nodeCoord = sceneTransform().inverted().map(event->scenePos());
 
         PortIndex const portIndex = geometry.checkPortHit(_nodeId, portToCheck, nodeCoord);

@@ -278,9 +278,14 @@ bool DataFlowGraphModel::setNodeData(NodeId nodeId, NodeRole role, QVariant valu
     case NodeRole::CaptionVisible:
         break;
 
-    case NodeRole::Caption:
+    case NodeRole::Caption: {
+        auto it = _models.find(nodeId);
+        if (it != _models.end()) {
+            it->second->setCaption(value.toString());
+            result = true;
+        }
         break;
-
+    }
     case NodeRole::Style:
         break;
 

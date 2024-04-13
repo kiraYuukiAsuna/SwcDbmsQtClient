@@ -12,7 +12,7 @@ public:
 
     virtual bool captionVisible() const override { return true; }
 
-    virtual QString caption() const override { return "SnapshotDelegateModel";};
+    virtual QString caption() const override { return _caption;};
 
     virtual bool portCaptionVisible(QtNodes::PortType, QtNodes::PortIndex) const { return true; }
 
@@ -102,6 +102,11 @@ public:
 
     virtual bool resizable() const { return false; }
 
+    QString _caption;
+    //
+    void setCaption(QString const &caption) override {
+        _caption = caption;
+    }
 
     // slots
 //    virtual void inputConnectionCreated(ConnectionId const &) {}

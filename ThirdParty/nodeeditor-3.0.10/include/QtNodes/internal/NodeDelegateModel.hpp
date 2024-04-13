@@ -80,6 +80,8 @@ public:
 
     virtual bool resizable() const { return false; }
 
+    virtual void setCaption(QString const &caption) = 0;
+
 public Q_SLOTS:
 
     virtual void inputConnectionCreated(ConnectionId const &) {}

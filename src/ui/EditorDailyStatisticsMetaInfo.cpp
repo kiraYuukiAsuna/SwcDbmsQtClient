@@ -85,7 +85,7 @@ bool EditorDailyStatisticsMetaInfo::save() {
     auto status = RpcCall::getInstance().Stub()->UpdateDailyStatistics(&context,request,&response);
     if(status.ok()) {
         if(response.metainfo().status()) {
-            QMessageBox::information(this,"Info","Update DailyStatistics Successfully!");
+            // QMessageBox::information(this,"Info","Update DailyStatistics Successfully!");
             return true;
         }
         QMessageBox::critical(this,"Error",QString::fromStdString(response.metainfo().message()));

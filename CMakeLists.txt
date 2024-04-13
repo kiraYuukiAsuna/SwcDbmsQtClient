@@ -18,6 +18,7 @@ find_package(Qt6 COMPONENTS
         Widgets
         Svg
         OpenGL
+        OpenGLWidgets
         REQUIRED)
 find_package(protobuf CONFIG REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
@@ -147,6 +148,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         Qt::Widgets
         Qt::Svg
         Qt::OpenGL
+        Qt::OpenGLWidgets
+        opengl32
         PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
         PRIVATE spdlog::spdlog
         PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts
@@ -156,8 +159,8 @@ target_compile_definitions(${PROJECT_NAME}
         PUBLIC
         NODE_EDITOR_STATIC
         NODE_EDITOR_EXPORTS
+        NOMINMAX
 )
-
 
 if (WIN32)
     Set_Target_Properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
