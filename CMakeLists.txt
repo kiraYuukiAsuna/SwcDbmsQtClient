@@ -149,7 +149,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         Qt::Svg
         Qt::OpenGL
         Qt::OpenGLWidgets
-        opengl32
         PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
         PRIVATE spdlog::spdlog
         PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts

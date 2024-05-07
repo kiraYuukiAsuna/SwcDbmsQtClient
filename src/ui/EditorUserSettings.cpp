@@ -10,6 +10,7 @@
 #include "src/framework/service/CachedProtoData.h"
 #include "src/framework/defination/ImageDefination.h"
 #include "LeftClientView.h"
+#include "src/framework/service/WrappedCall.h"
 
 EditorUserSettings::EditorUserSettings(LeftClientView *leftClientView) :
         QDialog(leftClientView), ui(new Ui::EditorUserSettings) {
@@ -121,7 +122,11 @@ void EditorUserSettings::getUserMetaInfo() {
         pixmap.loadFromData(data);
         pixmap = pixmap.scaled(QSize(128,128),Qt::KeepAspectRatioByExpanding);
         ui->HeadPhoto->setPixmap(pixmap);
-        ui->PermissionGroup->setText(QString::fromStdString(response.userinfo().userpermissiongroup()));
+
+        proto::GetPermissionGroupResponse responseGetPermissionGroup;
+        WrappedCall::GetPermissionGroupByUuid(response.userinfo().permissiongroupuuid(),responseGetPermissionGroup,this);
+
+        ui->PermissionGroup->setText(QString::fromStdString(responseGetPermissionGroup.permissiongroup().name()));
         ui->PermissionGroup->setReadOnly(true);
         ui->UserId->setText(QString::fromStdString(std::to_string(response.userinfo().userid())));
         ui->UserId->setReadOnly(true);

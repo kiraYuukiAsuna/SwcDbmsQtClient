@@ -25,6 +25,7 @@ public:
                 return true;
             }
             QMessageBox::critical(parent, "Info", QString::fromStdString(actionName + " Failed!" + rspMeta.message()));
+            return false;
         }
         QMessageBox::critical(parent, "Error", QString::fromStdString(status.error_message()));
         return false;
@@ -336,6 +337,17 @@ public:
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->RevertSwcVersion(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool GetPermissionGroupByUuid(const std::string& uuid, proto::GetPermissionGroupResponse&response,
+                                 QWidget* parent) {
+        proto::GetPermissionGroupRequest request;
+        setCommonRequestField(request);
+        request.mutable_permissiongroup()->mutable_base()->set_uuid(uuid);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->GetPermissionGroup(&context, request, &response);
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 };

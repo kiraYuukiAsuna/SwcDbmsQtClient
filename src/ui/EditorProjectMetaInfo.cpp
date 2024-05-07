@@ -55,23 +55,6 @@ bool EditorProjectMetaInfo::save() {
         }
     }
 
-    request.mutable_projectinfo()->clear_userpermissionoverride();
-    for (int i = 0; i < ui->UserPermissionOverride->rowCount(); i++) {
-        auto *userNameItem = ui->UserPermissionOverride->item(i, 0);
-        if (userNameItem->checkState() == Qt::Checked) {
-            auto *permissionOverride = request.mutable_projectinfo()->add_userpermissionoverride();
-            permissionOverride->set_username(userNameItem->text().toStdString());
-            permissionOverride->mutable_projectpermission()->set_writepermissionadddata(
-                    std::stoi(ui->UserPermissionOverride->item(i, 1)->text().toStdString()));
-            permissionOverride->mutable_projectpermission()->set_writepermissiondeletedata(
-                    std::stoi(ui->UserPermissionOverride->item(i, 2)->text().toStdString()));
-            permissionOverride->mutable_projectpermission()->set_writepermissionmodifydata(
-                    std::stoi(ui->UserPermissionOverride->item(i, 3)->text().toStdString()));
-            permissionOverride->mutable_projectpermission()->set_readperimissionquery(
-                    std::stoi(ui->UserPermissionOverride->item(i, 4)->text().toStdString()));
-        }
-    }
-
     auto status = RpcCall::getInstance().Stub()->UpdateProject(&context, request, &response);
     if (status.ok()) {
         if (response.metainfo().status()) {
@@ -127,71 +110,4 @@ void EditorProjectMetaInfo::refresh(proto::GetProjectResponse &response) {
         }
         ui->SwcList->addItem(item);
     }
-
-    proto::GetAllUserResponse responseAllUser;
-    WrappedCall::getAllUserMetaInfo(responseAllUser, this);
-
-    ui->UserPermissionOverride->clear();
-    ui->UserPermissionOverride->setRowCount(responseAllUser.userinfo_size());
-    ui->UserPermissionOverride->setColumnCount(5);
-    QStringList headerLabels;
-    headerLabels
-            << "UserName"
-            << "ProjectWritePermissionAddData"
-            << "ProjectWritePermissionModifyData"
-            << "ProjectWritePermissionDeleteData"
-            << "ProjectReadPerimissionQuery";
-    ui->UserPermissionOverride->setHorizontalHeaderLabels(headerLabels);
-    ui->UserPermissionOverride->resizeColumnsToContents();
-
-    for (int i = 0; i < responseAllUser.userinfo_size(); i++) {
-        auto userInfo = responseAllUser.userinfo().Get(i);
-        auto userNameItem = new QTableWidgetItem(
-                QString::fromStdString(userInfo.name()));
-        ui->UserPermissionOverride->setItem(i, 0, userNameItem);
-        ui->UserPermissionOverride->setItem(i, 1,
-                                            new QTableWidgetItem(QString::fromStdString(std::to_string(1))));
-        ui->UserPermissionOverride->setItem(i, 2,
-                                            new QTableWidgetItem(QString::fromStdString(std::to_string(1))));
-        ui->UserPermissionOverride->setItem(i, 3,
-                                            new QTableWidgetItem(QString::fromStdString(std::to_string(1))));
-        ui->UserPermissionOverride->setItem(i, 4,
-                                            new QTableWidgetItem(QString::fromStdString(std::to_string(1))));
-        proto::UserPermissionOverrideMetaInfoV1 permissionOverride;
-        bool bFind = false;
-        for (int j = 0; j < m_ProjectMetaInfo.userpermissionoverride().size(); j++) {
-            permissionOverride = m_ProjectMetaInfo.userpermissionoverride().Get(j);
-            if (permissionOverride.username() == userInfo.name()) {
-                bFind = true;
-            }
-        }
-        if (bFind) {
-            ui->UserPermissionOverride->setItem(i, 0, userNameItem);
-            ui->UserPermissionOverride->setItem(i, 1,
-                                                new QTableWidgetItem(
-                                                        QString::fromStdString(
-                                                                std::to_string(
-                                                                        permissionOverride.projectpermission().writepermissionadddata()))));
-            ui->UserPermissionOverride->setItem(i, 2,
-                                                new QTableWidgetItem(
-                                                        QString::fromStdString(
-                                                                std::to_string(
-                                                                        permissionOverride.projectpermission().writepermissionmodifydata()))));
-            ui->UserPermissionOverride->setItem(i, 3,
-                                                new QTableWidgetItem(
-                                                        QString::fromStdString(
-                                                                std::to_string(
-                                                                        permissionOverride.projectpermission().writepermissiondeletedata()))));
-            ui->UserPermissionOverride->setItem(i, 4,
-                                                new QTableWidgetItem(
-                                                        QString::fromStdString(
-                                                                std::to_string(
-                                                                        permissionOverride.projectpermission().readperimissionquery()))));
-            userNameItem->setCheckState(Qt::Checked);
-        } else {
-            userNameItem->setCheckState(Qt::Unchecked);
-        }
-    }
-
-    ui->UserPermissionOverride->resizeColumnsToContents();
 }

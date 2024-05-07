@@ -180,10 +180,12 @@ void EditorSwcNode::refreshByQueryOption() {
         return;
     }
 
-    std::string userName = checkedUserNames[0];
     if (checkedUserNumber == 0) {
-        userName = "";
+        QMessageBox::information(this, "Warning", "No user has been selected!");
+        return;
     }
+    std::string userName = checkedUserNames[0];
+
 
     WrappedCall::getSwcNodeDataListByTimeAndUserResponse(m_SwcName, userName, startTime, endTime, response, this);
 
