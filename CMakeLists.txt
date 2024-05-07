@@ -142,17 +142,32 @@ set(PROJECT_SOURCES
 
 add_executable(${PROJECT_NAME} ${NODEEDITOR_SOURCE_FILES} ${NODEEDITOR_HEADER_FILES} ${QRESOURCE} ${PROJECT_HEADERS} ${PROJECT_SOURCES} ${SRC_LIST})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
-        Qt::Core
-        Qt::Gui
-        Qt::Widgets
-        Qt::Svg
-        Qt::OpenGL
-        Qt::OpenGLWidgets
-        PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
-        PRIVATE spdlog::spdlog
-        PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts
-)
+if (WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+            Qt::Core
+            Qt::Gui
+            Qt::Widgets
+            Qt::Svg
+            Qt::OpenGL
+            Qt::OpenGLWidgets
+            opengl32
+            PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
+            PRIVATE spdlog::spdlog
+            PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts
+    )
+elseif (UNIX)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+            Qt::Core
+            Qt::Gui
+            Qt::Widgets
+            Qt::Svg
+            Qt::OpenGL
+            Qt::OpenGLWidgets
+            PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
+            PRIVATE spdlog::spdlog
+            PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts
+    )
+endif ()
 
 target_compile_definitions(${PROJECT_NAME}
         PUBLIC
