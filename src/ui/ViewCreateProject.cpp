@@ -29,45 +29,6 @@ ViewCreateProject::ViewCreateProject(QWidget* parent) : QDialog(parent), ui(new 
         ui->listWidget->addItem(item);
     }
 
-    ui->tableWidget->clear();
-    proto::GetAllUserResponse responseAllUser;
-    WrappedCall::getAllUserMetaInfo(responseAllUser, this);
-    ui->tableWidget->setRowCount(responseAllUser.userinfo_size());
-    ui->tableWidget->setColumnCount(5);
-    QStringList headerLabels;
-    headerLabels
-            << "UserName"
-            << "ProjectWritePermissionAddData"
-            << "ProjectWritePermissionModifyData"
-            << "ProjectWritePermissionDeleteData"
-            << "ProjectReadPerimissionQuery";
-    ui->tableWidget->setHorizontalHeaderLabels(headerLabels);
-
-    for (int i = 0; i < responseAllUser.userinfo_size(); i++) {
-        auto userInfo = responseAllUser.userinfo().Get(i);
-        auto userNameItem = new QTableWidgetItem(
-            QString::fromStdString(userInfo.name()));
-        userNameItem->setCheckState(Qt::Unchecked);
-        ui->tableWidget->setItem(i, 0, userNameItem);
-        ui->tableWidget->setItem(i, 1,
-                                 new QTableWidgetItem(
-                                     QString::fromStdString(
-                                         std::to_string(1))));
-        ui->tableWidget->setItem(i, 2,
-                                 new QTableWidgetItem(
-                                     QString::fromStdString(
-                                         std::to_string(1))));
-        ui->tableWidget->setItem(i, 3,
-                                 new QTableWidgetItem(
-                                     QString::fromStdString(
-                                         std::to_string(1))));
-        ui->tableWidget->setItem(i, 4,
-                                 new QTableWidgetItem(
-                                     QString::fromStdString(
-                                         std::to_string(1))));
-    }
-    ui->tableWidget->resizeColumnsToContents();
-
     connect(ui->CancelBtn, &QPushButton::clicked, this, [this]() {
         reject();
     });
@@ -96,22 +57,6 @@ ViewCreateProject::ViewCreateProject(QWidget* parent) : QDialog(parent), ui(new 
             if (item->checkState() == Qt::Checked) {
                 auto* swc = request.mutable_projectinfo()->add_swclist();
                 *swc = item->text().toStdString();
-            }
-        }
-
-        for (int i = 0; i < ui->tableWidget->rowCount(); i++) {
-            auto* userNameItem = ui->tableWidget->item(i, 0);
-            if (userNameItem->checkState() == Qt::Checked) {
-                auto* permissionOverride = request.mutable_projectinfo()->add_userpermissionoverride();
-                permissionOverride->set_username(userNameItem->text().toStdString());
-                permissionOverride->mutable_projectpermission()->set_writepermissionadddata(
-                    std::stoi(ui->tableWidget->item(i, 1)->text().toStdString()));
-                permissionOverride->mutable_projectpermission()->set_writepermissiondeletedata(
-                    std::stoi(ui->tableWidget->item(i, 2)->text().toStdString()));
-                permissionOverride->mutable_projectpermission()->set_writepermissionmodifydata(
-                    std::stoi(ui->tableWidget->item(i, 3)->text().toStdString()));
-                permissionOverride->mutable_projectpermission()->set_readperimissionquery(
-                    std::stoi(ui->tableWidget->item(i, 4)->text().toStdString()));
             }
         }
 
