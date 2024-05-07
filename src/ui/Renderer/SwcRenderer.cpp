@@ -109,46 +109,48 @@ void SwcRenderer::renderOneSwc() {
         maxZ = (std::max)(maxZ, node.z);
     }
 
+    float maxDim = (std::max)((std::max)(maxX - minX, maxY - minY), maxZ - minZ);
+
     // render point
     glPointSize(m_CreateInfo.style.pointSize);
     glBegin(GL_POINTS);
     for (auto&node: units) {
-        float x = 2.0f * (node.x - minX) / (maxX - minX) - 1.0f;
-        float y = 2.0f * (node.y - minY) / (maxY - minY) - 1.0f;
-        float z = 2.0f * (node.z - minZ) / (maxZ - minZ) - 1.0f;
+        float x = 2.0f * (node.x - minX) / (maxDim - minX) - 1.0f;
+        float y = 2.0f * (node.y - minY) / (maxDim - minY) - 1.0f;
+        float z = 2.0f * (node.z - minZ) / (maxDim - minZ) - 1.0f;
         glColor4f(m_CreateInfo.style.pointColor[0], m_CreateInfo.style.pointColor[1], m_CreateInfo.style.pointColor[2],
                   m_CreateInfo.style.pointColor[3]);
         glVertex3f(x, y, z);
     }
     glEnd();
 
-    // // Render lines
-    // glLineWidth(m_CreateInfo.style.lineWidth);
-    // glBegin(GL_LINES);
-    // glColor4f(m_CreateInfo.style.lineColor[0], m_CreateInfo.style.lineColor[1], m_CreateInfo.style.lineColor[2],
-    //           m_CreateInfo.style.lineColor[3]);
-    // for (int i = 0; i < units.size(); ++i) {
-    //     auto node = units[i];
-    //     if (node.parent != -1) {
-    //         auto iter = n_to_index_map.find(node.parent);
-    //         if (iter == n_to_index_map.end()) {
-    //             continue;
-    //         }
-    //
-    //         // Normalize the coordinates to the range [-1, 1]
-    //         float x1 = 2.0f * (node.x - minX) / (maxX - minX) - 1.0f;
-    //         float y1 = 2.0f * (node.y - minY) / (maxY - minY) - 1.0f;
-    //         float z1 = 2.0f * (node.z - minZ) / (maxZ - minZ) - 1.0f;
-    //
-    //         float x2 = 2.0f * (units[iter->second].x - minX) / (maxX - minX) - 1.0f;
-    //         float y2 = 2.0f * (units[iter->second].y - minY) / (maxY - minY) - 1.0f;
-    //         float z2 = 2.0f * (units[iter->second].z - minZ) / (maxZ - minZ) - 1.0f;
-    //
-    //         glVertex3f(x1, y1, z1);
-    //         glVertex3f(x2, y2, z2);
-    //     }
-    // }
-    // glEnd();
+    // Render lines
+    glLineWidth(m_CreateInfo.style.lineWidth);
+    glBegin(GL_LINES);
+    glColor4f(m_CreateInfo.style.lineColor[0], m_CreateInfo.style.lineColor[1], m_CreateInfo.style.lineColor[2],
+              m_CreateInfo.style.lineColor[3]);
+    for (int i = 0; i < units.size(); ++i) {
+        auto node = units[i];
+        if (node.parent != -1) {
+            auto iter = n_to_index_map.find(node.parent);
+            if (iter == n_to_index_map.end()) {
+                continue;
+            }
+
+            // Normalize the coordinates to the range [-1, 1]
+            float x1 = 2.0f * (node.x - minX) / (maxDim - minX) - 1.0f;
+            float y1 = 2.0f * (node.y - minY) / (maxDim - minY) - 1.0f;
+            float z1 = 2.0f * (node.z - minZ) / (maxDim - minZ) - 1.0f;
+
+            float x2 = 2.0f * (units[iter->second].x - minX) / (maxDim - minX) - 1.0f;
+            float y2 = 2.0f * (units[iter->second].y - minY) / (maxDim - minY) - 1.0f;
+            float z2 = 2.0f * (units[iter->second].z - minZ) / (maxDim - minZ) - 1.0f;
+
+            glVertex3f(x1, y1, z1);
+            glVertex3f(x2, y2, z2);
+        }
+    }
+    glEnd();
 
     renderBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
 }
@@ -181,13 +183,15 @@ void SwcRenderer::renderDiffSwc() {
         maxZ = (std::max)(maxZ, node.z);
     }
 
+    float maxDim = (std::max)((std::max)(maxX - minX, maxY - minY), maxZ - minZ);
+
     // render point
     glPointSize(m_CreateInfo.style.pointSize);
     glBegin(GL_POINTS);
     for (auto&node: addedUnits) {
-        float x = 2.0f * (node.x - minX) / (maxX - minX) - 1.0f;
-        float y = 2.0f * (node.y - minY) / (maxY - minY) - 1.0f;
-        float z = 2.0f * (node.z - minZ) / (maxZ - minZ) - 1.0f;
+        float x = 2.0f * (node.x - minX) / (maxDim - minX) - 1.0f;
+        float y = 2.0f * (node.y - minY) / (maxDim - minY) - 1.0f;
+        float z = 2.0f * (node.z - minZ) / (maxDim - minZ) - 1.0f;
         glColor4f(m_CreateInfo.style.lineColorAdd[0], m_CreateInfo.style.lineColorAdd[1],
                   m_CreateInfo.style.lineColorAdd[2],
                   m_CreateInfo.style.lineColorAdd[3]);
@@ -198,9 +202,9 @@ void SwcRenderer::renderDiffSwc() {
     glPointSize(m_CreateInfo.style.pointSize);
     glBegin(GL_POINTS);
     for (auto&node: deletedUnits) {
-        float x = 2.0f * (node.x - minX) / (maxX - minX) - 1.0f;
-        float y = 2.0f * (node.y - minY) / (maxY - minY) - 1.0f;
-        float z = 2.0f * (node.z - minZ) / (maxZ - minZ) - 1.0f;
+        float x = 2.0f * (node.x - minX) / (maxDim - minX) - 1.0f;
+        float y = 2.0f * (node.y - minY) / (maxDim - minY) - 1.0f;
+        float z = 2.0f * (node.z - minZ) / (maxDim - minZ) - 1.0f;
         glColor4f(m_CreateInfo.style.lineColorDelete[0], m_CreateInfo.style.lineColorDelete[1],
                   m_CreateInfo.style.lineColorDelete[2],
                   m_CreateInfo.style.lineColorDelete[3]);
@@ -211,9 +215,9 @@ void SwcRenderer::renderDiffSwc() {
     glPointSize(m_CreateInfo.style.pointSize);
     glBegin(GL_POINTS);
     for (auto&node: modifiedUnits) {
-        float x = 2.0f * (node.x - minX) / (maxX - minX) - 1.0f;
-        float y = 2.0f * (node.y - minY) / (maxY - minY) - 1.0f;
-        float z = 2.0f * (node.z - minZ) / (maxZ - minZ) - 1.0f;
+        float x = 2.0f * (node.x - minX) / (maxDim - minX) - 1.0f;
+        float y = 2.0f * (node.y - minY) / (maxDim - minY) - 1.0f;
+        float z = 2.0f * (node.z - minZ) / (maxDim - minZ) - 1.0f;
         glColor4f(m_CreateInfo.style.lineColorModified[0], m_CreateInfo.style.lineColorModified[1],
                   m_CreateInfo.style.lineColorModified[2],
                   m_CreateInfo.style.lineColorModified[3]);
@@ -224,156 +228,156 @@ void SwcRenderer::renderDiffSwc() {
     glPointSize(m_CreateInfo.style.pointSize);
     glBegin(GL_POINTS);
     for (auto&node: unchangedUnits) {
-        float x = 2.0f * (node.x - minX) / (maxX - minX) - 1.0f;
-        float y = 2.0f * (node.y - minY) / (maxY - minY) - 1.0f;
-        float z = 2.0f * (node.z - minZ) / (maxZ - minZ) - 1.0f;
+        float x = 2.0f * (node.x - minX) / (maxDim - minX) - 1.0f;
+        float y = 2.0f * (node.y - minY) / (maxDim - minY) - 1.0f;
+        float z = 2.0f * (node.z - minZ) / (maxDim - minZ) - 1.0f;
         glColor4f(m_CreateInfo.style.lineColor[0], m_CreateInfo.style.lineColor[1], m_CreateInfo.style.lineColor[2],
                   m_CreateInfo.style.lineColor[3]);
         glVertex3f(x, y, z);
     }
     glEnd();
 
-    // // Render lines
-    // glLineWidth(m_CreateInfo.style.lineWidth);
-    // glBegin(GL_LINES);
-    // glColor4f(m_CreateInfo.style.lineColorAdd[0], m_CreateInfo.style.lineColorAdd[1],
-    //           m_CreateInfo.style.lineColorAdd[2],
-    //           m_CreateInfo.style.lineColorAdd[3]);
-    // for (int i = 0; i < addedUnits.size(); ++i) {
-    //     auto node = addedUnits[i];
-    //     if (node.parent != -1) {
-    //         auto iter = new_n_to_index_map.find(node.parent);
-    //         if (iter == new_n_to_index_map.end()) {
-    //             continue;
-    //         }
-    //
-    //         // Normalize the coordinates to the range [-1, 1]
-    //         float x1 = 2.0f * (node.x - minX) / (maxX - minX) - 1.0f;
-    //         float y1 = 2.0f * (node.y - minY) / (maxY - minY) - 1.0f;
-    //         float z1 = 2.0f * (node.z - minZ) / (maxZ - minZ) - 1.0f;
-    //
-    //         float x2 = 2.0f * (newUnits[iter->second].x - minX) / (maxX - minX) - 1.0f;
-    //         float y2 = 2.0f * (newUnits[iter->second].y - minY) / (maxY - minY) - 1.0f;
-    //         float z2 = 2.0f * (newUnits[iter->second].z - minZ) / (maxZ - minZ) - 1.0f;
-    //
-    //         glVertex3f(x1, y1, z1);
-    //         glVertex3f(x2, y2, z2);
-    //     }
-    // }
-    // glEnd();
-    //
-    // glLineWidth(m_CreateInfo.style.lineWidth);
-    // glBegin(GL_LINES);
-    // glColor4f(m_CreateInfo.style.lineColorDelete[0], m_CreateInfo.style.lineColorDelete[1],
-    //           m_CreateInfo.style.lineColorDelete[2],
-    //           m_CreateInfo.style.lineColorDelete[3]);
-    // for (int i = 0; i < deletedUnits.size(); ++i) {
-    //     auto node = deletedUnits[i];
-    //     if (node.parent != -1) {
-    //         auto iter = n_to_index_map.find(node.parent);
-    //         if (iter == n_to_index_map.end()) {
-    //             continue;
-    //         }
-    //
-    //         // Normalize the coordinates to the range [-1, 1]
-    //         float x1 = 2.0f * (node.x - minX) / (maxX - minX) - 1.0f;
-    //         float y1 = 2.0f * (node.y - minY) / (maxY - minY) - 1.0f;
-    //         float z1 = 2.0f * (node.z - minZ) / (maxZ - minZ) - 1.0f;
-    //
-    //         float x2 = 2.0f * (oldUnits[iter->second].x - minX) / (maxX - minX) - 1.0f;
-    //         float y2 = 2.0f * (oldUnits[iter->second].y - minY) / (maxY - minY) - 1.0f;
-    //         float z2 = 2.0f * (oldUnits[iter->second].z - minZ) / (maxZ - minZ) - 1.0f;
-    //
-    //         glVertex3f(x1, y1, z1);
-    //         glVertex3f(x2, y2, z2);
-    //     }
-    //
-    //     if(childMap.find(node.n)!=childMap.end()) {
-    //         auto childNode = childMap[node.n];
-    //         // Normalize the coordinates to the range [-1, 1]
-    //         float x1 = 2.0f * (node.x - minX) / (maxX - minX) - 1.0f;
-    //         float y1 = 2.0f * (node.y - minY) / (maxY - minY) - 1.0f;
-    //         float z1 = 2.0f * (node.z - minZ) / (maxZ - minZ) - 1.0f;
-    //
-    //         float x2 = 2.0f * (childNode.x - minX) / (maxX - minX) - 1.0f;
-    //         float y2 = 2.0f * (childNode.y - minY) / (maxY - minY) - 1.0f;
-    //         float z2 = 2.0f * (childNode.z - minZ) / (maxZ - minZ) - 1.0f;
-    //
-    //         glVertex3f(x1, y1, z1);
-    //         glVertex3f(x2, y2, z2);
-    //     }
-    // }
-    // glEnd();
-    //
-    // glLineWidth(m_CreateInfo.style.lineWidth);
-    // glBegin(GL_LINES);
-    // glColor4f(m_CreateInfo.style.lineColorModified[0], m_CreateInfo.style.lineColorModified[1],
-    //           m_CreateInfo.style.lineColorModified[2],
-    //           m_CreateInfo.style.lineColorModified[3]);
-    // for (int i = 0; i < modifiedUnits.size(); ++i) {
-    //     auto node = modifiedUnits[i];
-    //     if (node.parent != -1) {
-    //         auto iter = new_n_to_index_map.find(node.parent);
-    //         if (iter == new_n_to_index_map.end()) {
-    //             continue;
-    //         }
-    //
-    //         // Normalize the coordinates to the range [-1, 1]
-    //         float x1 = 2.0f * (node.x - minX) / (maxX - minX) - 1.0f;
-    //         float y1 = 2.0f * (node.y - minY) / (maxY - minY) - 1.0f;
-    //         float z1 = 2.0f * (node.z - minZ) / (maxZ - minZ) - 1.0f;
-    //
-    //         float x2 = 2.0f * (newUnits[iter->second].x - minX) / (maxX - minX) - 1.0f;
-    //         float y2 = 2.0f * (newUnits[iter->second].y - minY) / (maxY - minY) - 1.0f;
-    //         float z2 = 2.0f * (newUnits[iter->second].z - minZ) / (maxZ - minZ) - 1.0f;
-    //
-    //         glVertex3f(x1, y1, z1);
-    //         glVertex3f(x2, y2, z2);
-    //     }
-    //
-    //     if(childMap.find(node.n)!=childMap.end()) {
-    //         auto childNode = childMap[node.n];
-    //         // Normalize the coordinates to the range [-1, 1]
-    //         float x1 = 2.0f * (node.x - minX) / (maxX - minX) - 1.0f;
-    //         float y1 = 2.0f * (node.y - minY) / (maxY - minY) - 1.0f;
-    //         float z1 = 2.0f * (node.z - minZ) / (maxZ - minZ) - 1.0f;
-    //
-    //         float x2 = 2.0f * (childNode.x - minX) / (maxX - minX) - 1.0f;
-    //         float y2 = 2.0f * (childNode.y - minY) / (maxY - minY) - 1.0f;
-    //         float z2 = 2.0f * (childNode.z - minZ) / (maxZ - minZ) - 1.0f;
-    //
-    //         glVertex3f(x1, y1, z1);
-    //         glVertex3f(x2, y2, z2);
-    //     }
-    // }
-    // glEnd();
-    //
-    // glLineWidth(m_CreateInfo.style.lineWidth);
-    // glBegin(GL_LINES);
-    // glColor4f(m_CreateInfo.style.lineColor[0], m_CreateInfo.style.lineColor[1], m_CreateInfo.style.lineColor[2],
-    //           m_CreateInfo.style.lineColor[3]);
-    // for (int i = 0; i < unchangedUnits.size(); ++i) {
-    //     auto node = unchangedUnits[i];
-    //     if (node.parent != -1) {
-    //         auto iter = new_n_to_index_map.find(node.parent);
-    //         if (iter == new_n_to_index_map.end()) {
-    //             continue;
-    //         }
-    //
-    //         // Normalize the coordinates to the range [-1, 1]
-    //         float x1 = 2.0f * (node.x - minX) / (maxX - minX) - 1.0f;
-    //         float y1 = 2.0f * (node.y - minY) / (maxY - minY) - 1.0f;
-    //         float z1 = 2.0f * (node.z - minZ) / (maxZ - minZ) - 1.0f;
-    //
-    //         float x2 = 2.0f * (newUnits[iter->second].x - minX) / (maxX - minX) - 1.0f;
-    //         float y2 = 2.0f * (newUnits[iter->second].y - minY) / (maxY - minY) - 1.0f;
-    //         float z2 = 2.0f * (newUnits[iter->second].z - minZ) / (maxZ - minZ) - 1.0f;
-    //
-    //         glVertex3f(x1, y1, z1);
-    //         glVertex3f(x2, y2, z2);
-    //     }
-    // }
-    // glEnd();
+    // Render lines
+    glLineWidth(m_CreateInfo.style.lineWidth);
+    glBegin(GL_LINES);
+    glColor4f(m_CreateInfo.style.lineColorAdd[0], m_CreateInfo.style.lineColorAdd[1],
+              m_CreateInfo.style.lineColorAdd[2],
+              m_CreateInfo.style.lineColorAdd[3]);
+    for (int i = 0; i < addedUnits.size(); ++i) {
+        auto node = addedUnits[i];
+        if (node.parent != -1) {
+            auto iter = new_n_to_index_map.find(node.parent);
+            if (iter == new_n_to_index_map.end()) {
+                continue;
+            }
+
+            // Normalize the coordinates to the range [-1, 1]
+            float x1 = 2.0f * (node.x - minX) / (maxDim - minX) - 1.0f;
+            float y1 = 2.0f * (node.y - minY) / (maxDim - minY) - 1.0f;
+            float z1 = 2.0f * (node.z - minZ) / (maxDim - minZ) - 1.0f;
+
+            float x2 = 2.0f * (newUnits[iter->second].x - minX) / (maxDim - minX) - 1.0f;
+            float y2 = 2.0f * (newUnits[iter->second].y - minY) / (maxDim - minY) - 1.0f;
+            float z2 = 2.0f * (newUnits[iter->second].z - minZ) / (maxDim - minZ) - 1.0f;
+
+            glVertex3f(x1, y1, z1);
+            glVertex3f(x2, y2, z2);
+        }
+    }
+    glEnd();
+
+    glLineWidth(m_CreateInfo.style.lineWidth);
+    glBegin(GL_LINES);
+    glColor4f(m_CreateInfo.style.lineColorDelete[0], m_CreateInfo.style.lineColorDelete[1],
+              m_CreateInfo.style.lineColorDelete[2],
+              m_CreateInfo.style.lineColorDelete[3]);
+    for (int i = 0; i < deletedUnits.size(); ++i) {
+        auto node = deletedUnits[i];
+        if (node.parent != -1) {
+            auto iter = n_to_index_map.find(node.parent);
+            if (iter == n_to_index_map.end()) {
+                continue;
+            }
+
+            // Normalize the coordinates to the range [-1, 1]
+            float x1 = 2.0f * (node.x - minX) / (maxDim - minX) - 1.0f;
+            float y1 = 2.0f * (node.y - minY) / (maxDim - minY) - 1.0f;
+            float z1 = 2.0f * (node.z - minZ) / (maxDim - minZ) - 1.0f;
+
+            float x2 = 2.0f * (oldUnits[iter->second].x - minX) / (maxDim - minX) - 1.0f;
+            float y2 = 2.0f * (oldUnits[iter->second].y - minY) / (maxDim - minY) - 1.0f;
+            float z2 = 2.0f * (oldUnits[iter->second].z - minZ) / (maxDim - minZ) - 1.0f;
+
+            glVertex3f(x1, y1, z1);
+            glVertex3f(x2, y2, z2);
+        }
+
+        if(childMap.find(node.n)!=childMap.end()) {
+            auto childNode = childMap[node.n];
+            // Normalize the coordinates to the range [-1, 1]
+            float x1 = 2.0f * (node.x - minX) / (maxDim - minX) - 1.0f;
+            float y1 = 2.0f * (node.y - minY) / (maxDim - minY) - 1.0f;
+            float z1 = 2.0f * (node.z - minZ) / (maxDim - minZ) - 1.0f;
+
+            float x2 = 2.0f * (childNode.x - minX) / (maxDim - minX) - 1.0f;
+            float y2 = 2.0f * (childNode.y - minY) / (maxDim - minY) - 1.0f;
+            float z2 = 2.0f * (childNode.z - minZ) / (maxDim - minZ) - 1.0f;
+
+            glVertex3f(x1, y1, z1);
+            glVertex3f(x2, y2, z2);
+        }
+    }
+    glEnd();
+
+    glLineWidth(m_CreateInfo.style.lineWidth);
+    glBegin(GL_LINES);
+    glColor4f(m_CreateInfo.style.lineColorModified[0], m_CreateInfo.style.lineColorModified[1],
+              m_CreateInfo.style.lineColorModified[2],
+              m_CreateInfo.style.lineColorModified[3]);
+    for (int i = 0; i < modifiedUnits.size(); ++i) {
+        auto node = modifiedUnits[i];
+        if (node.parent != -1) {
+            auto iter = new_n_to_index_map.find(node.parent);
+            if (iter == new_n_to_index_map.end()) {
+                continue;
+            }
+
+            // Normalize the coordinates to the range [-1, 1]
+            float x1 = 2.0f * (node.x - minX) / (maxDim - minX) - 1.0f;
+            float y1 = 2.0f * (node.y - minY) / (maxDim - minY) - 1.0f;
+            float z1 = 2.0f * (node.z - minZ) / (maxDim - minZ) - 1.0f;
+
+            float x2 = 2.0f * (newUnits[iter->second].x - minX) / (maxDim - minX) - 1.0f;
+            float y2 = 2.0f * (newUnits[iter->second].y - minY) / (maxDim - minY) - 1.0f;
+            float z2 = 2.0f * (newUnits[iter->second].z - minZ) / (maxDim - minZ) - 1.0f;
+
+            glVertex3f(x1, y1, z1);
+            glVertex3f(x2, y2, z2);
+        }
+
+        if(childMap.find(node.n)!=childMap.end()) {
+            auto childNode = childMap[node.n];
+            // Normalize the coordinates to the range [-1, 1]
+            float x1 = 2.0f * (node.x - minX) / (maxDim - minX) - 1.0f;
+            float y1 = 2.0f * (node.y - minY) / (maxDim - minY) - 1.0f;
+            float z1 = 2.0f * (node.z - minZ) / (maxDim - minZ) - 1.0f;
+
+            float x2 = 2.0f * (childNode.x - minX) / (maxDim - minX) - 1.0f;
+            float y2 = 2.0f * (childNode.y - minY) / (maxDim - minY) - 1.0f;
+            float z2 = 2.0f * (childNode.z - minZ) / (maxDim - minZ) - 1.0f;
+
+            glVertex3f(x1, y1, z1);
+            glVertex3f(x2, y2, z2);
+        }
+    }
+    glEnd();
+
+    glLineWidth(m_CreateInfo.style.lineWidth);
+    glBegin(GL_LINES);
+    glColor4f(m_CreateInfo.style.lineColor[0], m_CreateInfo.style.lineColor[1], m_CreateInfo.style.lineColor[2],
+              m_CreateInfo.style.lineColor[3]);
+    for (int i = 0; i < unchangedUnits.size(); ++i) {
+        auto node = unchangedUnits[i];
+        if (node.parent != -1) {
+            auto iter = new_n_to_index_map.find(node.parent);
+            if (iter == new_n_to_index_map.end()) {
+                continue;
+            }
+
+            // Normalize the coordinates to the range [-1, 1]
+            float x1 = 2.0f * (node.x - minX) / (maxDim - minX) - 1.0f;
+            float y1 = 2.0f * (node.y - minY) / (maxDim - minY) - 1.0f;
+            float z1 = 2.0f * (node.z - minZ) / (maxDim - minZ) - 1.0f;
+
+            float x2 = 2.0f * (newUnits[iter->second].x - minX) / (maxDim - minX) - 1.0f;
+            float y2 = 2.0f * (newUnits[iter->second].y - minY) / (maxDim - minY) - 1.0f;
+            float z2 = 2.0f * (newUnits[iter->second].z - minZ) / (maxDim - minZ) - 1.0f;
+
+            glVertex3f(x1, y1, z1);
+            glVertex3f(x2, y2, z2);
+        }
+    }
+    glEnd();
 
     renderBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
 }
@@ -489,71 +493,73 @@ void SwcRenderer::normalizeAngle(int* angle) {
 }
 
 void SwcRenderer::renderBoundingBox(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+    float maxDim = (std::max)((std::max)(maxX - minX, maxY - minY), maxZ - minZ);
+
     // Draw bounding box
     glLineWidth(2.0f);
     glBegin(GL_LINES);
     glColor4f(m_CreateInfo.style.boundingBoxLineColor[0], m_CreateInfo.style.boundingBoxLineColor[1], m_CreateInfo.style.boundingBoxLineColor[2], m_CreateInfo.style.boundingBoxLineColor[3]);
     // Bottom square
-    glVertex3f(2.0f * (minX - minX) / (maxX - minX) - 1.0f, 2.0f * (minY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (minZ - minZ) / (maxZ - minZ) - 1.0f);
-    glVertex3f(2.0f * (maxX - minX) / (maxX - minX) - 1.0f, 2.0f * (minY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (minZ - minZ) / (maxZ - minZ) - 1.0f);
+    glVertex3f(2.0f * (minX - minX) / (maxDim - minX) - 1.0f, 2.0f * (minY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (minZ - minZ) / (maxDim - minZ) - 1.0f);
+    glVertex3f(2.0f * (maxX - minX) / (maxDim - minX) - 1.0f, 2.0f * (minY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (minZ - minZ) / (maxDim - minZ) - 1.0f);
 
-    glVertex3f(2.0f * (maxX - minX) / (maxX - minX) - 1.0f, 2.0f * (minY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (minZ - minZ) / (maxZ - minZ) - 1.0f);
-    glVertex3f(2.0f * (maxX - minX) / (maxX - minX) - 1.0f, 2.0f * (maxY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (minZ - minZ) / (maxZ - minZ) - 1.0f);
+    glVertex3f(2.0f * (maxX - minX) / (maxDim - minX) - 1.0f, 2.0f * (minY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (minZ - minZ) / (maxDim - minZ) - 1.0f);
+    glVertex3f(2.0f * (maxX - minX) / (maxDim - minX) - 1.0f, 2.0f * (maxY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (minZ - minZ) / (maxDim - minZ) - 1.0f);
 
-    glVertex3f(2.0f * (maxX - minX) / (maxX - minX) - 1.0f, 2.0f * (maxY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (minZ - minZ) / (maxZ - minZ) - 1.0f);
-    glVertex3f(2.0f * (minX - minX) / (maxX - minX) - 1.0f, 2.0f * (maxY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (minZ - minZ) / (maxZ - minZ) - 1.0f);
+    glVertex3f(2.0f * (maxX - minX) / (maxDim - minX) - 1.0f, 2.0f * (maxY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (minZ - minZ) / (maxDim - minZ) - 1.0f);
+    glVertex3f(2.0f * (minX - minX) / (maxDim - minX) - 1.0f, 2.0f * (maxY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (minZ - minZ) / (maxDim - minZ) - 1.0f);
 
-    glVertex3f(2.0f * (minX - minX) / (maxX - minX) - 1.0f, 2.0f * (maxY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (minZ - minZ) / (maxZ - minZ) - 1.0f);
-    glVertex3f(2.0f * (minX - minX) / (maxX - minX) - 1.0f, 2.0f * (minY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (minZ - minZ) / (maxZ - minZ) - 1.0f);
+    glVertex3f(2.0f * (minX - minX) / (maxDim - minX) - 1.0f, 2.0f * (maxY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (minZ - minZ) / (maxDim - minZ) - 1.0f);
+    glVertex3f(2.0f * (minX - minX) / (maxDim - minX) - 1.0f, 2.0f * (minY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (minZ - minZ) / (maxDim - minZ) - 1.0f);
 
     // Top square
-    glVertex3f(2.0f * (minX - minX) / (maxX - minX) - 1.0f, 2.0f * (minY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (maxZ - minZ) / (maxZ - minZ) - 1.0f);
-    glVertex3f(2.0f * (maxX - minX) / (maxX - minX) - 1.0f, 2.0f * (minY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (maxZ - minZ) / (maxZ - minZ) - 1.0f);
+    glVertex3f(2.0f * (minX - minX) / (maxDim - minX) - 1.0f, 2.0f * (minY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (maxZ - minZ) / (maxDim - minZ) - 1.0f);
+    glVertex3f(2.0f * (maxX - minX) / (maxDim - minX) - 1.0f, 2.0f * (minY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (maxZ - minZ) / (maxDim - minZ) - 1.0f);
 
-    glVertex3f(2.0f * (maxX - minX) / (maxX - minX) - 1.0f, 2.0f * (minY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (maxZ - minZ) / (maxZ - minZ) - 1.0f);
-    glVertex3f(2.0f * (maxX - minX) / (maxX - minX) - 1.0f, 2.0f * (maxY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (maxZ - minZ) / (maxZ - minZ) - 1.0f);
+    glVertex3f(2.0f * (maxX - minX) / (maxDim - minX) - 1.0f, 2.0f * (minY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (maxZ - minZ) / (maxDim - minZ) - 1.0f);
+    glVertex3f(2.0f * (maxX - minX) / (maxDim - minX) - 1.0f, 2.0f * (maxY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (maxZ - minZ) / (maxDim - minZ) - 1.0f);
 
-    glVertex3f(2.0f * (maxX - minX) / (maxX - minX) - 1.0f, 2.0f * (maxY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (maxZ - minZ) / (maxZ - minZ) - 1.0f);
-    glVertex3f(2.0f * (minX - minX) / (maxX - minX) - 1.0f, 2.0f * (maxY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (maxZ - minZ) / (maxZ - minZ) - 1.0f);
+    glVertex3f(2.0f * (maxX - minX) / (maxDim - minX) - 1.0f, 2.0f * (maxY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (maxZ - minZ) / (maxDim - minZ) - 1.0f);
+    glVertex3f(2.0f * (minX - minX) / (maxDim - minX) - 1.0f, 2.0f * (maxY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (maxZ - minZ) / (maxDim - minZ) - 1.0f);
 
-    glVertex3f(2.0f * (minX - minX) / (maxX - minX) - 1.0f, 2.0f * (maxY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (maxZ - minZ) / (maxZ - minZ) - 1.0f);
-    glVertex3f(2.0f * (minX - minX) / (maxX - minX) - 1.0f, 2.0f * (minY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (maxZ - minZ) / (maxZ - minZ) - 1.0f);
+    glVertex3f(2.0f * (minX - minX) / (maxDim - minX) - 1.0f, 2.0f * (maxY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (maxZ - minZ) / (maxDim - minZ) - 1.0f);
+    glVertex3f(2.0f * (minX - minX) / (maxDim - minX) - 1.0f, 2.0f * (minY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (maxZ - minZ) / (maxDim - minZ) - 1.0f);
 
     // Vertical lines
-    glVertex3f(2.0f * (minX - minX) / (maxX - minX) - 1.0f, 2.0f * (minY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (minZ - minZ) / (maxZ - minZ) - 1.0f);
-    glVertex3f(2.0f * (minX - minX) / (maxX - minX) - 1.0f, 2.0f * (minY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (maxZ - minZ) / (maxZ - minZ) - 1.0f);
+    glVertex3f(2.0f * (minX - minX) / (maxDim - minX) - 1.0f, 2.0f * (minY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (minZ - minZ) / (maxDim - minZ) - 1.0f);
+    glVertex3f(2.0f * (minX - minX) / (maxDim - minX) - 1.0f, 2.0f * (minY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (maxZ - minZ) / (maxDim - minZ) - 1.0f);
 
-    glVertex3f(2.0f * (maxX - minX) / (maxX - minX) - 1.0f, 2.0f * (minY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (minZ - minZ) / (maxZ - minZ) - 1.0f);
-    glVertex3f(2.0f * (maxX - minX) / (maxX - minX) - 1.0f, 2.0f * (minY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (maxZ - minZ) / (maxZ - minZ) - 1.0f);
+    glVertex3f(2.0f * (maxX - minX) / (maxDim - minX) - 1.0f, 2.0f * (minY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (minZ - minZ) / (maxDim - minZ) - 1.0f);
+    glVertex3f(2.0f * (maxX - minX) / (maxDim - minX) - 1.0f, 2.0f * (minY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (maxZ - minZ) / (maxDim - minZ) - 1.0f);
 
-    glVertex3f(2.0f * (maxX - minX) / (maxX - minX) - 1.0f, 2.0f * (maxY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (minZ - minZ) / (maxZ - minZ) - 1.0f);
-    glVertex3f(2.0f * (maxX - minX) / (maxX - minX) - 1.0f, 2.0f * (maxY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (maxZ - minZ) / (maxZ - minZ) - 1.0f);
+    glVertex3f(2.0f * (maxX - minX) / (maxDim - minX) - 1.0f, 2.0f * (maxY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (minZ - minZ) / (maxDim - minZ) - 1.0f);
+    glVertex3f(2.0f * (maxX - minX) / (maxDim - minX) - 1.0f, 2.0f * (maxY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (maxZ - minZ) / (maxDim - minZ) - 1.0f);
 
-    glVertex3f(2.0f * (minX - minX) / (maxX - minX) - 1.0f, 2.0f * (maxY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (minZ - minZ) / (maxZ - minZ) - 1.0f);
-    glVertex3f(2.0f * (minX - minX) / (maxX - minX) - 1.0f, 2.0f * (maxY - minY) / (maxY - minY) - 1.0f,
-               2.0f * (maxZ - minZ) / (maxZ - minZ) - 1.0f);
+    glVertex3f(2.0f * (minX - minX) / (maxDim - minX) - 1.0f, 2.0f * (maxY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (minZ - minZ) / (maxDim - minZ) - 1.0f);
+    glVertex3f(2.0f * (minX - minX) / (maxDim - minX) - 1.0f, 2.0f * (maxY - minY) / (maxDim - minY) - 1.0f,
+               2.0f * (maxZ - minZ) / (maxDim - minZ) - 1.0f);
     glEnd();
 }
