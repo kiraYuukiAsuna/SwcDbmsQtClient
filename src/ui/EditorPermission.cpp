@@ -45,12 +45,12 @@ EditorPermission::EditorPermission(const std::string&name, MetaInfoType type, QW
         }
 
         proto::GetUserByNameResponse rsp1;
-        if(!WrappedCall::GetUserInfoByName(newGroupName.toStdString(),rsp1, this)) {
+        if (!WrappedCall::GetUserInfoByName(newGroupName.toStdString(), rsp1, this)) {
             return;
         }
 
         proto::GetSwcMetaInfoResponse rsp2;
-        if(!WrappedCall::getSwcMetaInfoByName(name, rsp2, this)) {
+        if (!WrappedCall::getSwcMetaInfoByName(name, rsp2, this)) {
             return;
         }
 
@@ -58,7 +58,8 @@ EditorPermission::EditorPermission(const std::string&name, MetaInfoType type, QW
         acl.set_useruuid(rsp1.userinfo().base().uuid());
 
         for (int i = 0; i < acl.ace().GetDescriptor()->field_count(); i++) {
-           acl.ace().GetReflection()->SetBool(acl.mutable_ace(), acl.ace().GetDescriptor()->field(i), false);
+            bool a = false;
+            acl.ace().GetReflection()->SetBool(acl.mutable_ace(), acl.ace().GetDescriptor()->field(i), a);
         }
 
         acl.PrintDebugString();
@@ -69,7 +70,7 @@ EditorPermission::EditorPermission(const std::string&name, MetaInfoType type, QW
 
 
         proto::UpdateSwcResponse response;
-        if(!WrappedCall::UpdateSwcMetaInfo(rsp2.swcinfo(),response,this)) {
+        if (!WrappedCall::UpdateSwcMetaInfo(rsp2.swcinfo(), response, this)) {
             return;
         }
 
@@ -110,7 +111,8 @@ void EditorPermission::refresh() {
     auto&owner = m_PermissionMetaInfo.owner();
     proto::GetUserByUuidResponse ownerResponse;
     WrappedCall::GetUserInfoByUuid(owner.useruuid(), ownerResponse, this);
-    m_TreeWidget->addTopItem(owner.useruuid(), "Owner: " + ownerResponse.userinfo().name(), QIcon(Image::ImageUserPermission), {});
+    m_TreeWidget->addTopItem(owner.useruuid(), "Owner: " + ownerResponse.userinfo().name(),
+                             QIcon(Image::ImageUserPermission), {});
     auto ownerDescriptor = owner.ace().GetDescriptor();
     for (int permission = 0; permission < ownerDescriptor->field_count(); permission++) {
         auto name = ownerDescriptor->field(permission)->name();

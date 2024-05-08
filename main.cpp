@@ -15,6 +15,17 @@
 int main(int argc, char *argv[]) {
     setbuf(stdout, nullptr);
 
+    proto::UserPermissionAclV1 acl;
+    acl.set_useruuid("11232");
+    acl.mutable_ace()->set_readperimissionqueryswcdata(false);
+
+    // for (int i = 0; i < acl.ace().GetDescriptor()->field_count(); i++) {
+    //     bool a = false;
+    //     acl.ace().GetReflection()->SetBool(acl.mutable_ace(), acl.ace().GetDescriptor()->field(i), a);
+    // }
+
+    acl.PrintDebugString();
+
     QApplication a(argc, argv);
 
     const QString fontPath = QString(R"(:/fonts/SourceHanSansCN/SourceHanSansCN-Regular.ttf)");
