@@ -13,6 +13,7 @@
 
 #include "CreateSwcSnapshotView.h"
 #include "EditorAttachmentView.h"
+#include "EditorPermission.h"
 #include "ViewCreateProject.h"
 #include "ViewCreateSwc.h"
 #include "src/framework/config/AppConfig.h"
@@ -274,6 +275,14 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
         m_MainWindow->getRightClientView().openProjectMetaInfo(data.name);
     });
 
+    auto* MenuEditProjectPermission = new QAction(this);
+    MenuEditProjectPermission->setText("Edit Permission");
+    MenuEditProjectPermission->setIcon(QIcon(Image::ImageHelp));
+    connect(MenuEditProjectPermission, &QAction::triggered, this, [this,data](bool checked) {
+        EditorPermission view(this);
+        view.exec();
+    });
+
     auto* MenuImportSwcFile = new QAction(this);
     MenuImportSwcFile->setText("Import Swc File");
     MenuImportSwcFile->setIcon(QIcon(Image::ImageImport));
@@ -422,6 +431,14 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
         m_MainWindow->getRightClientView().openSwcNodeData(data.name);
     });
 
+    auto* MenuEditSwcPermission = new QAction(this);
+    MenuEditSwcPermission->setText("Edit Permission");
+    MenuEditSwcPermission->setIcon(QIcon(Image::ImageHelp));
+    connect(MenuEditSwcPermission, &QAction::triggered, this, [this,data](bool checked) {
+        EditorPermission view(this);
+        view.exec();
+    });
+
     auto* MenuDeleteDailyStatistics = new QAction(this);
     MenuDeleteDailyStatistics->setText("Delete DailyStatistics");
     MenuDeleteDailyStatistics->setIcon(QIcon(Image::ImageDelete));
@@ -510,6 +527,8 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
         case MetaInfoType::eProject: {
             popMenu->addAction(MenuEditProject);
             popMenu->addSeparator();
+            popMenu->addAction(MenuEditProjectPermission);
+            popMenu->addSeparator();
             popMenu->addAction(MenuExportToSwcFile);
             popMenu->addSeparator();
             popMenu->addAction(MenuDeleteProject);
@@ -525,6 +544,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
         case MetaInfoType::eSwc: {
             popMenu->addAction(MenuEditSwc);
             popMenu->addAction(MenuEditSwcNodeData);
+            popMenu->addAction(MenuEditProjectPermission);
             popMenu->addAction(MenuEditorAttachment);
             popMenu->addSeparator();
             popMenu->addAction(MenuExportToSwcFile);
