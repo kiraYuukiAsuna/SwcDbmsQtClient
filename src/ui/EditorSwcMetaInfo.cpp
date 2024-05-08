@@ -1,14 +1,13 @@
 #include "EditorSwcMetaInfo.h"
 #include <QIcon>
-#include <QMessageBox>
 #include <grpcpp/client_context.h>
 #include <Message/Request.pb.h>
 #include <Message/Response.pb.h>
 
 #include "ui_EditorSwcMetaInfo.h"
 #include "src/framework/defination/ImageDefination.h"
-#include "src/framework/service/CachedProtoData.h"
 #include "src/framework/service/RpcCall.h"
+#include "src/framework/service/WrappedCall.h"
 
 
 EditorSwcMetaInfo::EditorSwcMetaInfo(proto::GetSwcMetaInfoResponse& response, QWidget *parent) :
@@ -24,36 +23,20 @@ EditorSwcMetaInfo::~EditorSwcMetaInfo() {
 }
 
 bool EditorSwcMetaInfo::save() {
-    proto::UpdateSwcRequest request;
-    request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
     proto::UpdateSwcResponse response;
-    grpc::ClientContext context;
-
-    auto* userInfo = request.mutable_userverifyinfo();
-    userInfo->set_username(CachedProtoData::getInstance().UserName);
-    userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
-    request.mutable_swcinfo()->CopyFrom(m_SwcMetaInfo);
 
     if(ui->Description->text().isEmpty()) {
         QMessageBox::warning(this,"Error","Description cannot be empty!");
         return false;
     }
 
-    // std::cout<<m_SwcMetaInfo.DebugString()<<std::endl;
+    m_SwcMetaInfo.set_description(ui->Description->text().toStdString());
 
-
-    request.mutable_swcinfo()->set_description(ui->Description->text().toStdString());
-
-    auto status = RpcCall::getInstance().Stub()->UpdateSwc(&context,request,&response);
-    if(status.ok()) {
-        if(response.metainfo().status()) {
-            // QMessageBox::information(this,"Info","Update Swc Successfully!");
-            return true;
-        }
-        QMessageBox::critical(this,"Error",QString::fromStdString(response.metainfo().message()));
+    if(!WrappedCall::UpdateSwcMetaInfo(m_SwcMetaInfo,response,this)) {
+        return false;
     }
-    QMessageBox::critical(this,"Error",QString::fromStdString(status.error_message()));
-    return false;
+
+    return true;
 }
 
 void EditorSwcMetaInfo::refresh(proto::GetSwcMetaInfoResponse& response) {

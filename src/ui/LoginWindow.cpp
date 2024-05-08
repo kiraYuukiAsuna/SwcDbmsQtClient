@@ -103,6 +103,7 @@ bool LoginWindow::doLogin(QString userName, QString password, bool slientMode) {
 
             CachedProtoData::getInstance().CachedUserMetaInfo = response.userinfo();
             CachedProtoData::getInstance().UserName = response.userverifyinfo().username();
+            CachedProtoData::getInstance().UserUuid = response.userinfo().base().uuid();
             CachedProtoData::getInstance().UserToken = response.userverifyinfo().usertoken();
             CachedProtoData::getInstance().OnlineStatus = true;
 

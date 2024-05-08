@@ -32,6 +32,7 @@ public:
     }
 
     bool save() override {
+        return true;
     }
 
     void refresh();

@@ -90,18 +90,9 @@ EditorUserSettings::~EditorUserSettings() {
 }
 
 void EditorUserSettings::getUserMetaInfo() {
-    proto::GetUserRequest request;
-    request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
-    auto* userInfo = request.mutable_userverifyinfo();
-    userInfo->set_username(CachedProtoData::getInstance().UserName);
-    userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
-    request.set_username(CachedProtoData::getInstance().UserName);
-
-    proto::GetUserResponse response;
-    grpc::ClientContext context;
-
-    auto result = RpcCall::getInstance().Stub()->GetUser(&context,request,&response);
-    if(result.ok()) {
+    proto::GetUserByUuidResponse response;
+    auto result = WrappedCall::GetUserInfoByUuid(CachedProtoData::getInstance().UserUuid,response,this);
+    if(result) {
         CachedProtoData::getInstance().CachedUserMetaInfo.CopyFrom(response.userinfo());
 
         ui->Id->setText(QString::fromStdString(response.userinfo().base()._id()));
@@ -130,7 +121,5 @@ void EditorUserSettings::getUserMetaInfo() {
         ui->PermissionGroup->setReadOnly(true);
         ui->UserId->setText(QString::fromStdString(std::to_string(response.userinfo().userid())));
         ui->UserId->setReadOnly(true);
-    }else{
-        QMessageBox::critical(this,"Error",QString::fromStdString(result.error_message()));
     }
 }

@@ -279,7 +279,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuEditProjectPermission->setText("Edit Permission");
     MenuEditProjectPermission->setIcon(QIcon(Image::ImageHelp));
     connect(MenuEditProjectPermission, &QAction::triggered, this, [this,data](bool checked) {
-        EditorPermission view(this);
+        EditorPermission view(data.name, MetaInfoType::eProject, this);
         view.exec();
     });
 
@@ -435,7 +435,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuEditSwcPermission->setText("Edit Permission");
     MenuEditSwcPermission->setIcon(QIcon(Image::ImageHelp));
     connect(MenuEditSwcPermission, &QAction::triggered, this, [this,data](bool checked) {
-        EditorPermission view(this);
+        EditorPermission view(data.name, MetaInfoType::eSwc, this);
         view.exec();
     });
 
@@ -544,7 +544,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
         case MetaInfoType::eSwc: {
             popMenu->addAction(MenuEditSwc);
             popMenu->addAction(MenuEditSwcNodeData);
-            popMenu->addAction(MenuEditProjectPermission);
+            popMenu->addAction(MenuEditSwcPermission);
             popMenu->addAction(MenuEditorAttachment);
             popMenu->addSeparator();
             popMenu->addAction(MenuExportToSwcFile);

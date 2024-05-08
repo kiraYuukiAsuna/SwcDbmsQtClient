@@ -12,6 +12,7 @@ public:
     bool OnlineStatus = false;
 
     std::string UserName;
+    std::string UserUuid;
     std::string UserToken;
 
 private:

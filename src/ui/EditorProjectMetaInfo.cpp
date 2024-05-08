@@ -25,15 +25,6 @@ EditorProjectMetaInfo::~EditorProjectMetaInfo() {
 }
 
 bool EditorProjectMetaInfo::save() {
-    proto::UpdateProjectRequest request;
-    request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
-    proto::UpdateProjectResponse response;
-    grpc::ClientContext context;
-    auto* userInfo = request.mutable_userverifyinfo();
-    userInfo->set_username(CachedProtoData::getInstance().UserName);
-    userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
-    request.mutable_projectinfo()->CopyFrom(m_ProjectMetaInfo);
-
     if (ui->Dsecription->text().isEmpty()) {
         QMessageBox::warning(this, "Error", "Description cannot be empty!");
         return false;
@@ -43,28 +34,23 @@ bool EditorProjectMetaInfo::save() {
         return false;
     }
 
-    request.mutable_projectinfo()->set_description(ui->Dsecription->text().toStdString());
-    request.mutable_projectinfo()->set_workmode(ui->WorkMode->text().toStdString());
+    m_ProjectMetaInfo.set_description(ui->Dsecription->text().toStdString());
+    m_ProjectMetaInfo.set_workmode(ui->WorkMode->text().toStdString());
 
-    request.mutable_projectinfo()->clear_swclist();
+    m_ProjectMetaInfo.clear_swclist();
     for (int i = 0; i < ui->SwcList->count(); i++) {
         auto *item = ui->SwcList->item(i);
         if (item->checkState() == Qt::Checked) {
-            auto *swc = request.mutable_projectinfo()->add_swclist();
+            auto *swc = m_ProjectMetaInfo.add_swclist();
             *swc = item->text().toStdString();
         }
     }
 
-    auto status = RpcCall::getInstance().Stub()->UpdateProject(&context, request, &response);
-    if (status.ok()) {
-        if (response.metainfo().status()) {
-            // QMessageBox::information(this, "Info", "Update Project Successfully!");
-            return true;
-        }
-        QMessageBox::critical(this, "Error", QString::fromStdString(response.metainfo().message()));
+    proto::UpdateProjectResponse response;
+    if(!WrappedCall::UpdateProjectMetaInfo(m_ProjectMetaInfo,response,this)) {
+        return false;
     }
-    QMessageBox::critical(this, "Error", QString::fromStdString(status.error_message()));
-    return false;
+    return true;
 }
 
 void EditorProjectMetaInfo::refresh(proto::GetProjectResponse &response) {

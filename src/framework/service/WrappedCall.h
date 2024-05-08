@@ -405,4 +405,53 @@ public:
         auto status = RpcCall::getInstance().Stub()->UpdatePermissionGroup(&context, request, &response);
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
+
+    static bool GetUserInfoByUuid(const std::string&userUuid, proto::GetUserByUuidResponse&response,
+                                  QWidget* parent) {
+        proto::GetUserByUuidRequest request;
+        setCommonRequestField(request);
+
+        request.set_useruuid(userUuid);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->GetUserByUuid(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool GetUserInfoByName(const std::string&userName, proto::GetUserByNameResponse&response,
+                                  QWidget* parent) {
+        proto::GetUserByNameRequest request;
+        setCommonRequestField(request);
+
+        request.set_username(userName);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->GetUserByName(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool UpdateSwcMetaInfo(proto::SwcMetaInfoV1 metaInfo, proto::UpdateSwcResponse&response,
+                              QWidget* parent) {
+        proto::UpdateSwcRequest request;
+        setCommonRequestField(request);
+
+        request.mutable_swcinfo()->CopyFrom(metaInfo);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->UpdateSwc(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool UpdateProjectMetaInfo(proto::ProjectMetaInfoV1 metaInfo, proto::UpdateProjectResponse&response,
+                          QWidget* parent) {
+        proto::UpdateProjectRequest request;
+        setCommonRequestField(request);
+
+        request.mutable_projectinfo()->CopyFrom(metaInfo);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->UpdateProject(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
 };
