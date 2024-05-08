@@ -1,36 +1,45 @@
-//
-// Created by KiraY on 2023/11/23.
-//
+#pragma once
 
-#ifndef EDITORPERMISSIONGROUP_H
-#define EDITORPERMISSIONGROUP_H
-
+#include <QDialog>
 #include <QWidget>
 
 #include "EditorBase.h"
-
+#include "TreeWidget/TreeWidget.h"
+#include "Message/Message.pb.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class EditorPermissionGroup; }
+
+namespace Ui {
+    class EditorPermissionGroup;
+}
+
 QT_END_NAMESPACE
 
-class EditorPermissionGroup : public QWidget, public EditorBase{
-Q_OBJECT
+class EditorPermissionGroup : public QDialog, public EditorBase {
+    Q_OBJECT
 
 public:
-    explicit EditorPermissionGroup(QWidget *parent = nullptr);
+    explicit EditorPermissionGroup(QWidget* parent = nullptr);
+
     ~EditorPermissionGroup() override;
 
-    virtual std::string getName() {
+    std::string getName() override {
         return "";
     }
 
-    virtual MetaInfoType getMetaInfoType() {
+    MetaInfoType getMetaInfoType() override {
         return MetaInfoType::ePermissionGroupMetaInfo;
     }
+
+    bool save() override {
+    }
+
+    void refresh();
+
 private:
-    Ui::EditorPermissionGroup *ui;
+    Ui::EditorPermissionGroup* ui;
+
+    TreeWidget* m_TreeWidget;
+
+    google::protobuf::RepeatedPtrField<proto::PermissionGroupMetaInfoV1> m_PermissionGroupList;
 };
-
-
-#endif //EDITORPERMISSIONGROUP_H

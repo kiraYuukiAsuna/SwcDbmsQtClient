@@ -9,6 +9,7 @@
 #include <Message/Request.pb.h>
 #include <Message/Response.pb.h>
 
+#include "EditorPermissionGroup.h"
 #include "ViewImportSwcFromFile.h"
 #include "src/framework/service/CachedProtoData.h"
 #include "src/framework/service/RpcCall.h"
@@ -48,6 +49,30 @@ MainWindow::MainWindow(QWidget *parent) :
         view.exec();
         m_LeftClientView->refreshTree();
     });
+
+    auto *menuTools = new QMenu(menuBar);
+    menuTools->setTitle("Tools");
+    menuTools->setIcon(QIcon(Image::ImageHelp));
+    menuBar->addMenu(menuTools);
+
+    auto *menuManagePermissionGroup = new QAction(menuTools);
+    menuManagePermissionGroup->setText("Manage Permission Group");
+    menuManagePermissionGroup->setIcon(QIcon(Image::ImageUserPermission));
+    menuTools->addAction(menuManagePermissionGroup);
+    connect(menuManagePermissionGroup, &QAction::triggered, this, [&]() {
+        EditorPermissionGroup view(this);
+        view.exec();
+    });
+
+    auto *menuManageUser = new QAction(menuTools);
+    menuManageUser->setText("Manage User");
+    menuManageUser->setIcon(QIcon(Image::ImageUserPermission));
+    menuTools->addAction(menuManageUser);
+    connect(menuManageUser, &QAction::triggered, this, [&]() {
+        EditorPermissionGroup view(this);
+        view.exec();
+    });
+
 
     auto *menuHelp = new QMenu(menuBar);
     menuHelp->setTitle("Help");

@@ -327,7 +327,7 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool RevertSwcVersion(const std::string&name, google::protobuf::Timestamp& endTime,
+    static bool RevertSwcVersion(const std::string&name, google::protobuf::Timestamp&endTime,
                                  proto::RevertSwcVersionResponse&response,
                                  QWidget* parent) {
         proto::RevertSwcVersionRequest request;
@@ -340,14 +340,69 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool GetPermissionGroupByUuid(const std::string& uuid, proto::GetPermissionGroupResponse&response,
-                                 QWidget* parent) {
+    static bool GetPermissionGroupByUuid(const std::string&uuid, proto::GetPermissionGroupResponse&response,
+                                         QWidget* parent) {
         proto::GetPermissionGroupRequest request;
         setCommonRequestField(request);
         request.mutable_permissiongroup()->mutable_base()->set_uuid(uuid);
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->GetPermissionGroup(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool GetAllPermissionGroup(proto::GetAllPermissionGroupResponse&response,
+                                      QWidget* parent) {
+        proto::GetAllPermissionGroupRequest request;
+        setCommonRequestField(request);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->GetAllPermissionGroup(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool CreatePermissionGroup(const std::string&permissionGroupName,
+                                      const std::string&permissionGroupDescription,
+                                      proto::CreatePermissionGroupResponse&response,
+                                      QWidget* parent) {
+        proto::CreatePermissionGroupRequest request;
+        setCommonRequestField(request);
+
+        request.set_permissiongroupname(permissionGroupName);
+        request.set_permissiongroupdescription(permissionGroupDescription);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->CreatePermissionGroup(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool DeletePermissionGroup(const std::string&permissionGroupUuid,
+                                      proto::DeletePermissionGroupResponse&response,
+                                      QWidget* parent) {
+        proto::DeletePermissionGroupRequest request;
+        setCommonRequestField(request);
+
+        request.set_permissiongroupuuid(permissionGroupUuid);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->DeletePermissionGroup(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool UpdatePermissionGroup(const std::string&permissionGroupUuid, const std::string&permissionGroupName,
+                                      const std::string&permissionGroupDescription, proto::PermissionGroupAceV1 ace,
+                                      proto::UpdatePermissionGroupResponse&response,
+                                      QWidget* parent) {
+        proto::UpdatePermissionGroupRequest request;
+        setCommonRequestField(request);
+
+        request.set_permissiongroupuuid(permissionGroupUuid);
+        request.set_permissiongroupname(permissionGroupName);
+        request.set_permissiongroupdescription(permissionGroupDescription);
+        request.mutable_ace()->CopyFrom(ace);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->UpdatePermissionGroup(&context, request, &response);
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 };
