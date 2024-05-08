@@ -56,20 +56,17 @@ EditorPermission::EditorPermission(const std::string&name, MetaInfoType type, QW
 
         proto::UserPermissionAclV1 acl;
         acl.set_useruuid(rsp1.userinfo().base().uuid());
-
         for (int i = 0; i < acl.ace().GetDescriptor()->field_count(); i++) {
-            bool a = false;
-            acl.ace().GetReflection()->SetBool(acl.mutable_ace(), acl.ace().GetDescriptor()->field(i), a);
+            acl.ace().GetReflection()->SetBool(acl.mutable_ace(), acl.ace().GetDescriptor()->field(i), true);
         }
 
-        acl.PrintDebugString();
-
         auto permission = rsp2.mutable_swcinfo()->mutable_permission();
+
         auto ele = permission->mutable_users()->Add();
         ele->CopyFrom(acl);
 
-
         proto::UpdateSwcResponse response;
+        std::cout<<rsp2.mutable_swcinfo()->mutable_permission()->users_size();
         if (!WrappedCall::UpdateSwcMetaInfo(rsp2.swcinfo(), response, this)) {
             return;
         }
@@ -132,7 +129,7 @@ void EditorPermission::refresh() {
     m_TreeWidget->addTopItem("Users", "Users", QIcon(Image::ImageUserPermission), {});
     for (auto&value: users) {
         proto::GetUserByUuidResponse response;
-        WrappedCall::GetUserInfoByUuid(owner.useruuid(), response, this);
+        WrappedCall::GetUserInfoByUuid(value.useruuid(), response, this);
         m_TreeWidget->addItem("Users", "Users" + value.useruuid(), response.userinfo().name(),
                               QIcon(Image::ImageUserPermission), {});
 

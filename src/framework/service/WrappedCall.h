@@ -24,7 +24,7 @@ public:
             if (rspMeta.status()) {
                 return true;
             }
-            QMessageBox::critical(parent, "Info", QString::fromStdString(actionName + " Failed!" + rspMeta.message()));
+            QMessageBox::critical(parent, "Error", QString::fromStdString(actionName + " Failed! " + rspMeta.message()));
             return false;
         }
         QMessageBox::critical(parent, "Error", QString::fromStdString(status.error_message()));
@@ -430,7 +430,7 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool UpdateSwcMetaInfo(proto::SwcMetaInfoV1 metaInfo, proto::UpdateSwcResponse&response,
+    static bool UpdateSwcMetaInfo(const proto::SwcMetaInfoV1& metaInfo, proto::UpdateSwcResponse&response,
                               QWidget* parent) {
         proto::UpdateSwcRequest request;
         setCommonRequestField(request);
@@ -442,7 +442,7 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool UpdateProjectMetaInfo(proto::ProjectMetaInfoV1 metaInfo, proto::UpdateProjectResponse&response,
+    static bool UpdateProjectMetaInfo(const proto::ProjectMetaInfoV1& metaInfo, proto::UpdateProjectResponse&response,
                           QWidget* parent) {
         proto::UpdateProjectRequest request;
         setCommonRequestField(request);
