@@ -8,7 +8,7 @@
 #include <unordered_set>
 
 #include "FileIoInterface.hpp"
-#include "src/util/util.hpp"
+#include "src/framework/util/util.hpp"
 
 struct NeuronUnit {
     NeuronUnit() = default;

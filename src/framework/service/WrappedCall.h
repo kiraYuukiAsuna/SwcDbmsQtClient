@@ -340,14 +340,25 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool GetPermissionGroupByUuid(const std::string&uuid, proto::GetPermissionGroupResponse&response,
-                                         QWidget* parent) {
-        proto::GetPermissionGroupRequest request;
+    static bool GetPermissionGroupByUuid(const std::string&uuid, proto::GetPermissionGroupByUuidResponse&response,
+                                     QWidget* parent) {
+        proto::GetPermissionGroupByUuidRequest request;
         setCommonRequestField(request);
-        request.mutable_permissiongroup()->mutable_base()->set_uuid(uuid);
+        request.set_permissiongroupuuid(uuid);
 
         grpc::ClientContext context;
-        auto status = RpcCall::getInstance().Stub()->GetPermissionGroup(&context, request, &response);
+        auto status = RpcCall::getInstance().Stub()->GetPermissionGroupByUuid(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool GetPermissionGroupByName(const std::string&name, proto::GetPermissionGroupByNameResponse&response,
+                                 QWidget* parent) {
+        proto::GetPermissionGroupByNameRequest request;
+        setCommonRequestField(request);
+        request.set_permissiongroupname(name);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->GetPermissionGroupByName(&context, request, &response);
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 

@@ -114,7 +114,7 @@ void EditorUserSettings::getUserMetaInfo() {
         pixmap = pixmap.scaled(QSize(128,128),Qt::KeepAspectRatioByExpanding);
         ui->HeadPhoto->setPixmap(pixmap);
 
-        proto::GetPermissionGroupResponse responseGetPermissionGroup;
+        proto::GetPermissionGroupByUuidResponse responseGetPermissionGroup;
         WrappedCall::GetPermissionGroupByUuid(response.userinfo().permissiongroupuuid(),responseGetPermissionGroup,this);
 
         ui->PermissionGroup->setText(QString::fromStdString(responseGetPermissionGroup.permissiongroup().name()));

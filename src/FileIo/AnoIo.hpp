@@ -4,7 +4,6 @@
 #include <utility>
 
 #include "FileIoInterface.hpp"
-#include "src/util/util.hpp"
 
 struct AnoUnit {
     std::string APOFILE;

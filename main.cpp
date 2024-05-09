@@ -1,27 +1,29 @@
 #include <QApplication>
-#include <QPushButton>
-#include <iostream>
 #include <QFontDatabase>
 #include <QProcess>
-#include "grpcpp/grpcpp.h"
-#include "Service/Service.grpc.pb.h"
 #include "src/styles/QtAdvancedStylesheet.h"
 #include "src/ui/MainWindow.h"
 #include "src/ui/LoginWindow.h"
 #include "src/framework/service/RpcCall.h"
 #include "src/framework/config/AppConfig.h"
+#include "src/framework/core/log/Log.h"
 #include "src/framework/defination/ImageDefination.h"
+#include "src/framework/util/util.hpp"
 
-int main(int argc, char *argv[]) {
-    setbuf(stdout, nullptr);
+int main(int argc, char* argv[]) {
+    Seele::Log::Init();
 
-    QApplication a(argc, argv);
+    auto timestamp = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).
+            time_since_epoch();
+    SEELE_INFO_TAG("Main", "App Start At: {}", timestampToString(timestamp.count()));
+
+    QApplication app(argc, argv);
 
     const QString fontPath = QString(R"(:/fonts/SourceHanSansCN/SourceHanSansCN-Regular.ttf)");
     const int loadedFontID = QFontDatabase::addApplicationFont(fontPath);
     if (const QStringList loadedFontFamilies = QFontDatabase::applicationFontFamilies(loadedFontID);
-            !loadedFontFamilies.empty()) {
-        const QString &sansCNFamily = loadedFontFamilies.at(0);
+        !loadedFontFamilies.empty()) {
+        const QString&sansCNFamily = loadedFontFamilies.at(0);
         QFont defaultFont = QApplication::font();
         defaultFont.setFamily(sansCNFamily);
         defaultFont.setPixelSize(14);
@@ -74,4 +76,6 @@ int main(int argc, char *argv[]) {
     if (exitCode == RestartCode) {
         QProcess::startDetached(qApp->applicationFilePath(), QStringList());
     }
+
+    Seele::Log::Shutdown();
 }

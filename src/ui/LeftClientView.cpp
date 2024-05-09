@@ -8,7 +8,6 @@
 #include "src/framework/defination/ImageDefination.h"
 #include "src/framework/service/WrappedCall.h"
 #include "src/ui/EditorUserSettings.h"
-#include <QMenu>
 #include <ui_ViewCreateSwc.h>
 
 #include "CreateSwcSnapshotView.h"
