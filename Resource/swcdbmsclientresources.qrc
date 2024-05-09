@@ -112,5 +112,8 @@
         <file>images/version_control.png</file>
         <file>images/attachment.png</file>
         <file>images/help.png</file>
+        <file>images/ACL.png</file>
+        <file>images/ACE.png</file>
+        <file>images/tool.png</file>
     </qresource>
 </RCC>

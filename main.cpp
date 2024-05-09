@@ -11,7 +11,7 @@
 #include "src/framework/util/util.hpp"
 
 int main(int argc, char* argv[]) {
-    Seele::Log::Init();
+    Seele::Log::Init("logs", "Core.log", "App.log", "EditorConsole.log", true, false);
 
     auto timestamp = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).
             time_since_epoch();

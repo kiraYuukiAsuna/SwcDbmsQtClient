@@ -139,7 +139,7 @@ void EditorPermissionGroup::refresh() {
         for (int permission = 0; permission < descriptor->field_count(); permission++) {
             auto name = descriptor->field(permission)->name();
             auto* item = m_TreeWidget->addItem(value.name(), value.name() + name, name,
-                                               QIcon(Image::ImageUserPermission), {});
+                                               QIcon(Image::ImageACE), {});
 
             if (value.ace().GetReflection()->GetBool(value.ace(), descriptor->field(permission))) {
                 item->setCheckState(0, Qt::Checked);

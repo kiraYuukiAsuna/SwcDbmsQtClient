@@ -276,7 +276,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
 
     auto* MenuEditProjectPermission = new QAction(this);
     MenuEditProjectPermission->setText("Edit Permission");
-    MenuEditProjectPermission->setIcon(QIcon(Image::ImageHelp));
+    MenuEditProjectPermission->setIcon(QIcon(Image::ImageACL));
     connect(MenuEditProjectPermission, &QAction::triggered, this, [this,data](bool checked) {
         EditorPermission view(data.name, MetaInfoType::eProject, this);
         view.exec();
@@ -432,7 +432,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
 
     auto* MenuEditSwcPermission = new QAction(this);
     MenuEditSwcPermission->setText("Edit Permission");
-    MenuEditSwcPermission->setIcon(QIcon(Image::ImageHelp));
+    MenuEditSwcPermission->setIcon(QIcon(Image::ImageACL));
     connect(MenuEditSwcPermission, &QAction::triggered, this, [this,data](bool checked) {
         EditorPermission view(data.name, MetaInfoType::eSwc, this);
         view.exec();

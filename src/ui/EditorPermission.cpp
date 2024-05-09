@@ -393,12 +393,12 @@ void EditorPermission::refresh() {
     proto::GetUserByUuidResponse ownerResponse;
     WrappedCall::GetUserInfoByUuid(owner.useruuid(), ownerResponse, this);
     m_TreeWidget->addTopItem(owner.useruuid(), "Owner: " + ownerResponse.userinfo().name(),
-                             QIcon(Image::ImageUserPermission), {});
+                             QIcon(Image::ImageUser), {});
     auto ownerDescriptor = owner.ace().GetDescriptor();
     for (int permission = 0; permission < ownerDescriptor->field_count(); permission++) {
         auto name = ownerDescriptor->field(permission)->name();
         auto* item = m_TreeWidget->addItem(owner.useruuid(), owner.useruuid() + name, name,
-                                           QIcon(Image::ImageUserPermission), {});
+                                           QIcon(Image::ImageACE), {});
 
         if (owner.ace().GetReflection()->GetBool(owner.ace(), ownerDescriptor->field(permission))) {
             item->setCheckState(0, Qt::Checked);
@@ -410,18 +410,18 @@ void EditorPermission::refresh() {
 
 
     auto&users = m_PermissionMetaInfo.users();
-    m_TreeWidget->addTopItem("Users", "Users", QIcon(Image::ImageUserPermission), {});
+    m_TreeWidget->addTopItem("Users", "Users", QIcon(Image::ImageUser), {});
     for (auto&value: users) {
         proto::GetUserByUuidResponse response;
         WrappedCall::GetUserInfoByUuid(value.useruuid(), response, this);
         m_TreeWidget->addItem("Users", "Users" + value.useruuid(), response.userinfo().name(),
-                              QIcon(Image::ImageUserPermission), {});
+                              QIcon(Image::ImageUser), {});
 
         auto descriptor = value.ace().GetDescriptor();
         for (int permission = 0; permission < descriptor->field_count(); permission++) {
             auto name = descriptor->field(permission)->name();
             auto* item = m_TreeWidget->addItem("Users" + value.useruuid(), "Users" + value.useruuid() + name, name,
-                                               QIcon(Image::ImageUserPermission), {});
+                                               QIcon(Image::ImageACE), {});
             if (value.ace().GetReflection()->GetBool(value.ace(), descriptor->field(permission))) {
                 item->setCheckState(0, Qt::Checked);
             }
@@ -443,7 +443,7 @@ void EditorPermission::refresh() {
         for (int permission = 0; permission < descriptor->field_count(); permission++) {
             auto name = descriptor->field(permission)->name();
             auto* item = m_TreeWidget->addItem("Groups" + value.groupuuid(), "Groups" + value.groupuuid() + name, name,
-                                               QIcon(Image::ImageUserPermission), {});
+                                               QIcon(Image::ImageACE), {});
             if (value.ace().GetReflection()->GetBool(value.ace(), descriptor->field(permission))) {
                 item->setCheckState(0, Qt::Checked);
             }

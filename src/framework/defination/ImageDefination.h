@@ -24,5 +24,8 @@ namespace Image {
     inline const char* ImageVersionControl = ":/images/version_control.png";
     inline const char* ImageAttachment = ":/images/attachment.png";
     inline const char* ImageHelp = ":/images/help.png";
+    inline const char* ImageACL = ":/images/ACL.png";
+    inline const char* ImageACE = ":/images/ACE.png";
+    inline const char* ImageTool = ":/images/tool.png";
 
 }

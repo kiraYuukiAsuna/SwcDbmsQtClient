@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     auto *menuTools = new QMenu(menuBar);
     menuTools->setTitle("Tools");
-    menuTools->setIcon(QIcon(Image::ImageHelp));
+    menuTools->setIcon(QIcon(Image::ImageTool));
     menuBar->addMenu(menuTools);
 
     auto *menuManagePermissionGroup = new QAction(menuTools);
@@ -66,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     auto *menuManageUser = new QAction(menuTools);
     menuManageUser->setText("Manage User");
-    menuManageUser->setIcon(QIcon(Image::ImageUserPermission));
+    menuManageUser->setIcon(QIcon(Image::ImageUser));
     menuTools->addAction(menuManageUser);
     connect(menuManageUser, &QAction::triggered, this, [&]() {
         EditorPermissionGroup view(this);

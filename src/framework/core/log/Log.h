@@ -21,7 +21,7 @@ namespace Seele {
             Level LevelFilter = Level::Trace;
         };
 
-        static void Init(const std::string&logsDirectory = "logs",
+        static void Init(const std::string&logsDirectory = "Logs",
                          const std::string&coreLogsFileName = "Core.log",
                          const std::string&appLogsFileName = "App.log",
                          const std::string&editorConsoleLogsFileName = "EditorConsole.log", bool hasConsole = true,
