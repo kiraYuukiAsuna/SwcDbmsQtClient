@@ -133,8 +133,10 @@ void EditorPermissionGroup::refresh() {
     m_PermissionGroupList = response.permissiongrouplist();
 
     for (auto&value: m_PermissionGroupList) {
-        m_TreeWidget->addTopItem(value.name(), value.name(), QIcon(Image::ImageUserPermission), {});
-
+        auto* item = m_TreeWidget->addTopItem(value.name(), value.name(), QIcon(Image::ImageUserPermission), {});
+        if(value.name() == "Admin") {
+            item->setDisabled(true);
+        }
         auto descriptor = value.ace().GetDescriptor();
         for (int permission = 0; permission < descriptor->field_count(); permission++) {
             auto name = descriptor->field(permission)->name();

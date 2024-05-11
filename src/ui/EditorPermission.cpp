@@ -399,7 +399,7 @@ void EditorPermission::refresh() {
         auto name = ownerDescriptor->field(permission)->name();
         auto* item = m_TreeWidget->addItem(owner.useruuid(), owner.useruuid() + name, name,
                                            QIcon(Image::ImageACE), {});
-
+        item->setDisabled(true);
         if (owner.ace().GetReflection()->GetBool(owner.ace(), ownerDescriptor->field(permission))) {
             item->setCheckState(0, Qt::Checked);
         }
