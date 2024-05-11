@@ -9,6 +9,7 @@
 #include <Message/Request.pb.h>
 #include <Message/Response.pb.h>
 
+#include "EditorAdminUserManager.h"
 #include "EditorPermissionGroup.h"
 #include "ViewImportSwcFromFile.h"
 #include "src/framework/service/CachedProtoData.h"
@@ -69,7 +70,7 @@ MainWindow::MainWindow(QWidget *parent) :
     menuManageUser->setIcon(QIcon(Image::ImageUser));
     menuTools->addAction(menuManageUser);
     connect(menuManageUser, &QAction::triggered, this, [&]() {
-        EditorPermissionGroup view(this);
+        EditorAdminUserManager view(this);
         view.exec();
     });
 

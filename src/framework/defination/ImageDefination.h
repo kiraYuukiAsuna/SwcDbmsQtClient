@@ -27,5 +27,6 @@ namespace Image {
     inline const char* ImageACL = ":/images/ACL.png";
     inline const char* ImageACE = ":/images/ACE.png";
     inline const char* ImageTool = ":/images/tool.png";
+    inline const char* ImageDescription = ":/images/description.png";
 
 }

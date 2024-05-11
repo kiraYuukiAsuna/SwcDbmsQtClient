@@ -106,8 +106,10 @@ EditorPermissionGroup::EditorPermissionGroup(QWidget* parent) : QDialog(parent),
                 }
             }
             proto::UpdatePermissionGroupResponse response;
-            WrappedCall::UpdatePermissionGroup(value.base().uuid(), value.name(), value.description(), value.ace(),
-                                               response, this);
+            if(!WrappedCall::UpdatePermissionGroup(value.base().uuid(), value.name(), value.description(), value.ace(),
+                                               response, this)) {
+                return;
+            }
         }
     });
 

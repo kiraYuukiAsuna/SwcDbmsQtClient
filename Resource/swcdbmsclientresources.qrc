@@ -115,5 +115,6 @@
         <file>images/ACL.png</file>
         <file>images/ACE.png</file>
         <file>images/tool.png</file>
+        <file>images/description.png</file>
     </qresource>
 </RCC>

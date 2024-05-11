@@ -441,6 +441,43 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
+    static bool CreateUser(const std::string&userName, const std::string&userPassword,const std::string& userDescription, proto::CreateUserResponse&response,
+                              QWidget* parent) {
+        proto::CreateUserRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
+        request.mutable_userinfo()->set_name(userName);
+        request.mutable_userinfo()->set_password(userPassword);
+        request.mutable_userinfo()->set_description(userDescription);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->CreateUser(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool UpdateUser(proto::UserMetaInfoV1 userMetaInfo, proto::UpdateUserResponse&response,
+                              QWidget* parent) {
+        proto::UpdateUserRequest request;
+        setCommonRequestField(request);
+
+        request.mutable_userinfo()->CopyFrom(userMetaInfo);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->UpdateUser(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool DeleteUser(const std::string userName, proto::DeleteUserResponse&response,
+                          QWidget* parent) {
+        proto::DeleteUserRequest request;
+        setCommonRequestField(request);
+
+        request.set_username(userName);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->DeleteUser(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
     static bool UpdateSwcMetaInfo(const proto::SwcMetaInfoV1& metaInfo, proto::UpdateSwcResponse&response,
                               QWidget* parent) {
         proto::UpdateSwcRequest request;

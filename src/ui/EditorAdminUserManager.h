@@ -1,9 +1,8 @@
 #pragma once
 
-#include <QWidget>
-
+#include <QDialog>
 #include "EditorBase.h"
-
+#include "TreeWidget/TreeWidget.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -13,7 +12,7 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-class EditorAdminUserManager : public QWidget, public EditorBase {
+class EditorAdminUserManager : public QDialog, public EditorBase {
     Q_OBJECT
 
 public:
@@ -33,6 +32,10 @@ public:
         return true;
     }
 
+    void refresh();
+
 private:
     Ui::EditorAdminUserManager* ui;
+
+    TreeWidget* m_TreeWidget;
 };

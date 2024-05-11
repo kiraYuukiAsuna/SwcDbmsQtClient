@@ -41,45 +41,35 @@ EditorUserSettings::EditorUserSettings(LeftClientView *leftClientView) :
         reject();
     });
     connect(ui->OKBtn,&QPushButton::clicked,this,[this](){
-        proto::UpdateUserRequest request;
-        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         proto::UpdateUserResponse response;
-        auto* userInfo = request.mutable_userverifyinfo();
-        userInfo->set_username(CachedProtoData::getInstance().UserName);
-        userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
-        request.mutable_userinfo()->CopyFrom(CachedProtoData::getInstance().CachedUserMetaInfo);
 
-        if(ui->Description->text().trimmed().isEmpty()){
-            QMessageBox::warning(this,"Error","Description cannot be empty!");
-            return;
-        }
-        request.mutable_userinfo()->set_description(ui->Description->text().trimmed().toStdString());
+        proto::UserMetaInfoV1 userMetaInfo;
+        userMetaInfo.CopyFrom(CachedProtoData::getInstance().CachedUserMetaInfo);
+
+        userMetaInfo.set_description(ui->Description->text().trimmed().toStdString());
 
         if(ui->Password->text().trimmed().isEmpty()){
             QMessageBox::warning(this,"Error","Password cannot be empty!");
             return;
         }
-        request.mutable_userinfo()->set_password(ui->Password->text().trimmed().toStdString());
+        userMetaInfo.set_password(ui->Password->text().trimmed().toStdString());
 
         QBuffer buffer;
         if(buffer.open(QIODevice::WriteOnly)){
             ui->HeadPhoto->pixmap().save(&buffer,"png");
-            request.mutable_userinfo()->set_headphotobindata(QByteArray(buffer.data()).toStdString());
+            userMetaInfo.set_headphotobindata(QByteArray(buffer.data()).toStdString());
         }
 
-        grpc::ClientContext context;
-        auto status = RpcCall::getInstance().Stub()->UpdateUser(&context,request,&response);
-        if(status.ok()){
-            if(response.metainfo().status()){
+        if (WrappedCall::UpdateUser(userMetaInfo, response, this)) {
+            if (response.metainfo().status()) {
                 CachedProtoData::getInstance().CachedUserMetaInfo.CopyFrom(response.userinfo());
-                QMessageBox::information(this,"Notice","Update user info success!");
+                QMessageBox::information(this, "Notice", "Update user info success!");
                 m_LeftClientView->refreshTree();
                 accept();
-            }else{
-                QMessageBox::critical(this,"Error",QString::fromStdString(response.metainfo().message()));
             }
-        }else{
-            QMessageBox::critical(this,"Error",QString::fromStdString(status.error_message()));
+            else {
+                QMessageBox::critical(this, "Error", QString::fromStdString(response.metainfo().message()));
+            }
         }
     });
     getUserMetaInfo();
