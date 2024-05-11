@@ -191,12 +191,20 @@ void EditorAdminUserManager::refresh() {
         return;
     }
 
+    proto::GetAllPermissionGroupResponse rsp1;
+    if (!WrappedCall::GetAllPermissionGroup(rsp1, this)) {
+        return;
+    }
+
     for (auto&userInfo: response.userinfo()) {
         auto* item = m_TreeWidget->addTopItem(userInfo.base().uuid(), userInfo.name(), QIcon(Image::ImageUser), {}, 0);
 
-        proto::GetPermissionGroupByUuidResponse rsp;
-        if (WrappedCall::GetPermissionGroupByUuid(userInfo.permissiongroupuuid(), rsp, this)) {
-            item->setText(1, QString::fromStdString(rsp.permissiongroup().name()));
+        auto iter = std::find_if(rsp1.permissiongrouplist().begin(), rsp1.permissiongrouplist().end(),
+                     [&](const proto::PermissionGroupMetaInfoV1&value) {
+                         return value.base().uuid() == userInfo.permissiongroupuuid();
+                     });
+        if (iter != rsp1.permissiongrouplist().end()) {
+            item->setText(1, QString::fromStdString(iter->name()));
         }else {
             item->setText(1, QString::fromStdString(userInfo.permissiongroupuuid()));
         }

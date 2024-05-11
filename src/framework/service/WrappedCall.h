@@ -6,6 +6,7 @@
 #include "Message/Request.pb.h"
 #include "RpcCall.h"
 #include "CachedProtoData.h"
+#include "src/framework/core/log/Log.h"
 
 class WrappedCall {
 public:
@@ -28,6 +29,20 @@ public:
             return false;
         }
         QMessageBox::critical(parent, "Error", QString::fromStdString(status.error_message()));
+        return false;
+    }
+
+    static bool defaultErrorHandlerNoMessageBox(const std::string&actionName, const grpc::Status&status,
+                                const proto::ResponseMetaInfoV1&rspMeta,
+                                QWidget* parent) {
+        if (status.ok()) {
+            if (rspMeta.status()) {
+                return true;
+            }
+            SEELE_ERROR_TAG("WrappedCall", "{}",actionName + " Failed! " + rspMeta.message());
+            return false;
+        }
+        SEELE_ERROR_TAG("WrappedCall", "{}",actionName + " Failed! " + status.error_message());
         return false;
     }
 
@@ -341,24 +356,30 @@ public:
     }
 
     static bool GetPermissionGroupByUuid(const std::string&uuid, proto::GetPermissionGroupByUuidResponse&response,
-                                     QWidget* parent) {
+                                     QWidget* parent, bool noMessageBoxWhenError = false) {
         proto::GetPermissionGroupByUuidRequest request;
         setCommonRequestField(request);
         request.set_permissiongroupuuid(uuid);
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->GetPermissionGroupByUuid(&context, request, &response);
+        if(noMessageBoxWhenError) {
+            return defaultErrorHandlerNoMessageBox(__func__, status, response.metainfo(), parent);
+        }
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
     static bool GetPermissionGroupByName(const std::string&name, proto::GetPermissionGroupByNameResponse&response,
-                                 QWidget* parent) {
+                                 QWidget* parent, bool noMessageBoxWhenError = false) {
         proto::GetPermissionGroupByNameRequest request;
         setCommonRequestField(request);
         request.set_permissiongroupname(name);
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->GetPermissionGroupByName(&context, request, &response);
+        if(noMessageBoxWhenError) {
+            return defaultErrorHandlerNoMessageBox(__func__, status, response.metainfo(), parent);
+        }
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
