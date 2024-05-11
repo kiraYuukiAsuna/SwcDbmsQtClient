@@ -124,7 +124,7 @@ private:
     std::string m_SwcName;
     std::string m_AttachmentUuid;
 
-    bool m_IsAnoAttachmentExist{false};
+    bool m_IsApoAttachmentExist{false};
 
     std::vector<proto::SwcAttachmentApoV1> m_SwcAttachmentApoData;
 

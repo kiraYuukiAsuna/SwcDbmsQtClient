@@ -15,11 +15,11 @@ EditorApoAttachment::EditorApoAttachment(const std::string &swcName, QWidget *pa
     ui->setupUi(this);
 
     connect(ui->OKBtn, &QPushButton::clicked, this, [&]() {
-        if (m_IsAnoAttachmentExist) {
+        if (m_IsApoAttachmentExist) {
             proto::UpdateSwcAttachmentApoResponse response;
             if (WrappedCall::updateSwcAttachmentApo(m_SwcName, m_AttachmentUuid, m_SwcAttachmentApoData, response,
                                                     this)) {
-                QMessageBox::information(this, "Info", "Update Swc Ano attachment successfully!");
+                QMessageBox::information(this, "Info", "Update Swc Apo attachment successfully!");
                 accept();
             } else {
                 QMessageBox::critical(this, "Error",
@@ -30,7 +30,7 @@ EditorApoAttachment::EditorApoAttachment(const std::string &swcName, QWidget *pa
             proto::CreateSwcAttachmentApoResponse response;
             if (WrappedCall::createSwcAttachmentApo(m_SwcName, m_SwcAttachmentApoData, response,
                                                     this)) {
-                QMessageBox::information(this, "Info", "Create Swc Ano attachment successfully!");
+                QMessageBox::information(this, "Info", "Create Swc Apo attachment successfully!");
                 accept();
             } else {
                 QMessageBox::critical(this, "Error",
@@ -95,7 +95,7 @@ EditorApoAttachment::EditorApoAttachment(const std::string &swcName, QWidget *pa
         proto::DeleteSwcAttachmentApoResponse response;
         if (WrappedCall::deleteSwcAttachmentApo(m_SwcName, m_AttachmentUuid, response,
                                                 this)) {
-            QMessageBox::information(this, "Info", "Delete Swc Ano attachment successfully!");
+            QMessageBox::information(this, "Info", "Delete Swc Apo attachment successfully!");
             accept();
         } else {
             QMessageBox::critical(this, "Error",
@@ -154,7 +154,7 @@ EditorApoAttachment::EditorApoAttachment(const std::string &swcName, QWidget *pa
                     QMessageBox::critical(this, "Error", e.what());
                 }
             } else {
-                QMessageBox::critical(this, "Error", "Selected Ano File Not Exists!");
+                QMessageBox::critical(this, "Error", "Selected Apo File Not Exists!");
             }
         }
     });
@@ -174,7 +174,7 @@ EditorApoAttachment::EditorApoAttachment(const std::string &swcName, QWidget *pa
 
         std::filesystem::path path(dirPath.toStdString());
         if (std::filesystem::exists(path)) {
-            auto filePath = path / (m_SwcName + ".ano.apo");
+            auto filePath = path / (m_SwcName + ".Apo.apo");
             ApoIo io(filePath.string());
             std::vector<ApoUnit> units;
             std::for_each(m_SwcAttachmentApoData.begin(), m_SwcAttachmentApoData.end(),
@@ -203,7 +203,7 @@ EditorApoAttachment::EditorApoAttachment(const std::string &swcName, QWidget *pa
 
             QMessageBox::information(this, "Info", "Export Successfully!");
         } else {
-            QMessageBox::critical(this, "Error", "Selected Ano File Save Path Not Exists!");
+            QMessageBox::critical(this, "Error", "Selected Apo File Save Path Not Exists!");
         }
     });
 
@@ -222,7 +222,7 @@ void EditorApoAttachment::getSwcApoAttachment() {
     }
 
     if (!get_swc_meta_info_response.swcinfo().swcattachmentapometainfo().attachmentuuid().empty()) {
-        m_IsAnoAttachmentExist = true;
+        m_IsApoAttachmentExist = true;
     } else {
         QMessageBox::critical(this, "Error", "No Apo Attachment found! You can create a new apo attchment!");
         return;

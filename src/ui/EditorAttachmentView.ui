@@ -30,6 +30,13 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="SwcAttachmentBtn">
+       <property name="text">
+        <string>Edit Swc Attachment</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>

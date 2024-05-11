@@ -502,4 +502,62 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
+     static bool GetSwcAttachmentSwc(const std::string&swcName, const std::string&attachmentUuid,
+                                    proto::GetSwcAttachmentSwcResponse&response,
+                                    QWidget* parent) {
+        proto::GetSwcAttachmentSwcRequest request;
+        setCommonRequestField(request);
+        request.set_swcname(swcName);
+        request.set_swcattachmentuuid(attachmentUuid);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->GetSwcAttachmentSwc(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool CreateSwcAttachmentSwc(const std::string&name, std::vector<proto::SwcNodeDataV1> attachments,
+                                       proto::CreateSwcAttachmentSwcResponse&response,
+                                       QWidget* parent) {
+        proto::CreateSwcAttachmentSwcRequest request;
+        setCommonRequestField(request);
+        request.set_swcname(name);
+        for (auto&attachment: attachments) {
+            request.add_swcdata()->CopyFrom(attachment);
+        }
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->CreateSwcAttachmentSwc(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool UpdateSwcAttachmentSwc(const std::string&name, const std::string&attachmentUuid,
+                                       std::vector<proto::SwcNodeDataV1> attachments,
+                                       proto::UpdateSwcAttachmentSwcResponse&response,
+                                       QWidget* parent) {
+        proto::UpdateSwcAttachmentSwcRequest request;
+        setCommonRequestField(request);
+        request.set_swcname(name);
+        request.set_swcattachmentuuid(attachmentUuid);
+        for (auto&attachment: attachments) {
+            request.add_newswcdata()->CopyFrom(attachment);
+        }
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->UpdateSwcAttachmentSwc(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
+    static bool DeleteSwcAttachmentSwc(const std::string&name, const std::string&attachmentUuid,
+                                       proto::DeleteSwcAttachmentSwcResponse&response,
+                                       QWidget* parent) {
+        proto::DeleteSwcAttachmentSwcRequest request;
+        setCommonRequestField(request);
+        request.set_swcname(name);
+        request.set_swcattachmentuuid(attachmentUuid);
+
+        grpc::ClientContext context;
+        auto status = RpcCall::getInstance().Stub()->DeleteSwcAttachmentSwc(&context, request, &response);
+        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+    }
+
 };
