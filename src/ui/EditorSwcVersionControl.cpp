@@ -5,7 +5,6 @@
 #include "ui_EditorSwcVersionControl.h"
 #include "src/framework/service/WrappedCall.h"
 #include "src/GraphModel/Registry.hpp"
-#include <QAction>
 
 #include "Renderer/SwcRenderer.h"
 

@@ -246,6 +246,8 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
         int processedSwcNumber = 0;
         int processedESwcNumber = 0;
         for (int i = 0; i < ui->SwcFileInfo->rowCount(); i++) {
+            QApplication::processEvents();
+
             auto swcName = ui->SwcFileInfo->item(i, 5)->text().toStdString();
 
             bool errorDetected = false;

@@ -92,6 +92,8 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData> &exportSwcDa
         }
 
         for (int i = 0; i < m_ExportSwcData.size(); i++) {
+            QApplication::processEvents();
+
             ui->ResultTable->setItem(i, 0,
                                      new QTableWidgetItem(
                                              QString::fromStdString(m_ExportSwcData[i].swcMetaInfo.name())));
@@ -321,7 +323,6 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData> &exportSwcDa
             ui->ResultTable->setItem(i, 4,
                                      new QTableWidgetItem(fileSavePath));
             setAllGridColor(i, Qt::red);
-
         }
         m_ActionExportComplete = true;
         ui->ResultTable->resizeColumnsToContents();
