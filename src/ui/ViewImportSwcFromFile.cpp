@@ -44,121 +44,13 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
         QStringList fileNames;
         if (fileDialog.exec()) {
             fileNames = fileDialog.selectedFiles();
-            ui->SwcFileInfo->setRowCount(fileNames.size());
-            for (int i = 0; i < fileNames.size(); i++) {
-                QCoreApplication::processEvents();
 
-                std::filesystem::path filePath(fileNames[i].toStdString());
-                if (filePath.extension() == ".swc") {
-                    auto unsortedSwcPath = convertSwcToUnsorted(filePath);
-
-                    Swc swc(unsortedSwcPath);
-                    swc.ReadFromFile();
-                    auto neuron = swc.getValue();
-
-                    std::string anoPath = (filePath.parent_path() / filePath.stem().string()).string();
-                    std::string apoPath = (filePath.parent_path() / (filePath.stem().string() + ".apo")).string();
-
-                    ExtraSwcImportAttribute attribute;
-
-                    if (std::filesystem::exists(anoPath)) {
-                        attribute.m_AnoPath = anoPath;
-                    }
-
-                    if (std::filesystem::exists(apoPath)) {
-                        attribute.m_ApoPath = apoPath;
-                    }
-
-                    m_SwcList.emplace_back(swc, attribute);
-
-                    ui->SwcFileInfo->setItem(i, 0,
-                                             new QTableWidgetItem(QString::fromStdString(filePath.string())));
-                    ui->SwcFileInfo->setItem(i, 1,
-                                             new QTableWidgetItem(QString::fromStdString(attribute.m_AnoPath)));
-                    ui->SwcFileInfo->setItem(i, 2,
-                                             new QTableWidgetItem(QString::fromStdString(attribute.m_ApoPath)));
-                    ui->SwcFileInfo->setItem(i, 3,
-                                             new QTableWidgetItem("swc"));
-                    ui->SwcFileInfo->setItem(i, 4,
-                                             new QTableWidgetItem(
-                                                     QString::fromStdString(std::to_string(neuron.size()))));
-                    ui->SwcFileInfo->setItem(i, 5,
-                                             new QTableWidgetItem(
-                                                     QString::fromStdString(filePath.filename().string())));
-                    ui->SwcFileInfo->setItem(i, 6,
-                                             new QTableWidgetItem(QString::fromStdString("Unprocessed")));
-
-                } else if (filePath.extension() == ".eswc") {
-                    auto unsortedSwcPath = convertSwcToUnsorted(filePath);
-
-                    ESwc eSwc(unsortedSwcPath);
-                    eSwc.ReadFromFile();
-                    auto neuron = eSwc.getValue();
-
-                    std::string anoPath = (filePath.parent_path() / filePath.stem().string()).string();
-                    std::string apoPath = (filePath.parent_path() / (filePath.stem().string() + ".apo")).string();
-
-                    ExtraSwcImportAttribute attribute;
-
-                    if (std::filesystem::exists(anoPath)) {
-                        attribute.m_AnoPath = anoPath;
-                    }
-
-                    if (std::filesystem::exists(apoPath)) {
-                        attribute.m_ApoPath = apoPath;
-                    }
-
-                    m_ESwcList.emplace_back(eSwc, attribute);
-
-                    ui->SwcFileInfo->setItem(i, 0,
-                                             new QTableWidgetItem(QString::fromStdString(filePath.string())));
-                    ui->SwcFileInfo->setItem(i, 1,
-                                             new QTableWidgetItem(QString::fromStdString(attribute.m_AnoPath)));
-                    ui->SwcFileInfo->setItem(i, 2,
-                                             new QTableWidgetItem(QString::fromStdString(attribute.m_ApoPath)));
-                    ui->SwcFileInfo->setItem(i, 3,
-                                             new QTableWidgetItem("eswc"));
-                    ui->SwcFileInfo->setItem(i, 4,
-                                             new QTableWidgetItem(
-                                                     QString::fromStdString(std::to_string(neuron.size()))));
-                    ui->SwcFileInfo->setItem(i, 5,
-                                             new QTableWidgetItem(
-                                                     QString::fromStdString(filePath.filename().string())));
-                    ui->SwcFileInfo->setItem(i, 6,
-                                             new QTableWidgetItem(QString::fromStdString("Unprocessed")));
-                }
-            }
-            ui->SwcFileInfo->resizeColumnsToContents();
-        }
-
-    });
-
-    connect(ui->SelectFolderBtn, &QPushButton::clicked, this, [this]() {
-        QFileDialog fileDialog(this);
-        fileDialog.setWindowTitle("Select Swc Folder");
-        fileDialog.setDirectory(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
-        fileDialog.setFileMode(QFileDialog::Directory);
-        fileDialog.setViewMode(QFileDialog::Detail);
-
-        m_SwcList.clear();
-        m_ESwcList.clear();
-
-        QStringList folderNames;
-        if (fileDialog.exec()) {
-            folderNames = fileDialog.selectedFiles();
-
-            int currentRow = 0;
-            for (auto folder: folderNames) {
-                std::filesystem::path folderPath(folder.toStdString());
-
-                for (auto &dirEntry: std::filesystem::recursive_directory_iterator(folderPath)) {
-                    QCoreApplication::processEvents();
-
-                    const std::filesystem::path &filePath(dirEntry.path());
+            auto task = [=]() {
+                for (int i = 0; i < fileNames.size(); i++) {
+                    std::filesystem::path filePath(fileNames[i].toStdString());
                     if (filePath.extension() == ".swc") {
                         auto unsortedSwcPath = convertSwcToUnsorted(filePath);
 
-                        ui->SwcFileInfo->setRowCount(ui->SwcFileInfo->rowCount() + 1);
                         Swc swc(unsortedSwcPath);
                         swc.ReadFromFile();
                         auto neuron = swc.getValue();
@@ -178,27 +70,17 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
 
                         m_SwcList.emplace_back(swc, attribute);
 
-                        ui->SwcFileInfo->setItem(currentRow, 0,
-                                                 new QTableWidgetItem(QString::fromStdString(filePath.string())));
-                        ui->SwcFileInfo->setItem(currentRow, 1,
-                                                 new QTableWidgetItem(QString::fromStdString(attribute.m_AnoPath)));
-                        ui->SwcFileInfo->setItem(currentRow, 2,
-                                                 new QTableWidgetItem(QString::fromStdString(attribute.m_ApoPath)));
-                        ui->SwcFileInfo->setItem(currentRow, 3,
-                                                 new QTableWidgetItem("swc"));
-                        ui->SwcFileInfo->setItem(currentRow, 4,
-                                                 new QTableWidgetItem(
-                                                         QString::fromStdString(std::to_string(neuron.size()))));
-                        ui->SwcFileInfo->setItem(currentRow, 5,
-                                                 new QTableWidgetItem(
-                                                         QString::fromStdString(filePath.filename().string())));
-                        ui->SwcFileInfo->setItem(currentRow, 6,
-                                                 new QTableWidgetItem(QString::fromStdString("Unprocessed")));
-                        currentRow++;
+                        QApplication::postEvent(this, new UpdateImportUiEvent(i,
+                           filePath.string(),
+                                    attribute.m_AnoPath,
+                                    attribute.m_ApoPath,
+                                    "swc",
+                                    neuron.size(),
+                                    "Unprocessed"));
+
                     } else if (filePath.extension() == ".eswc") {
                         auto unsortedSwcPath = convertSwcToUnsorted(filePath);
 
-                        ui->SwcFileInfo->setRowCount(ui->SwcFileInfo->rowCount() + 1);
                         ESwc eSwc(unsortedSwcPath);
                         eSwc.ReadFromFile();
                         auto neuron = eSwc.getValue();
@@ -218,27 +100,129 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
 
                         m_ESwcList.emplace_back(eSwc, attribute);
 
-                        ui->SwcFileInfo->setItem(currentRow, 0,
-                                                 new QTableWidgetItem(QString::fromStdString(filePath.string())));
-                        ui->SwcFileInfo->setItem(currentRow, 1,
-                                                 new QTableWidgetItem(QString::fromStdString(attribute.m_AnoPath)));
-                        ui->SwcFileInfo->setItem(currentRow, 2,
-                                                 new QTableWidgetItem(QString::fromStdString(attribute.m_ApoPath)));
-                        ui->SwcFileInfo->setItem(currentRow, 3,
-                                                 new QTableWidgetItem("eswc"));
-                        ui->SwcFileInfo->setItem(currentRow, 4,
-                                                 new QTableWidgetItem(
-                                                         QString::fromStdString(std::to_string(neuron.size()))));
-                        ui->SwcFileInfo->setItem(currentRow, 5,
-                                                 new QTableWidgetItem(
-                                                         QString::fromStdString(filePath.filename().string())));
-                        ui->SwcFileInfo->setItem(currentRow, 6,
-                                                 new QTableWidgetItem(QString::fromStdString("Unprocessed")));
-                        currentRow++;
+                        QApplication::postEvent(this, new UpdateImportUiEvent(i,
+                                               filePath.string(),
+                                                        attribute.m_AnoPath,
+                                                        attribute.m_ApoPath,
+                                                        "eswc",
+                                                        neuron.size(),
+                                                        "Unprocessed"));
+
                     }
                 }
-            }
-            ui->SwcFileInfo->resizeColumnsToContents();
+                QApplication::postEvent(this, new UpdateImportUiEndEvent());
+            };
+
+            m_IoContext.post(task);
+
+            m_IoThread = std::thread([this]() {
+                m_IoContext.run();
+            });
+            m_IoThread.detach();
+
+            this->setEnabled(false);
+        }
+
+    });
+
+    connect(ui->SelectFolderBtn, &QPushButton::clicked, this, [this](){
+        QFileDialog fileDialog(this);
+        fileDialog.setWindowTitle("Select Swc Folder");
+        fileDialog.setDirectory(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
+        fileDialog.setFileMode(QFileDialog::Directory);
+        fileDialog.setViewMode(QFileDialog::Detail);
+
+        m_SwcList.clear();
+        m_ESwcList.clear();
+
+        QStringList folderNames;
+        if (fileDialog.exec()) {
+            folderNames = fileDialog.selectedFiles();
+
+            auto task = [=]() {
+                int currentRow = 0;
+                for (auto folder: folderNames) {
+                    std::filesystem::path folderPath(folder.toStdString());
+
+                    for (auto &dirEntry: std::filesystem::recursive_directory_iterator(folderPath)) {
+                        const std::filesystem::path &filePath(dirEntry.path());
+                        if (filePath.extension() == ".swc") {
+                            auto unsortedSwcPath = convertSwcToUnsorted(filePath);
+
+                            Swc swc(unsortedSwcPath);
+                            swc.ReadFromFile();
+                            auto neuron = swc.getValue();
+
+                            std::string anoPath = (filePath.parent_path() / filePath.stem().string()).string();
+                            std::string apoPath = (filePath.parent_path() / (filePath.stem().string() + ".apo")).string();
+
+                            ExtraSwcImportAttribute attribute;
+
+                            if (std::filesystem::exists(anoPath)) {
+                                attribute.m_AnoPath = anoPath;
+                            }
+
+                            if (std::filesystem::exists(apoPath)) {
+                                attribute.m_ApoPath = apoPath;
+                            }
+
+                            m_SwcList.emplace_back(swc, attribute);
+
+                            QApplication::postEvent(this, new UpdateImportUiEvent(currentRow,
+                                                                        filePath.string(),
+                                                                                 attribute.m_AnoPath,
+                                                                                 attribute.m_ApoPath,
+                                                                                 "swc",
+                                                                                 neuron.size(),
+                                                                                 "Unprocessed"));
+
+                            currentRow++;
+                        } else if (filePath.extension() == ".eswc") {
+                            auto unsortedSwcPath = convertSwcToUnsorted(filePath);
+
+                            ESwc eSwc(unsortedSwcPath);
+                            eSwc.ReadFromFile();
+                            auto neuron = eSwc.getValue();
+
+                            std::string anoPath = (filePath.parent_path() / filePath.stem().string()).string();
+                            std::string apoPath = (filePath.parent_path() / (filePath.stem().string() + ".apo")).string();
+
+                            ExtraSwcImportAttribute attribute;
+
+                            if (std::filesystem::exists(anoPath)) {
+                                attribute.m_AnoPath = anoPath;
+                            }
+
+                            if (std::filesystem::exists(apoPath)) {
+                                attribute.m_ApoPath = apoPath;
+                            }
+
+                            m_ESwcList.emplace_back(eSwc, attribute);
+
+                            QApplication::postEvent(this, new UpdateImportUiEvent(currentRow,
+                                                                       filePath.string(),
+                                                                                attribute.m_AnoPath,
+                                                                                attribute.m_ApoPath,
+                                                                                "eswc",
+                                                                                neuron.size(),
+                                                                                "Unprocessed"));
+
+                            currentRow++;
+                        }
+                    }
+                }
+
+                QApplication::postEvent(this, new UpdateImportUiEndEvent());
+            };
+
+            m_IoContext.post(task);
+
+            m_IoThread = std::thread([this]() {
+                m_IoContext.run();
+            });
+            m_IoThread.detach();
+
+            this->setEnabled(false);
         }
 
     });
@@ -480,6 +464,38 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
 
 ViewImportSwcFromFile::~ViewImportSwcFromFile() {
     delete ui;
+}
+
+bool ViewImportSwcFromFile::event(QEvent* e) {
+    if(e->type() == UpdateImportUiEvent::TYPE) {
+
+        ui->SwcFileInfo->setRowCount(ui->SwcFileInfo->rowCount() + 1);
+
+        auto ev = dynamic_cast<UpdateImportUiEvent*>(e);
+
+        ui->SwcFileInfo->setItem(ev->currentRow, 0,
+                                 new QTableWidgetItem(QString::fromStdString(ev->swcFilePath)));
+        ui->SwcFileInfo->setItem(ev->currentRow, 1,
+                                 new QTableWidgetItem(QString::fromStdString(ev->anoFilePath)));
+        ui->SwcFileInfo->setItem(ev->currentRow, 2,
+                                 new QTableWidgetItem(QString::fromStdString(ev->apoFilePath)));
+        ui->SwcFileInfo->setItem(ev->currentRow, 3,
+                                 new QTableWidgetItem(QString::fromStdString(ev->swcType)));
+        ui->SwcFileInfo->setItem(ev->currentRow, 4,
+                                 new QTableWidgetItem(
+                                         QString::fromStdString(std::to_string(ev->nodeSize))));
+        ui->SwcFileInfo->setItem(ev->currentRow, 5,
+                                 new QTableWidgetItem(
+                                         QString::fromStdString(std::filesystem::path(ev->swcFilePath).filename().string())));
+        ui->SwcFileInfo->setItem(ev->currentRow, 6,
+                                 new QTableWidgetItem(QString::fromStdString("Unprocessed")));
+
+        ui->SwcFileInfo->resizeColumnsToContents();
+    }else if(e->type() == UpdateImportUiEndEvent::TYPE) {
+        this->setEnabled(true);
+    }
+
+    return QWidget::event(e);
 }
 
 void ViewImportSwcFromFile::setAllGridColor(int row, const QColor &color) {
