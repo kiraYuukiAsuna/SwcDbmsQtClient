@@ -46,6 +46,8 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
             fileNames = fileDialog.selectedFiles();
             ui->SwcFileInfo->setRowCount(fileNames.size());
             for (int i = 0; i < fileNames.size(); i++) {
+                QCoreApplication::processEvents();
+
                 std::filesystem::path filePath(fileNames[i].toStdString());
                 if (filePath.extension() == ".swc") {
                     Swc swc(filePath.string());
@@ -146,6 +148,8 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                 std::filesystem::path folderPath(folder.toStdString());
 
                 for (auto &dirEntry: std::filesystem::recursive_directory_iterator(folderPath)) {
+                    QCoreApplication::processEvents();
+
                     const std::filesystem::path &filePath(dirEntry.path());
                     if (filePath.extension() == ".swc") {
                         ui->SwcFileInfo->setRowCount(ui->SwcFileInfo->rowCount() + 1);
