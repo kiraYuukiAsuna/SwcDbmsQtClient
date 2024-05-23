@@ -116,5 +116,6 @@
         <file>images/ACE.png</file>
         <file>images/tool.png</file>
         <file>images/description.png</file>
+        <file>images/batch_management.png</file>
     </qresource>
 </RCC>

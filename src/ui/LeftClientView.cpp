@@ -12,6 +12,7 @@
 
 #include "CreateSwcSnapshotView.h"
 #include "EditorAttachmentView.h"
+#include "EditorBatchManageSwc.h"
 #include "EditorPermission.h"
 #include "ViewCreateProject.h"
 #include "ViewCreateSwc.h"
@@ -382,6 +383,16 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
         }
     });
 
+    auto* MenuBatchManageSwc = new QAction(this);
+    MenuBatchManageSwc->setText("Batch Manage Swc");
+    MenuBatchManageSwc->setIcon(QIcon(Image::ImageBatchManage));
+    connect(MenuBatchManageSwc, &QAction::triggered, this, [this](bool checked) {
+        EditorBatchManageSwc view;
+        if (view.exec() == QDialog::Accepted) {
+            refreshTree();
+        }
+    });
+
     auto* MenuDeleteSwc = new QAction(this);
     MenuDeleteSwc->setText("Delete Swc");
     MenuDeleteSwc->setIcon(QIcon(Image::ImageDelete));
@@ -538,6 +549,8 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
             popMenu->addAction(MenuExportToSwcFile);
             popMenu->addSeparator();
             popMenu->addAction(MenuCreateSwc);
+            popMenu->addSeparator();
+            popMenu->addAction(MenuBatchManageSwc);
             break;
         }
         case MetaInfoType::eSwc: {
