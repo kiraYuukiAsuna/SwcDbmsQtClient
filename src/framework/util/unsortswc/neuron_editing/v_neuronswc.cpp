@@ -58,19 +58,21 @@ using namespace std;
 void V_NeuronSWC::printInfo()
 {
 	qDebug()<<"*********** start print info";
-	qDebug()<<"name=["<<name.c_str()<<"] comment=["<<comment.c_str()<<"] file=["<<file.c_str()<<"] b_linegraph=["<<b_linegraph<<"] b_jointed=["<<b_jointed<<"]";
+    qDebug()<<"name=["<<name.c_str()<<"] comment=["<<comment.c_str()<<"] file=["<<file.c_str()<<"] b_linegraph=["<<b_linegraph<<"] b_jointed=["<<b_jointed<<"]";
+    qDebug()<<"to_be_deleted=["<<to_be_deleted<<"]";
 	for (V3DLONG i=0;i<row.size();i++)
 	{
 		V_NeuronSWC_unit v = row.at(i);
 		qDebug()<<"row ["<< i <<"] : "<<v.data[0]<<" "<<v.data[1]<<" "<<v.data[2]<<" "<<v.data[3]<<" "<<v.data[4]<<" "<<v.data[5]<<" "<<v.data[6];
+        qDebug()<<"uuid: "<<QString::fromStdString(v.uuid);
 	}
 	qDebug()<<"*********** finish print info";
 }
 
 
-vector <V_NeuronSWC> V_NeuronSWC::decompose()
+vector<V_NeuronSWC> V_NeuronSWC::decompose(bool& isSuccess)
 {
-	return decompose_V_NeuronSWC(*this);
+    return decompose_V_NeuronSWC(*this, isSuccess);
 }
 bool V_NeuronSWC::reverse()
 {
@@ -89,9 +91,10 @@ void V_NeuronSWC_list::decompose()
 {
 	vector <V_NeuronSWC> new_segs;
 	new_segs.clear();
+    bool isSuccess = true;
 	for (int k=0; k<seg.size(); k++)
 	{
-		vector <V_NeuronSWC> tmp_segs = seg.at(k).decompose();
+        vector <V_NeuronSWC> tmp_segs = seg.at(k).decompose(isSuccess);
 		for (int j=0; j<tmp_segs.size(); j++)
 		{
 			new_segs.push_back(tmp_segs.at(j));
@@ -106,7 +109,8 @@ bool V_NeuronSWC_list::reverse()
 	bool res = false;
 	//must first decompose to simple segments
 	{
-		seg = merge_V_NeuronSWC_list(*this).decompose();
+        bool isSuccess = true;
+        seg = merge_V_NeuronSWC_list(*this).decompose(isSuccess);
 	}
 	for (int i=0; i<seg.size(); i++)
 	{
@@ -405,7 +409,7 @@ Link_Map get_link_map(const V_NeuronSWC & in_swc)
 }
 
 //091212 RZC
-vector <V_NeuronSWC> decompose_V_NeuronSWC(V_NeuronSWC & in_swc)
+vector <V_NeuronSWC> decompose_V_NeuronSWC(V_NeuronSWC & in_swc, bool& isSuccess)
 {
 	double duration;
 
@@ -437,6 +441,7 @@ vector <V_NeuronSWC> decompose_V_NeuronSWC(V_NeuronSWC & in_swc)
 	int branchID = 0;
 	size_t removedCount = 0;
 	bool halted = false;
+    int repeatCount = 0;
 	for (;;)
 	{
 		if (indices.empty()) break;
@@ -480,7 +485,7 @@ vector <V_NeuronSWC> decompose_V_NeuronSWC(V_NeuronSWC & in_swc)
 			//	continue; //skip removed point
 			//}
 
-			n_left++; //left valid point
+            n_left++; //left valid powint
 			i_left = indices[i];
 
 			if ((nodelink.nlink ==1 && nodelink.in_link.size()==0) // tip point (include single point)
@@ -498,9 +503,14 @@ vector <V_NeuronSWC> decompose_V_NeuronSWC(V_NeuronSWC & in_swc)
 		{
 			if (n_left)
 			{
-				qDebug("split_V_NeuronSWC_segs cann't find start point (left %d points)", n_left);
-				istart = i_left;
+                qDebug("split_V_NeuronSWC_segs cann't find start point (left %d points)", n_left);
+                if(repeatCount >= 5){
+                    isSuccess = false;
+                    return out_swc_segs;
+                }
+                istart = i_left;
 				cout << " -- " << istart << endl;
+                repeatCount++;
                 continue;
 			}
 			else
@@ -509,6 +519,7 @@ vector <V_NeuronSWC> decompose_V_NeuronSWC(V_NeuronSWC & in_swc)
 				break;
 			}
 		}
+        repeatCount = 0;
 
 		// extract a simple segment
 		V_NeuronSWC new_seg;
@@ -1380,6 +1391,7 @@ bool simplify_V_NeuronSWC_nodeindex(V_NeuronSWC & my_swc)
 }
 
 
+//???
 V_SWCNodes V_NeuronSWC::unique_nodes_info()
 {
 	V_SWCNodes res;	if (row.size()<1) return res;

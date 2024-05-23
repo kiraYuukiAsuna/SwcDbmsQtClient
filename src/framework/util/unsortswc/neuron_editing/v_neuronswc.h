@@ -95,13 +95,14 @@ struct V_NeuronSWC_unit
 	union {
 		double data[10];
 		struct {
-			double n, type, x, y, z, r, parent,
+            double n, type, x, y, z, r, parent,
 			nchild,
             seg_id, nodeinseg_id,
             level, creatmode, timestamp, tfresindex;
 		};
 	};
-        V_NeuronSWC_unit() {for (V3DLONG i=0;i<V3DLONG(sizeof(data)/sizeof(double));i++) data[i]=0; r=0.5;}
+    string uuid;
+    V_NeuronSWC_unit() {for (V3DLONG i=0;i<V3DLONG(sizeof(data)/sizeof(double));i++) data[i]=0; r=0.5;}
 	operator V_NeuronSWC_coord() {V_NeuronSWC_coord c; c.x=x; c.y=y; c.z=z; return c;}
 	V_NeuronSWC_coord get_coord() {V_NeuronSWC_coord c; c.x=x; c.y=y; c.z=z; return c;}
 	void set(double x1, double y1, double z1, double r1, double p1, double t1) {x=x1; y=y1; z=z1; r=r1;parent=p1;type=t1;}
@@ -203,7 +204,7 @@ struct V_NeuronSWC
 
 	void append(V_NeuronSWC_unit & new_node) {row.push_back(new_node);}
 	void clear() {row.clear();}
-	vector <V_NeuronSWC> decompose();
+    vector<V_NeuronSWC> decompose(bool& isSuccess);
 	bool reverse();
 
 	bool isLineGraph() {return b_linegraph;} //just return the "claimed" property is a line graph
@@ -240,7 +241,7 @@ struct V_NeuronSWC_list
 	V_NeuronSWC_list() {last_seg_num=-1; *(int*)color_uc=0; b_traced=true;}
 
 	V3DLONG nsegs() {return seg.size();}
-        V3DLONG nrows() {V3DLONG n=0; for (V3DLONG i=0;i<(V3DLONG)seg.size();i++) n+=seg.at(i).nrows(); return n;}
+    V3DLONG nrows() {V3DLONG n=0; for (V3DLONG i=0;i<(V3DLONG)seg.size();i++) n+=seg.at(i).nrows(); return n;}
 	V3DLONG maxnoden()
 	{
                 V3DLONG maxn=0;	for (V3DLONG i=0;i<(V3DLONG)seg.size();i++) if (seg.at(i).maxnoden() > maxn) maxn = seg.at(i).maxnoden();	return maxn;
@@ -269,7 +270,7 @@ bool verifyIsLineGraph(const V_NeuronSWC & in_swc); //this will use graph algori
 //////////////////////////////
 
 Link_Map get_link_map(const V_NeuronSWC & in_swc);
-vector <V_NeuronSWC> decompose_V_NeuronSWC(V_NeuronSWC & in_swc);
+vector <V_NeuronSWC> decompose_V_NeuronSWC(V_NeuronSWC & in_swc, bool& isSuccess);
 V_NeuronSWC join_V_NeuronSWC_vec(vector <V_NeuronSWC> & in_swc_vec);
 
 bool reverse_V_NeuronSWC_inplace(V_NeuronSWC & in_swc);

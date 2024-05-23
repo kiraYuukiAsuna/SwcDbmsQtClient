@@ -49,6 +49,21 @@ public:
     }
 };
 
+class UpdateImportUiErrorEvent : public QEvent
+{
+public:
+    const static Type TYPE = static_cast<Type>(QEvent::User+3);
+    UpdateImportUiErrorEvent(std::string errorMessage)
+     : QEvent(TYPE),
+    errorMessage(errorMessage)
+    {
+
+    }
+
+    std::string errorMessage;
+};
+
+
 class ViewImportSwcFromFile : public QDialog {
 Q_OBJECT
 

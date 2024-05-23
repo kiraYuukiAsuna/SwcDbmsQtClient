@@ -49,7 +49,13 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                 for (int i = 0; i < fileNames.size(); i++) {
                     std::filesystem::path filePath(fileNames[i].toStdString());
                     if (filePath.extension() == ".swc") {
-                        auto unsortedSwcPath = convertSwcToUnsorted(filePath);
+                        std::string unsortedSwcPath;
+                        try {
+                            unsortedSwcPath = convertSwcToUnsorted(filePath);
+                        }catch (std::runtime_error &e) {
+                            QApplication::postEvent(this, new UpdateImportUiErrorEvent(e.what() + std::string(" , skip this file! filename: ") + filePath.filename().string()));
+                            continue;
+                        }
 
                         Swc swc(unsortedSwcPath);
                         swc.ReadFromFile();
@@ -79,7 +85,13 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                                     "Unprocessed"));
 
                     } else if (filePath.extension() == ".eswc") {
-                        auto unsortedSwcPath = convertSwcToUnsorted(filePath);
+                        std::string unsortedSwcPath;
+                        try {
+                            unsortedSwcPath = convertSwcToUnsorted(filePath);
+                        }catch (std::runtime_error &e) {
+                            QApplication::postEvent(this, new UpdateImportUiErrorEvent(e.what() + std::string(" , skip this file! filename: ") + filePath.filename().string()));
+                            continue;
+                        }
 
                         ESwc eSwc(unsortedSwcPath);
                         eSwc.ReadFromFile();
@@ -147,7 +159,13 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                     for (auto &dirEntry: std::filesystem::recursive_directory_iterator(folderPath)) {
                         const std::filesystem::path &filePath(dirEntry.path());
                         if (filePath.extension() == ".swc") {
-                            auto unsortedSwcPath = convertSwcToUnsorted(filePath);
+                            std::string unsortedSwcPath;
+                            try {
+                                unsortedSwcPath = convertSwcToUnsorted(filePath);
+                            }catch (std::runtime_error &e) {
+                                QApplication::postEvent(this, new UpdateImportUiErrorEvent(e.what() + std::string(" , skip this file! filename: ") + filePath.filename().string()));
+                                continue;
+                            }
 
                             Swc swc(unsortedSwcPath);
                             swc.ReadFromFile();
@@ -178,7 +196,13 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
 
                             currentRow++;
                         } else if (filePath.extension() == ".eswc") {
-                            auto unsortedSwcPath = convertSwcToUnsorted(filePath);
+                            std::string unsortedSwcPath;
+                            try {
+                                unsortedSwcPath = convertSwcToUnsorted(filePath);
+                            }catch (std::runtime_error &e) {
+                                QApplication::postEvent(this, new UpdateImportUiErrorEvent(e.what() + std::string(" , skip this file! filename: ") + filePath.filename().string()));
+                                continue;
+                            }
 
                             ESwc eSwc(unsortedSwcPath);
                             eSwc.ReadFromFile();
@@ -238,6 +262,8 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                                      "Import action has completed! Please reopen this import window if you want to import more swc data!");
             return;
         }
+
+        this->setEnabled(false);
 
         int processedSwcNumber = 0;
         int processedESwcNumber = 0;
@@ -451,6 +477,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                 processedESwcNumber++;
             }
         }
+        this->setEnabled(true);
         ui->SwcFileInfo->resizeColumnsToContents();
         m_ActionImportComplete = true;
         QMessageBox::information(this, "Info",
@@ -493,6 +520,9 @@ bool ViewImportSwcFromFile::event(QEvent* e) {
         ui->SwcFileInfo->resizeColumnsToContents();
     }else if(e->type() == UpdateImportUiEndEvent::TYPE) {
         this->setEnabled(true);
+    }else if(e->type() == UpdateImportUiErrorEvent::TYPE) {
+        auto ev = dynamic_cast<UpdateImportUiErrorEvent*>(e);
+        QMessageBox::critical(this, "Error", QString::fromStdString(ev->errorMessage));
     }
 
     return QWidget::event(e);

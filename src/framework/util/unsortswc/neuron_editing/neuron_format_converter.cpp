@@ -137,9 +137,14 @@ V_NeuronSWC_list NeuronTree__2__V_NeuronSWC_list(NeuronTree * nt)           //co
 	
 	V_NeuronSWC_list editableNeuron;
 
-	editableNeuron.seg = cur_seg.decompose(); //////////////
+	bool isSuccess = true;
+	editableNeuron.seg = cur_seg.decompose(isSuccess); //////////////
 //        qDebug("	editableNeuron.seg.size = %d", editableNeuron.seg.size());
-	
+
+	if(!isSuccess) {
+		throw std::runtime_error("NeuronTree__2__V_NeuronSWC_list: Decompose failed");
+	}
+
 	editableNeuron.name = qPrintable(nt->name);
 	editableNeuron.file = qPrintable(nt->file);
 	editableNeuron.b_traced = false;
@@ -150,8 +155,6 @@ V_NeuronSWC_list NeuronTree__2__V_NeuronSWC_list(NeuronTree * nt)           //co
 	
 	return editableNeuron;
 }
-
-
 
 V_NeuronSWC_list NeuronTree__2__V_NeuronSWC_list(NeuronTree & nt)           //convert to V3D's internal neuron structure. overload for convenience
 {
