@@ -32,6 +32,7 @@ include_directories(
         ThirdParty/nodeeditor-3.0.10/include
         ThirdParty/nodeeditor-3.0.10/include/QtNodes
         ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal
+        src/framework/util/unsortswc
 )
 
 link_directories(

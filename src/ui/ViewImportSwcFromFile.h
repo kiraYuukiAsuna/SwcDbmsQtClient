@@ -3,7 +3,6 @@
 #include <QDialog>
 #include "src/FileIo/SwcIo.hpp"
 
-
 struct ExtraSwcImportAttribute {
     std::string m_AnoPath;
     std::string m_ApoPath;
@@ -33,4 +32,5 @@ private:
 
     void setAllGridColor(int row, const QColor &color);
 
+    std::string convertSwcToUnsorted(const std::filesystem::path&filePath);
 };

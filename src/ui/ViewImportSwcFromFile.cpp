@@ -1,7 +1,6 @@
 #include "ViewImportSwcFromFile.h"
 #include "ui_ViewImportSwcFromFile.h"
 #include <QFileDialog>
-#include <QStandardPaths>
 #include "src/FileIo/SwcIo.hpp"
 #include "Message/Request.pb.h"
 #include "src/framework/service/WrappedCall.h"
@@ -9,6 +8,7 @@
 #include "src/FileIo/AnoIo.hpp"
 #include "src/FileIo/ApoIo.hpp"
 #include <filesystem>
+#include "src/framework/util/unsortswc/swcutils.h"
 
 ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
         QDialog(mainWindow), ui(new Ui::ViewImportSwcFromFile) {
@@ -50,7 +50,9 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
 
                 std::filesystem::path filePath(fileNames[i].toStdString());
                 if (filePath.extension() == ".swc") {
-                    Swc swc(filePath.string());
+                    auto unsortedSwcPath = convertSwcToUnsorted(filePath);
+
+                    Swc swc(unsortedSwcPath);
                     swc.ReadFromFile();
                     auto neuron = swc.getValue();
 
@@ -87,7 +89,9 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                                              new QTableWidgetItem(QString::fromStdString("Unprocessed")));
 
                 } else if (filePath.extension() == ".eswc") {
-                    ESwc eSwc(filePath.string());
+                    auto unsortedSwcPath = convertSwcToUnsorted(filePath);
+
+                    ESwc eSwc(unsortedSwcPath);
                     eSwc.ReadFromFile();
                     auto neuron = eSwc.getValue();
 
@@ -152,8 +156,10 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
 
                     const std::filesystem::path &filePath(dirEntry.path());
                     if (filePath.extension() == ".swc") {
+                        auto unsortedSwcPath = convertSwcToUnsorted(filePath);
+
                         ui->SwcFileInfo->setRowCount(ui->SwcFileInfo->rowCount() + 1);
-                        Swc swc(filePath.string());
+                        Swc swc(unsortedSwcPath);
                         swc.ReadFromFile();
                         auto neuron = swc.getValue();
 
@@ -190,8 +196,10 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                                                  new QTableWidgetItem(QString::fromStdString("Unprocessed")));
                         currentRow++;
                     } else if (filePath.extension() == ".eswc") {
+                        auto unsortedSwcPath = convertSwcToUnsorted(filePath);
+
                         ui->SwcFileInfo->setRowCount(ui->SwcFileInfo->rowCount() + 1);
-                        ESwc eSwc(filePath.string());
+                        ESwc eSwc(unsortedSwcPath);
                         eSwc.ReadFromFile();
                         auto neuron = eSwc.getValue();
 
@@ -482,4 +490,13 @@ void ViewImportSwcFromFile::setAllGridColor(int row, const QColor &color) {
     ui->SwcFileInfo->item(row, 4)->setBackground(QBrush(color));
     ui->SwcFileInfo->item(row, 5)->setBackground(QBrush(color));
     ui->SwcFileInfo->item(row, 6)->setBackground(QBrush(color));
+}
+
+std::string ViewImportSwcFromFile::convertSwcToUnsorted(const std::filesystem::path&filePath) {
+    QString inputSwcPath = QString::fromStdString(filePath.string());
+    QString outputSwcPath = QString::fromStdString((getTempLocation() / filePath.filename()).string());
+
+    convertSWC2UnSorted(inputSwcPath, outputSwcPath);
+
+    return outputSwcPath.toStdString();
 }

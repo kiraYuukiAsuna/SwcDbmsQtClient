@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <google/protobuf/timestamp.pb.h>
+#include <QStandardPaths>
 
 inline std::vector<std::string> stringSplit(const std::string&str, char delim) {
     std::stringstream ss(str);
@@ -48,4 +49,8 @@ inline uint64_t stringToTimestamp(const std::string&time_str) {
         return 0;
     }
     return static_cast<uint64_t>(time);
+}
+
+inline std::string getTempLocation() {
+    return QStandardPaths::writableLocation(QStandardPaths::TempLocation).toStdString();
 }
