@@ -342,7 +342,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                         std::vector<proto::SwcAttachmentApoV1> m_SwcAttachmentApoData = modelData;
 
                         proto::CreateSwcAttachmentApoResponse responseApo;
-                        if (!WrappedCall::createSwcAttachmentApo(swcName, m_SwcAttachmentApoData, responseApo,
+                        if (!WrappedCall::createSwcAttachmentApo(response.swcinfo().base().uuid(), m_SwcAttachmentApoData, responseApo,
                                                                  this)) {
                             if (!errorDetected) {
                                 ui->SwcFileInfo->item(i, 6)->setText(
@@ -362,7 +362,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                     AnoIo io(m_SwcList[processedSwcNumber].second.m_AnoPath);
                     io.ReadFromFile();
                     proto::CreateSwcAttachmentAnoResponse responseAno;
-                    if (!WrappedCall::createSwcAttachmentAno(swcName, io.getValue().APOFILE,
+                    if (!WrappedCall::createSwcAttachmentAno(response.swcinfo().base().uuid(), io.getValue().APOFILE,
                                                              io.getValue().SWCFILE, responseAno, this
                     )) {
                         if (!errorDetected) {
@@ -399,7 +399,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                     }
 
                     proto::CreateSwcNodeDataResponse response1;
-                    if (WrappedCall::addSwcNodeDataByUuid(swcName, swcData, response1, this)) {
+                    if (WrappedCall::addSwcNodeDataByUuid(response.swcinfo().base().uuid(), swcData, response1, this)) {
                         ui->SwcFileInfo->item(i, 6)->setText("Import Success!");
                         setAllGridColor(i, Qt::green);
                     } else {
@@ -442,7 +442,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                         std::vector<proto::SwcAttachmentApoV1> m_SwcAttachmentApoData = modelData;
 
                         proto::CreateSwcAttachmentApoResponse responseApo;
-                        if (!WrappedCall::createSwcAttachmentApo(swcName, m_SwcAttachmentApoData, responseApo,
+                        if (!WrappedCall::createSwcAttachmentApo(response.swcinfo().base().uuid(), m_SwcAttachmentApoData, responseApo,
                                                                  this)) {
                             if (!errorDetected) {
                                 ui->SwcFileInfo->item(i, 6)->setText(
@@ -462,7 +462,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                     AnoIo io(m_ESwcList[processedESwcNumber].second.m_AnoPath);
                     io.ReadFromFile();
                     proto::CreateSwcAttachmentAnoResponse responseAno;
-                    if (!WrappedCall::createSwcAttachmentAno(swcName, io.getValue().APOFILE,
+                    if (!WrappedCall::createSwcAttachmentAno(response.swcinfo().base().uuid(), io.getValue().APOFILE,
                                                              io.getValue().SWCFILE, responseAno, this
                     )) {
                         if (!errorDetected) {

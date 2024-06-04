@@ -9,8 +9,8 @@
 #include "src/FileIo/ApoIo.hpp"
 #include <filesystem>
 
-EditorAnoAttachment::EditorAnoAttachment(const std::string&swcUUid, const std::string&swcName, QWidget* parent) : QDialog(parent),
-    ui(new Ui::EditorAnoAttachment), m_SwcUuid(swcUUid), m_SwcName(swcName) {
+EditorAnoAttachment::EditorAnoAttachment(const std::string&swcUUid, QWidget* parent) : QDialog(parent),
+    ui(new Ui::EditorAnoAttachment), m_SwcUuid(swcUUid){
     ui->setupUi(this);
 
     getSwcAnoAttachment();
@@ -105,7 +105,9 @@ EditorAnoAttachment::EditorAnoAttachment(const std::string&swcUUid, const std::s
 
         std::filesystem::path path(dirPath.toStdString());
         if (std::filesystem::exists(path)) {
-            auto filePath = path / (m_SwcName + ".ano");
+            proto::GetSwcMetaInfoResponse response;
+            WrappedCall::getSwcMetaInfoByUuid(m_SwcUuid,response,this);
+            auto filePath = path / (response.swcinfo().name() + ".ano");
             AnoIo io(filePath.string());
             AnoUnit unit;
             unit.APOFILE = ui->ApoFileName->text().toStdString();

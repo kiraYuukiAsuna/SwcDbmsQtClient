@@ -14,7 +14,7 @@ class EditorSwcVersionControl : public QDialog {
 Q_OBJECT
 
 public:
-    explicit EditorSwcVersionControl(const std::string&swcUuid, const std::string &swcName, QWidget *parent = nullptr);
+    explicit EditorSwcVersionControl(const std::string&swcUuid, QWidget *parent = nullptr);
 
     ~EditorSwcVersionControl() override;
 

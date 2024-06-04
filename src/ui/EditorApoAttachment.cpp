@@ -9,9 +9,9 @@
 #include "src/framework/service/WrappedCall.h"
 #include <filesystem>
 
-EditorApoAttachment::EditorApoAttachment(const std::string& swcUuid, const std::string &swcName, QWidget *parent) : QDialog(parent),
-                                                                                        ui(new Ui::EditorApoAttachment), m_SwcUuid(swcUuid),
-                                                                                        m_SwcName(swcName) {
+EditorApoAttachment::EditorApoAttachment(const std::string& swcUuid, QWidget *parent) : QDialog(parent),
+                                                                                        ui(new Ui::EditorApoAttachment), m_SwcUuid(swcUuid)
+                                                                                         {
     ui->setupUi(this);
 
     connect(ui->OKBtn, &QPushButton::clicked, this, [&]() {
@@ -28,7 +28,7 @@ EditorApoAttachment::EditorApoAttachment(const std::string& swcUuid, const std::
             }
         } else {
             proto::CreateSwcAttachmentApoResponse response;
-            if (WrappedCall::createSwcAttachmentApo(m_SwcName, m_SwcAttachmentApoData, response,
+            if (WrappedCall::createSwcAttachmentApo(m_SwcUuid, m_SwcAttachmentApoData, response,
                                                     this)) {
                 QMessageBox::information(this, "Info", "Create Swc Apo attachment successfully!");
                 accept();
@@ -174,7 +174,9 @@ EditorApoAttachment::EditorApoAttachment(const std::string& swcUuid, const std::
 
         std::filesystem::path path(dirPath.toStdString());
         if (std::filesystem::exists(path)) {
-            auto filePath = path / (m_SwcName + ".Apo.apo");
+            proto::GetSwcMetaInfoResponse response;
+            WrappedCall::getSwcMetaInfoByUuid(m_SwcUuid,response,this);
+            auto filePath = path / (response.swcinfo().name() + ".Apo.apo");
             ApoIo io(filePath.string());
             std::vector<ApoUnit> units;
             std::for_each(m_SwcAttachmentApoData.begin(), m_SwcAttachmentApoData.end(),

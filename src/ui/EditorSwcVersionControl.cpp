@@ -8,7 +8,7 @@
 
 #include "Renderer/SwcRenderer.h"
 
-EditorSwcVersionControl::EditorSwcVersionControl(const std::string&swcUuid, const std::string&swcName, QWidget* parent) : QDialog(parent),
+EditorSwcVersionControl::EditorSwcVersionControl(const std::string&swcUuid, QWidget* parent) : QDialog(parent),
     ui(new Ui::EditorSwcVersionControl),
     m_SwcUuid(swcUuid),
     m_DataFlowGraphModel(

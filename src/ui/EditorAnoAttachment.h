@@ -11,14 +11,13 @@ class EditorAnoAttachment : public QDialog {
 Q_OBJECT
 
 public:
-    explicit EditorAnoAttachment(const std::string&swcUuid, const std::string& swcName,QWidget *parent = nullptr);
+    explicit EditorAnoAttachment(const std::string&swcUuid,QWidget *parent = nullptr);
     ~EditorAnoAttachment() override;
 
 private:
     Ui::EditorAnoAttachment *ui;
 
     std::string m_SwcUuid;
-    std::string m_SwcName;
     std::string m_AttachmentUuid;
 
     bool m_IsAnoAttachmentExist{false};

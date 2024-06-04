@@ -113,7 +113,7 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData> &exportSwcDa
                     apoSavePath = apoSavePath / (m_ExportSwcData[i].swcMetaInfo.name() + ".ano.apo");
                     proto::GetSwcAttachmentApoResponse response;
                     auto attachmentUuid = m_ExportSwcData[i].swcMetaInfo.swcattachmentapometainfo().attachmentuuid();
-                    if (!WrappedCall::getSwcAttachmentApoByUuid(m_ExportSwcData[i].swcMetaInfo.name(), attachmentUuid,
+                    if (!WrappedCall::getSwcAttachmentApoByUuid(m_ExportSwcData[i].swcMetaInfo.base().uuid(), attachmentUuid,
                                                           response, this)) {
                         QMessageBox::critical(this, "Error",
                                               QString::fromStdString(response.metainfo().message()));
@@ -159,7 +159,7 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData> &exportSwcDa
                 if (!m_ExportSwcData[i].swcMetaInfo.swcattachmentanometainfo().attachmentuuid().empty()) {
                     proto::GetSwcAttachmentAnoResponse get_swc_attachment_ano_response;
                     auto anoAttachmentUuid = m_ExportSwcData[i].swcMetaInfo.swcattachmentanometainfo().attachmentuuid();
-                    if (!WrappedCall::getSwcAttachmentAnoByUuid(m_ExportSwcData[i].swcMetaInfo.name(), anoAttachmentUuid,
+                    if (!WrappedCall::getSwcAttachmentAnoByUuid(m_ExportSwcData[i].swcMetaInfo.base().uuid(), anoAttachmentUuid,
                                                           get_swc_attachment_ano_response,
                                                           this)) {
                         return;
@@ -186,7 +186,7 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData> &exportSwcDa
                     if (m_GetDataFromServer) {
                         if (!m_ExportSwcData[i].isSnapshot) {
                             proto::GetSwcFullNodeDataResponse response;
-                            if (!WrappedCall::getSwcFullNodeDataByUuid(m_ExportSwcData[i].swcMetaInfo.name(), response,
+                            if (!WrappedCall::getSwcFullNodeDataByUuid(m_ExportSwcData[i].swcMetaInfo.base().uuid(), response,
                                                                  this)) {
                                 QMessageBox::critical(this, "Error",
                                                       QString::fromStdString(response.metainfo().message()));
@@ -200,7 +200,7 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData> &exportSwcDa
                             m_ExportSwcData[i].swcData = response.swcnodedata();
                         } else {
                             proto::GetSnapshotResponse response;
-                            if (!WrappedCall::getSwcSnapshot(m_ExportSwcData[i].swcMetaInfo.name(), response,
+                            if (!WrappedCall::getSwcSnapshot(m_ExportSwcData[i].swcMetaInfo.base().uuid(), response,
                                                              this)) {
                                 QMessageBox::critical(this, "Error",
                                                       QString::fromStdString(response.metainfo().message()));
@@ -250,7 +250,7 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData> &exportSwcDa
                     if (m_GetDataFromServer) {
                         if (!m_ExportSwcData[i].isSnapshot) {
                             proto::GetSwcFullNodeDataResponse response;
-                            if (!WrappedCall::getSwcFullNodeDataByUuid(m_ExportSwcData[i].swcMetaInfo.name(), response,
+                            if (!WrappedCall::getSwcFullNodeDataByUuid(m_ExportSwcData[i].swcMetaInfo.base().uuid(), response,
                                                                  this)) {
                                 QMessageBox::critical(this, "Error",
                                                       QString::fromStdString(response.metainfo().message()));

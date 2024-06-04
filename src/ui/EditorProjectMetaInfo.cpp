@@ -42,7 +42,7 @@ bool EditorProjectMetaInfo::save() {
         auto *item = ui->SwcList->item(i);
         if (item->checkState() == Qt::Checked) {
             auto *swc = m_ProjectMetaInfo.add_swclist();
-            *swc = item->text().toStdString();
+            *swc = item->data(Qt::UserRole).value<QString>().toStdString();
         }
     }
 
@@ -84,11 +84,12 @@ void EditorProjectMetaInfo::refresh(proto::GetProjectResponse &response) {
         auto *item = new QListWidgetItem;
         item->setText(QString::fromStdString(swcInfo.name()));
         for (int j = 0; j < m_ProjectMetaInfo.swclist().size(); j++) {
-            auto name = m_ProjectMetaInfo.swclist().Get(j);
-            if (name == swcInfo.name()) {
+            auto uuid = m_ProjectMetaInfo.swclist().Get(j);
+            if (uuid == swcInfo.base().uuid()) {
                 bFind = true;
             }
         }
+        item->setData(Qt::UserRole, QString::fromStdString(swcInfo.base().uuid()));
         if (bFind) {
             item->setCheckState(Qt::Checked);
         } else {

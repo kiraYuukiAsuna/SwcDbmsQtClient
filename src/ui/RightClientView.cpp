@@ -107,7 +107,7 @@ void RightClientView::refreshProjectMetaInfo(const std::string& projectName) {
     }
 }
 
-void RightClientView::openSwcMetaInfo(const std::string& swcUuid, const std::string& swcName) {
+void RightClientView::openSwcMetaInfo(const std::string& swcUuid) {
     auto index = findIfTabAlreadOpenned(swcUuid, MetaInfoType::eSwc);
 
     proto::GetSwcMetaInfoResponse response;
@@ -262,7 +262,7 @@ int RightClientView::findIfTabAlreadOpenned(const std::string& swcUuid, MetaInfo
     return -1;
 }
 
-void RightClientView::openSwcNodeData(const std::string &swcUuid, const std::string &swcName) {
+void RightClientView::openSwcNodeData(const std::string &swcUuid) {
     auto index = findIfTabAlreadOpenned(swcUuid, MetaInfoType::eSwcData);
 
     if (index != -1) {
@@ -285,7 +285,7 @@ void RightClientView::openSwcNodeData(const std::string &swcUuid, const std::str
     }
 
     auto* editor = new EditorSwcNode(swcUuid, m_TabWidget);
-    auto newIndex = m_TabWidget->addTab(editor, QIcon(Image::ImageDaily),QString::fromStdString(swcName));
+    auto newIndex = m_TabWidget->addTab(editor, QIcon(Image::ImageDaily),QString::fromStdString(swcUuid));
     m_TabWidget->setCurrentIndex(newIndex);
 }
 

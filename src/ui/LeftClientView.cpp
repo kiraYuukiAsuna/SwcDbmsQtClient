@@ -112,19 +112,19 @@ LeftClientView::LeftClientView(MainWindow* mainWindow) : QWidget(mainWindow), ui
                     case MetaInfoType::eProjectContainer:
                         break;
                     case MetaInfoType::eProject: {
-                        m_MainWindow->getRightClientView().openProjectMetaInfo(metaInfo.name);
+                        m_MainWindow->getRightClientView().openProjectMetaInfo(metaInfo.uuid);
                         break;
                     }
                     case MetaInfoType::eSwcContainer:
                         break;
                     case MetaInfoType::eSwc: {
-                        m_MainWindow->getRightClientView().openSwcMetaInfo(metaInfo.uuid,metaInfo.name);
+                        m_MainWindow->getRightClientView().openSwcMetaInfo(metaInfo.uuid);
                         break;
                     }
                     case MetaInfoType::eDailyStatisticsContainer:
                         break;
                     case MetaInfoType::eDailyStatistics: {
-                        m_MainWindow->getRightClientView().openDailyStatisticsMetaInfo(metaInfo.name);
+                        m_MainWindow->getRightClientView().openDailyStatisticsMetaInfo(metaInfo.uuid);
                         break;
                     }
                     case MetaInfoType::eUserMetaInfo:
@@ -168,7 +168,6 @@ void LeftClientView::getProjectMetaInfo() {
         item->setIcon(0, QIcon(Image::ImageProject));
         LeftClientViewTreeWidgetItemMetaInfo metaInfo{};
         metaInfo.type = MetaInfoType::eProject;
-        metaInfo.name = projectInfo.name();
         metaInfo.uuid = projectInfo.base().uuid();
         item->setData(0, Qt::UserRole, QVariant::fromValue(metaInfo));
         m_TopProjectItem->addChild(item);
@@ -186,7 +185,6 @@ void LeftClientView::getSwcMetaInfo() {
         item->setIcon(0, QIcon(Image::ImageNode));
         LeftClientViewTreeWidgetItemMetaInfo metaInfo{};
         metaInfo.type = MetaInfoType::eSwc;
-        metaInfo.name = swcInfo.name();
         metaInfo.uuid = swcInfo.base().uuid();
         item->setData(0, Qt::UserRole, QVariant::fromValue(metaInfo));
         m_TopSwcItem->addChild(item);
@@ -204,7 +202,6 @@ void LeftClientView::getAllDailyStatisticsMetaInfo() {
         item->setIcon(0, QIcon(Image::ImageDaily));
         LeftClientViewTreeWidgetItemMetaInfo metaInfo{};
         metaInfo.type = MetaInfoType::eDailyStatistics;
-        metaInfo.name = dailyStatisticsMetaInfo.name();
         metaInfo.uuid = dailyStatisticsMetaInfo.base().uuid();
         item->setData(0, Qt::UserRole, QVariant::fromValue(metaInfo));
         m_TopDailyStatisticsItem->addChild(item);
@@ -353,8 +350,8 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
                     auto&swcInfo = responseAllSwc.swcinfo(i);
                     bool bFind = false;
                     for (int j = 0; j < projectResponse.projectinfo().swclist().size(); j++) {
-                        auto name = projectResponse.projectinfo().swclist(j);
-                        if (name == swcInfo.name()) {
+                        auto uuid = projectResponse.projectinfo().swclist(j);
+                        if (uuid == swcInfo.base().uuid()) {
                             bFind = true;
                         }
                     }
@@ -434,14 +431,14 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuEditSwc->setText("Edit Swc");
     MenuEditSwc->setIcon(QIcon(Image::ImageEdit));
     connect(MenuEditSwc, &QAction::triggered, this, [this,data](bool checked) {
-        m_MainWindow->getRightClientView().openSwcMetaInfo(data.uuid, data.name);
+        m_MainWindow->getRightClientView().openSwcMetaInfo(data.uuid);
     });
 
     auto* MenuEditSwcNodeData = new QAction(this);
     MenuEditSwcNodeData->setText("Edit SwcNodeData");
     MenuEditSwcNodeData->setIcon(QIcon(Image::ImageEdit));
     connect(MenuEditSwcNodeData, &QAction::triggered, this, [this,data](bool checked) {
-        m_MainWindow->getRightClientView().openSwcNodeData(data.uuid, data.name);
+        m_MainWindow->getRightClientView().openSwcNodeData(data.uuid);
     });
 
     auto* MenuEditSwcPermission = new QAction(this);
@@ -496,7 +493,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuEditorAttachment->setText("Edit Attachment");
     MenuEditorAttachment->setIcon(QIcon(Image::ImageAttachment));
     connect(MenuEditorAttachment, &QAction::triggered, this, [this,data](bool checked) {
-        EditorAttachmentView view(data.uuid, data.name,this);
+        EditorAttachmentView view(data.uuid, this);
         view.exec();
     });
 
@@ -528,7 +525,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuEditorVersionControl->setText("Version Control");
     MenuEditorVersionControl->setIcon(QIcon(Image::ImageVersionControl));
     connect(MenuEditorVersionControl, &QAction::triggered, this, [this,data](bool checked) {
-        EditorSwcVersionControl view(data.uuid, data.name,this);
+        EditorSwcVersionControl view(data.uuid, this);
         view.exec();
     });
 
@@ -612,7 +609,6 @@ void LeftClientView::clearAll() {
     m_TopProjectItem->setIcon(0, QIcon(Image::ImageProject));
     LeftClientViewTreeWidgetItemMetaInfo metaInfoProject{};
     metaInfoProject.type = MetaInfoType::eProjectContainer;
-    metaInfoProject.name = "Project";
     m_TopProjectItem->setData(0, Qt::UserRole, QVariant::fromValue(metaInfoProject));
 
     m_TopSwcItem = new QTreeWidgetItem(m_TreeWidget);
@@ -620,7 +616,6 @@ void LeftClientView::clearAll() {
     m_TopSwcItem->setIcon(0, QIcon(Image::ImageNode));
     LeftClientViewTreeWidgetItemMetaInfo metaInfoSwc{};
     metaInfoSwc.type = MetaInfoType::eSwcContainer;
-    metaInfoProject.name = "Swc";
     m_TopSwcItem->setData(0, Qt::UserRole, QVariant::fromValue(metaInfoSwc));
 
     m_TopDailyStatisticsItem = new QTreeWidgetItem(m_TreeWidget);
@@ -628,7 +623,6 @@ void LeftClientView::clearAll() {
     m_TopDailyStatisticsItem->setIcon(0, QIcon(Image::ImageDaily));
     LeftClientViewTreeWidgetItemMetaInfo metaInfoDailyStatistic{};
     metaInfoDailyStatistic.type = MetaInfoType::eDailyStatisticsContainer;
-    metaInfoProject.name = "DailyStatistics";
     m_TopDailyStatisticsItem->setData(0, Qt::UserRole, QVariant::fromValue(metaInfoDailyStatistic));
 
     m_TreeWidget->addTopLevelItem(m_TopProjectItem);
