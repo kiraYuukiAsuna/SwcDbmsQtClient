@@ -84,7 +84,7 @@ public:
 
 private:
     Ui::EditorSwcSnapshot *ui;
-    std::string m_SwcName;
+    std::string m_SwcUuid;
     std::vector<proto::SwcSnapshotMetaInfoV1> m_SwcSnapshots;
     void getAllSnapshot();
     void refreshTableView();

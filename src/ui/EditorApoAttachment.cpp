@@ -9,15 +9,15 @@
 #include "src/framework/service/WrappedCall.h"
 #include <filesystem>
 
-EditorApoAttachment::EditorApoAttachment(const std::string &swcName, QWidget *parent) : QDialog(parent),
-                                                                                        ui(new Ui::EditorApoAttachment),
+EditorApoAttachment::EditorApoAttachment(const std::string& swcUuid, const std::string &swcName, QWidget *parent) : QDialog(parent),
+                                                                                        ui(new Ui::EditorApoAttachment), m_SwcUuid(swcUuid),
                                                                                         m_SwcName(swcName) {
     ui->setupUi(this);
 
     connect(ui->OKBtn, &QPushButton::clicked, this, [&]() {
         if (m_IsApoAttachmentExist) {
             proto::UpdateSwcAttachmentApoResponse response;
-            if (WrappedCall::updateSwcAttachmentApo(m_SwcName, m_AttachmentUuid, m_SwcAttachmentApoData, response,
+            if (WrappedCall::updateSwcAttachmentApoByUuid(m_SwcUuid, m_AttachmentUuid, m_SwcAttachmentApoData, response,
                                                     this)) {
                 QMessageBox::information(this, "Info", "Update Swc Apo attachment successfully!");
                 accept();
@@ -93,7 +93,7 @@ EditorApoAttachment::EditorApoAttachment(const std::string &swcName, QWidget *pa
 
     connect(ui->DeleteBtnFromDbBtn, &QPushButton::clicked, this, [&]() {
         proto::DeleteSwcAttachmentApoResponse response;
-        if (WrappedCall::deleteSwcAttachmentApo(m_SwcName, m_AttachmentUuid, response,
+        if (WrappedCall::deleteSwcAttachmentApoByUuid(m_SwcUuid, m_AttachmentUuid, response,
                                                 this)) {
             QMessageBox::information(this, "Info", "Delete Swc Apo attachment successfully!");
             accept();
@@ -217,7 +217,7 @@ EditorApoAttachment::~EditorApoAttachment() {
 
 void EditorApoAttachment::getSwcApoAttachment() {
     proto::GetSwcMetaInfoResponse get_swc_meta_info_response;
-    if (!WrappedCall::getSwcMetaInfoByName(m_SwcName, get_swc_meta_info_response, this)) {
+    if (!WrappedCall::getSwcMetaInfoByUuid(m_SwcUuid, get_swc_meta_info_response, this)) {
         return;
     }
 
@@ -230,7 +230,7 @@ void EditorApoAttachment::getSwcApoAttachment() {
 
     proto::GetSwcAttachmentApoResponse response;
     m_AttachmentUuid = get_swc_meta_info_response.swcinfo().swcattachmentapometainfo().attachmentuuid();
-    if (!WrappedCall::getSwcAttachmentApo(m_SwcName, m_AttachmentUuid, response, this)) {
+    if (!WrappedCall::getSwcAttachmentApoByUuid(m_SwcUuid, m_AttachmentUuid, response, this)) {
         return;
     }
 

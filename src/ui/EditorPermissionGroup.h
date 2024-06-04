@@ -27,6 +27,10 @@ public:
         return "";
     }
 
+    std::string getUuid() override {
+        return "";
+    }
+
     MetaInfoType getMetaInfoType() override {
         return MetaInfoType::ePermissionGroupMetaInfo;
     }

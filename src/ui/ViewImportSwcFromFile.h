@@ -4,6 +4,7 @@
 #include "src/FileIo/SwcIo.hpp"
 #include <asio.hpp>
 #include <QEvent>
+#include <filesystem>
 
 struct ExtraSwcImportAttribute {
     std::string m_AnoPath;

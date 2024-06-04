@@ -9,8 +9,8 @@
 #include "src/FileIo/ApoIo.hpp"
 #include <filesystem>
 
-EditorAnoAttachment::EditorAnoAttachment(const std::string&swcName, QWidget* parent) : QDialog(parent),
-    ui(new Ui::EditorAnoAttachment), m_SwcName(swcName) {
+EditorAnoAttachment::EditorAnoAttachment(const std::string&swcUUid, const std::string&swcName, QWidget* parent) : QDialog(parent),
+    ui(new Ui::EditorAnoAttachment), m_SwcUuid(swcUUid), m_SwcName(swcName) {
     ui->setupUi(this);
 
     getSwcAnoAttachment();
@@ -18,7 +18,7 @@ EditorAnoAttachment::EditorAnoAttachment(const std::string&swcName, QWidget* par
     connect(ui->OKBtn, &QPushButton::clicked, this, [&]() {
         if (m_IsAnoAttachmentExist) {
             proto::UpdateSwcAttachmentAnoResponse response;
-            if (WrappedCall::updateSwcAttachmentAno(m_SwcName, m_AttachmentUuid, ui->ApoFileName->text().toStdString(),
+            if (WrappedCall::updateSwcAttachmentAnoByUuid(m_SwcUuid, m_AttachmentUuid, ui->ApoFileName->text().toStdString(),
                                                     ui->SwcFileName->text().toStdString(), response, parent
             )) {
                 QMessageBox::information(this, "Info", "Update Swc Ano attachment successfully!");
@@ -32,7 +32,7 @@ EditorAnoAttachment::EditorAnoAttachment(const std::string&swcName, QWidget* par
         }
         else {
             proto::CreateSwcAttachmentAnoResponse response;
-            if (WrappedCall::createSwcAttachmentAno(m_SwcName, ui->ApoFileName->text().toStdString(),
+            if (WrappedCall::createSwcAttachmentAno(m_SwcUuid, ui->ApoFileName->text().toStdString(),
                                                     ui->SwcFileName->text().toStdString(), response, parent
             )) {
                 QMessageBox::information(this, "Info", "Create Swc Ano attachment successfully!");
@@ -49,7 +49,7 @@ EditorAnoAttachment::EditorAnoAttachment(const std::string&swcName, QWidget* par
     connect(ui->DeleteBtn, &QPushButton::clicked, this, [&]() {
         if (m_IsAnoAttachmentExist) {
             proto::DeleteSwcAttachmentAnoResponse response;
-            if (WrappedCall::deleteSwcAttachmentAno(m_SwcName, m_AttachmentUuid, response, parent
+            if (WrappedCall::deleteSwcAttachmentAnoByUuid(m_SwcUuid, m_AttachmentUuid, response, parent
             )) {
                 QMessageBox::information(this, "Info", "Delete Swc Ano attachment successfully!");
                 accept();
@@ -131,7 +131,7 @@ EditorAnoAttachment::~EditorAnoAttachment() {
 
 void EditorAnoAttachment::getSwcAnoAttachment() {
     proto::GetSwcMetaInfoResponse get_swc_meta_info_response;
-    if (!WrappedCall::getSwcMetaInfoByName(m_SwcName, get_swc_meta_info_response, this)) {
+    if (!WrappedCall::getSwcMetaInfoByUuid(m_SwcUuid, get_swc_meta_info_response, this)) {
         return;
     }
 
@@ -145,7 +145,7 @@ void EditorAnoAttachment::getSwcAnoAttachment() {
 
     proto::GetSwcAttachmentAnoResponse get_swc_attachment_ano_response;
     m_AttachmentUuid = get_swc_meta_info_response.swcinfo().swcattachmentanometainfo().attachmentuuid();
-    if (!WrappedCall::getSwcAttachmentAno(m_SwcName, m_AttachmentUuid, get_swc_attachment_ano_response,
+    if (!WrappedCall::getSwcAttachmentAnoByUuid(m_SwcUuid, m_AttachmentUuid, get_swc_attachment_ano_response,
                                           this)) {
         return;
     }

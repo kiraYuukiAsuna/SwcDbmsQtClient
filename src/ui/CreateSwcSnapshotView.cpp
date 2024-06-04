@@ -23,7 +23,7 @@ CreateSwcSnapshotView::CreateSwcSnapshotView(const std::string&swcName, QWidget*
             proto::CreateSwcSnapshotRequest request;
             proto::CreateSwcSnapshotResponse response;
             WrappedCall::setCommonRequestField(request);
-            request.set_swcname(m_SwcName);
+            request.set_swcuuid(m_SwcName);
 
             auto status = RpcCall::getInstance().Stub()->CreateSwcSnapshot(&context,request,&response);
             if(status.ok()) {

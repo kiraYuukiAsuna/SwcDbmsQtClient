@@ -22,6 +22,10 @@ public:
         return "";
     }
 
+    std::string getUuid() override {
+        return "";
+    }
+
     MetaInfoType getMetaInfoType() override {
         return MetaInfoType::ePermissionGroupMetaInfo;
     }
@@ -37,7 +41,7 @@ private:
 
     TreeWidget* m_TreeWidget;
 
-    std::string m_Name;
+    std::string m_Uuid;
     MetaInfoType m_Type;
 
     proto::PermissionMetaInfoV1 m_PermissionMetaInfo;

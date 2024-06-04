@@ -8,14 +8,14 @@
 #include "ViewSwcNodeData.h"
 #include "src/FileIo/SwcIo.hpp"
 
-EditorSwcAttachment::EditorSwcAttachment(const std::string& swcName, QWidget *parent) :
-    QDialog(parent), ui(new Ui::EditorSwcAttachment), m_SwcName(swcName) {
+EditorSwcAttachment::EditorSwcAttachment(const std::string& swcUuid, const std::string& swcName, QWidget *parent) :
+    QDialog(parent), ui(new Ui::EditorSwcAttachment), m_SwcUuid(swcUuid),m_SwcName(swcName) {
     ui->setupUi(this);
 
     connect(ui->OKBtn, &QPushButton::clicked, this, [&]() {
         if (m_IsSwcAttachmentExist) {
             proto::UpdateSwcAttachmentSwcResponse response;
-            if (WrappedCall::UpdateSwcAttachmentSwc(m_SwcName, m_SwcAttachmentUuid, m_SwcAttachmentSwcData, response,
+            if (WrappedCall::UpdateSwcAttachmentSwcByUuid(m_SwcName, m_SwcAttachmentUuid, m_SwcAttachmentSwcData, response,
                                                     this)) {
                 QMessageBox::information(this, "Info", "Update Swc Swc attachment successfully!");
                 accept();
@@ -26,7 +26,7 @@ EditorSwcAttachment::EditorSwcAttachment(const std::string& swcName, QWidget *pa
             }
         } else {
             proto::CreateSwcAttachmentSwcResponse response;
-            if (WrappedCall::CreateSwcAttachmentSwc(m_SwcName, m_SwcAttachmentSwcData, response,
+            if (WrappedCall::CreateSwcAttachmentSwcByUuid(m_SwcName, m_SwcAttachmentSwcData, response,
                                                     this)) {
                 QMessageBox::information(this, "Info", "Create Swc Swc attachment successfully!");
                 accept();
@@ -96,7 +96,7 @@ EditorSwcAttachment::EditorSwcAttachment(const std::string& swcName, QWidget *pa
 
     connect(ui->DeleteBtnFromDbBtn, &QPushButton::clicked, this, [&]() {
         proto::DeleteSwcAttachmentSwcResponse response;
-        if (WrappedCall::DeleteSwcAttachmentSwc(m_SwcName, m_SwcAttachmentUuid, response,
+        if (WrappedCall::DeleteSwcAttachmentSwcByUuid(m_SwcName, m_SwcAttachmentUuid, response,
                                                 this)) {
             QMessageBox::information(this, "Info", "Delete Swc Swc attachment successfully!");
             accept();
@@ -215,7 +215,7 @@ EditorSwcAttachment::~EditorSwcAttachment() {
 
 void EditorSwcAttachment::getSwcAttachmentSwc() {
     proto::GetSwcMetaInfoResponse get_swc_meta_info_response;
-    if (!WrappedCall::getSwcMetaInfoByName(m_SwcName, get_swc_meta_info_response, this)) {
+    if (!WrappedCall::getSwcMetaInfoByUuid(m_SwcUuid, get_swc_meta_info_response, this)) {
         return;
     }
 

@@ -22,6 +22,10 @@ public:
         return m_DailyStatisticsMetaInfo.name();
     }
 
+    std::string getUuid() override {
+        return m_DailyStatisticsMetaInfo.base().uuid();
+    }
+
     MetaInfoType getMetaInfoType() override {
         return MetaInfoType::eDailyStatistics;
     }

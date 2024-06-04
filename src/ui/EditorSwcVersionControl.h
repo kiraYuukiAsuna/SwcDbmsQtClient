@@ -14,7 +14,7 @@ class EditorSwcVersionControl : public QDialog {
 Q_OBJECT
 
 public:
-    explicit EditorSwcVersionControl(const std::string &swcName, QWidget *parent = nullptr);
+    explicit EditorSwcVersionControl(const std::string&swcUuid, const std::string &swcName, QWidget *parent = nullptr);
 
     ~EditorSwcVersionControl() override;
 
@@ -23,7 +23,7 @@ public:
 private:
     Ui::EditorSwcVersionControl *ui;
 
-    std::string m_SwcName;
+    std::string m_SwcUuid;
 
     bool m_HasExportedStatus{false};
     int64_t m_EndTime;

@@ -8,9 +8,9 @@
 
 #include "Renderer/SwcRenderer.h"
 
-EditorSwcVersionControl::EditorSwcVersionControl(const std::string&swcName, QWidget* parent) : QDialog(parent),
+EditorSwcVersionControl::EditorSwcVersionControl(const std::string&swcUuid, const std::string&swcName, QWidget* parent) : QDialog(parent),
     ui(new Ui::EditorSwcVersionControl),
-    m_SwcName(swcName),
+    m_SwcUuid(swcUuid),
     m_DataFlowGraphModel(
         registerDataModels()) {
     ui->setupUi(this);
@@ -50,7 +50,7 @@ EditorSwcVersionControl::EditorSwcVersionControl(const std::string&swcName, QWid
             proto::RevertSwcVersionResponse response;
             google::protobuf::Timestamp endTime;
             endTime.set_seconds(m_EndTime);
-            if (!WrappedCall::RevertSwcVersion(m_SwcName, endTime, response, this)) {
+            if (!WrappedCall::RevertSwcVersionByUuid(m_SwcUuid, endTime, response, this)) {
                 return;
             }
 
@@ -78,7 +78,7 @@ EditorSwcVersionControl::EditorSwcVersionControl(const std::string&swcName, QWid
         }
 
         proto::GetSwcMetaInfoResponse response;
-        if (!WrappedCall::getSwcMetaInfoByName(m_SwcName, response, this)) {
+        if (!WrappedCall::getSwcMetaInfoByUuid(m_SwcUuid, response, this)) {
             return;
         }
 
@@ -243,7 +243,7 @@ void EditorSwcVersionControl::getSwcLastSnapshot() {
     proto::GetAllSnapshotMetaInfoResponse response;
     WrappedCall::setCommonRequestField(request);
 
-    request.set_swcname(m_SwcName);
+    request.set_swcuuid(m_SwcUuid);
 
     if (auto status = RpcCall::getInstance().Stub()->GetAllSnapshotMetaInfo(&context, request, &response); status.
         ok()) {
@@ -287,7 +287,7 @@ void EditorSwcVersionControl::getSwcIncrementRecord(proto::SwcSnapshotMetaInfoV1
     proto::GetAllIncrementOperationMetaInfoResponse response;
     WrappedCall::setCommonRequestField(request);
 
-    request.set_swcname(m_SwcName);
+    request.set_swcuuid(m_SwcUuid);
 
     proto::SwcIncrementOperationMetaInfoV1 currentIncrement;
 
@@ -329,7 +329,7 @@ void EditorSwcVersionControl::getSwcIncrementRecord(proto::SwcSnapshotMetaInfoV1
                 }
 
                 proto::GetSwcMetaInfoResponse swc_meta_info_response;
-                if (!WrappedCall::getSwcMetaInfoByName(m_SwcName, swc_meta_info_response, this)) {
+                if (!WrappedCall::getSwcMetaInfoByUuid(m_SwcUuid, swc_meta_info_response, this)) {
                     return;
                 }
 
@@ -409,7 +409,7 @@ void EditorSwcVersionControl::getAllSnapshot() {
     proto::GetAllSnapshotMetaInfoRequest request;
     proto::GetAllSnapshotMetaInfoResponse response;
     WrappedCall::setCommonRequestField(request);
-    request.set_swcname(m_SwcName);
+    request.set_swcuuid(m_SwcUuid);
 
     auto status = RpcCall::getInstance().Stub()->GetAllSnapshotMetaInfo(&context, request, &response);
     if (status.ok()) {
@@ -431,7 +431,7 @@ void EditorSwcVersionControl::getAllSnapshot() {
 void EditorSwcVersionControl::getAllSwcIncrementRecord() {
     proto::GetAllIncrementOperationMetaInfoResponse response;
 
-    if (WrappedCall::getAllSwcIncrementRecord(m_SwcName, response, this)) {
+    if (WrappedCall::getAllSwcIncrementRecordByUuid(m_SwcUuid, response, this)) {
         m_SwcIncrements.clear();
         for (auto&incrementRecordCollection: response.swcincrementoperationmetainfo()) {
             m_SwcIncrements.push_back(incrementRecordCollection);

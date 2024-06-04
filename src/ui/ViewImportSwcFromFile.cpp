@@ -298,7 +298,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                     }
 
                     proto::CreateSwcNodeDataResponse response1;
-                    if (WrappedCall::addSwcNodeData(swcName, swcData, response1, this)) {
+                    if (WrappedCall::addSwcNodeDataByUuid(response.swcinfo().base().uuid(), swcData, response1, this)) {
                         ui->SwcFileInfo->item(i, 6)->setText("Import Success!");
                         setAllGridColor(i, Qt::green);
 
@@ -399,7 +399,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow *mainWindow) :
                     }
 
                     proto::CreateSwcNodeDataResponse response1;
-                    if (WrappedCall::addSwcNodeData(swcName, swcData, response1, this)) {
+                    if (WrappedCall::addSwcNodeDataByUuid(swcName, swcData, response1, this)) {
                         ui->SwcFileInfo->item(i, 6)->setText("Import Success!");
                         setAllGridColor(i, Qt::green);
                     } else {

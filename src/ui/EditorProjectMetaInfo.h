@@ -23,6 +23,10 @@ public:
         return m_ProjectMetaInfo.name();
     }
 
+    std::string getUuid() override {
+        return m_ProjectMetaInfo.base().uuid();
+    }
+
     MetaInfoType getMetaInfoType() override {
         return MetaInfoType::eProject;
     }

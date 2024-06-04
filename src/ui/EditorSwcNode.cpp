@@ -7,7 +7,7 @@
 #include "ViewExportSwcToFile.h"
 #include "Renderer/SwcRenderer.h"
 
-EditorSwcNode::EditorSwcNode(const std::string&swcName, QWidget* parent) : QWidget(parent), ui(new Ui::EditorSwcNode) {
+EditorSwcNode::EditorSwcNode(const std::string&swcUuid, QWidget* parent) : QWidget(parent), ui(new Ui::EditorSwcNode) {
     ui->setupUi(this);
     std::string stylesheet = std::string("QListWidget::indicator:checked{image:url(")
                              + Image::ImageCheckBoxChecked + ");}" +
@@ -15,7 +15,7 @@ EditorSwcNode::EditorSwcNode(const std::string&swcName, QWidget* parent) : QWidg
                              Image::ImageCheckBoxUnchecked + ");}";
     ui->UserList->setStyleSheet(QString::fromStdString(stylesheet));
 
-    m_SwcName = swcName;
+    m_SwcUuid = swcUuid;
 
     ui->StartTime->setDateTime(QDateTime(QDate::currentDate(), QTime::currentTime()));
     ui->EndTime->setDateTime(QDateTime(QDate::currentDate(), QTime::currentTime()));
@@ -31,7 +31,7 @@ EditorSwcNode::EditorSwcNode(const std::string&swcName, QWidget* parent) : QWidg
             newData->mutable_swcnodeinternaldata()->CopyFrom(swcNodeInternalData);
 
             proto::CreateSwcNodeDataResponse response;
-            if (WrappedCall::addSwcNodeData(m_SwcName, swcData, response, this)) {
+            if (WrappedCall::addSwcNodeDataByUuid(m_SwcUuid, swcData, response, this)) {
                 QMessageBox::information(this, "Info", "Create Swc node successfully!");
                 refreshAll();
             }
@@ -64,7 +64,7 @@ EditorSwcNode::EditorSwcNode(const std::string&swcName, QWidget* parent) : QWidg
             swcData.add_swcdata()->CopyFrom(swcNodeData);
 
             proto::UpdateSwcNodeDataResponse response;
-            if (WrappedCall::modifySwcNodeData(m_SwcName, swcData, response, this)) {
+            if (WrappedCall::modifySwcNodeDataByUuid(m_SwcUuid, swcData, response, this)) {
                 QMessageBox::information(this, "Info", "Modify Swc node successfully!");
                 refreshAll();
             }
@@ -92,7 +92,7 @@ EditorSwcNode::EditorSwcNode(const std::string&swcName, QWidget* parent) : QWidg
             newData->CopyFrom(InitSwcNodeData);
 
             proto::DeleteSwcNodeDataResponse response;
-            if (WrappedCall::deleteSwcNodeData(m_SwcName, swcData, response, this)) {
+            if (WrappedCall::deleteSwcNodeDataByUuid(m_SwcUuid, swcData, response, this)) {
                 QMessageBox::information(this, "Info", "Delete Swc node successfully!");
                 refreshAll();
             }
@@ -109,7 +109,7 @@ EditorSwcNode::EditorSwcNode(const std::string&swcName, QWidget* parent) : QWidg
 
     connect(ui->ExportQueryResultBtn, &QPushButton::clicked, this, [this]() {
         proto::GetSwcMetaInfoResponse response;
-        if (!WrappedCall::getSwcMetaInfoByName(m_SwcName, response, this)) {
+        if (!WrappedCall::getSwcMetaInfoByUuid(m_SwcUuid, response, this)) {
             QMessageBox::critical(this, "Error", "Get Swc MetaInfo Failed!");
             return;
         }
@@ -150,7 +150,7 @@ void EditorSwcNode::refreshUserArea() {
 
 void EditorSwcNode::refreshAll() {
     proto::GetSwcFullNodeDataResponse response;
-    if (!WrappedCall::getSwcFullNodeData(m_SwcName, response, this)) {
+    if (!WrappedCall::getSwcFullNodeDataByUuid(m_SwcUuid, response, this)) {
         QMessageBox::critical(this, "Error", "Get Swc Node Data Failed!");
     }
 
@@ -187,7 +187,7 @@ void EditorSwcNode::refreshByQueryOption() {
     std::string userName = checkedUserNames[0];
 
 
-    WrappedCall::getSwcNodeDataListByTimeAndUserResponse(m_SwcName, userName, startTime, endTime, response, this);
+    WrappedCall::getSwcNodeDataListByTimeAndUserByUuid(m_SwcUuid, userName, startTime, endTime, response, this);
 
     auto swcData = response.swcnodedata();
     loadSwcData(swcData);

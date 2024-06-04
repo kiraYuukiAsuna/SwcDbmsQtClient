@@ -14,6 +14,8 @@ public:
         return "";
     }
 
+    virtual std::string getUuid() = 0;
+
     virtual bool save() = 0;
 
 };

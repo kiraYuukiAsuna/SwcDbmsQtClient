@@ -21,6 +21,10 @@ public:
         return m_SwcMetaInfo.name();
     }
 
+    std::string getUuid() override {
+        return m_SwcMetaInfo.base().uuid();
+    }
+
     MetaInfoType getMetaInfoType() override {
         return MetaInfoType::eSwc;
     }

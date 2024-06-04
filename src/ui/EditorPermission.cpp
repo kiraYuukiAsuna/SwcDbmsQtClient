@@ -10,8 +10,8 @@
 #include "src/framework/defination/ImageDefination.h"
 #include "src/framework/service/WrappedCall.h"
 
-EditorPermission::EditorPermission(const std::string&name, MetaInfoType type, QWidget* parent) : QDialog(parent),
-    ui(new Ui::EditorPermission), m_Name(name), m_Type(type) {
+EditorPermission::EditorPermission(const std::string&uuid, MetaInfoType type, QWidget* parent) : QDialog(parent),
+    ui(new Ui::EditorPermission), m_Uuid(uuid), m_Type(type) {
     ui->setupUi(this);
 
     auto* layout = new QVBoxLayout;
@@ -51,7 +51,7 @@ EditorPermission::EditorPermission(const std::string&name, MetaInfoType type, QW
 
         if (m_Type == MetaInfoType::eProject) {
             proto::GetProjectResponse rsp2;
-            if (!WrappedCall::getProjectMetaInfoByName(name, rsp2, this)) {
+            if (!WrappedCall::getProjectMetaInfoByUuid(m_Uuid, rsp2, this)) {
                 return;
             }
 
@@ -73,7 +73,7 @@ EditorPermission::EditorPermission(const std::string&name, MetaInfoType type, QW
         }
         else if (m_Type == MetaInfoType::eSwc) {
             proto::GetSwcMetaInfoResponse rsp2;
-            if (!WrappedCall::getSwcMetaInfoByName(name, rsp2, this)) {
+            if (!WrappedCall::getSwcMetaInfoByUuid(m_Uuid, rsp2, this)) {
                 return;
             }
 
@@ -120,7 +120,7 @@ EditorPermission::EditorPermission(const std::string&name, MetaInfoType type, QW
 
                         if (m_Type == MetaInfoType::eProject) {
                             proto::GetProjectResponse rsp1;
-                            WrappedCall::getProjectMetaInfoByName(m_Name, rsp1, this);
+                            WrappedCall::getProjectMetaInfoByUuid(m_Uuid, rsp1, this);
 
                             rsp1.mutable_projectinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
 
@@ -131,7 +131,7 @@ EditorPermission::EditorPermission(const std::string&name, MetaInfoType type, QW
                         }
                         else if (m_Type == MetaInfoType::eSwc) {
                             proto::GetSwcMetaInfoResponse rsp1;
-                            WrappedCall::getSwcMetaInfoByName(m_Name, rsp1, this);
+                            WrappedCall::getSwcMetaInfoByUuid(m_Uuid, rsp1, this);
 
                             rsp1.mutable_swcinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
 
@@ -171,7 +171,7 @@ EditorPermission::EditorPermission(const std::string&name, MetaInfoType type, QW
 
         if (m_Type == MetaInfoType::eProject) {
             proto::GetProjectResponse rsp2;
-            if (!WrappedCall::getProjectMetaInfoByName(name, rsp2, this)) {
+            if (!WrappedCall::getProjectMetaInfoByUuid(m_Uuid, rsp2, this)) {
                 return;
             }
 
@@ -193,7 +193,7 @@ EditorPermission::EditorPermission(const std::string&name, MetaInfoType type, QW
         }
         else if (m_Type == MetaInfoType::eSwc) {
             proto::GetSwcMetaInfoResponse rsp2;
-            if (!WrappedCall::getSwcMetaInfoByName(name, rsp2, this)) {
+            if (!WrappedCall::getSwcMetaInfoByUuid(m_Uuid, rsp2, this)) {
                 return;
             }
 
@@ -239,7 +239,7 @@ EditorPermission::EditorPermission(const std::string&name, MetaInfoType type, QW
 
                         if (m_Type == MetaInfoType::eProject) {
                             proto::GetProjectResponse rsp1;
-                            WrappedCall::getProjectMetaInfoByName(m_Name, rsp1, this);
+                            WrappedCall::getProjectMetaInfoByUuid(m_Uuid, rsp1, this);
 
                             rsp1.mutable_projectinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
 
@@ -250,7 +250,7 @@ EditorPermission::EditorPermission(const std::string&name, MetaInfoType type, QW
                         }
                         else if (m_Type == MetaInfoType::eSwc) {
                             proto::GetSwcMetaInfoResponse rsp1;
-                            WrappedCall::getSwcMetaInfoByName(m_Name, rsp1, this);
+                            WrappedCall::getSwcMetaInfoByUuid(m_Uuid, rsp1, this);
 
                             rsp1.mutable_swcinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
 
@@ -337,7 +337,7 @@ EditorPermission::EditorPermission(const std::string&name, MetaInfoType type, QW
 
         if (m_Type == MetaInfoType::eProject) {
             proto::GetProjectResponse rsp1;
-            WrappedCall::getProjectMetaInfoByName(m_Name, rsp1, this);
+            WrappedCall::getProjectMetaInfoByUuid(m_Uuid, rsp1, this);
 
             rsp1.mutable_projectinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
 
@@ -348,7 +348,7 @@ EditorPermission::EditorPermission(const std::string&name, MetaInfoType type, QW
         }
         else if (m_Type == MetaInfoType::eSwc) {
             proto::GetSwcMetaInfoResponse rsp1;
-            WrappedCall::getSwcMetaInfoByName(m_Name, rsp1, this);
+            WrappedCall::getSwcMetaInfoByUuid(m_Uuid, rsp1, this);
 
             rsp1.mutable_swcinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
 
@@ -380,12 +380,12 @@ void EditorPermission::refresh() {
 
     if (m_Type == MetaInfoType::eProject) {
         proto::GetProjectResponse response;
-        WrappedCall::getProjectMetaInfoByName(m_Name, response, this);
+        WrappedCall::getProjectMetaInfoByUuid(m_Uuid, response, this);
         m_PermissionMetaInfo = response.projectinfo().permission();
     }
     else if (m_Type == MetaInfoType::eSwc) {
         proto::GetSwcMetaInfoResponse response;
-        WrappedCall::getSwcMetaInfoByName(m_Name, response, this);
+        WrappedCall::getSwcMetaInfoByUuid(m_Uuid, response, this);
         m_PermissionMetaInfo = response.swcinfo().permission();
     }
 

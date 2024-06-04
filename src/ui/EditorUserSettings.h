@@ -21,6 +21,10 @@ public:
         return "EditorUserSettings";
     }
 
+    std::string getUuid() override {
+        return "";
+    }
+
     MetaInfoType getMetaInfoType() override {
         return MetaInfoType::eUserMetaInfo;
     }

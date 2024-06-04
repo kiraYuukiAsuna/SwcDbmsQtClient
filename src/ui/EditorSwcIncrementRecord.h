@@ -80,13 +80,13 @@ class EditorSwcIncrementRecord : public QDialog {
 Q_OBJECT
 
 public:
-    explicit EditorSwcIncrementRecord(const std::string& swcName, QWidget *parent = nullptr);
+    explicit EditorSwcIncrementRecord(const std::string& swcUuid, QWidget *parent = nullptr);
     ~EditorSwcIncrementRecord() override;
 
 private:
     Ui::EditorSwcIncrementRecord *ui;
 
-    std::string m_SwcName;
+    std::string m_SwcUuid;
     std::vector<proto::SwcIncrementOperationMetaInfoV1> m_SwcIncrements;
     void getAllSwcIncrementRecord();
     void refreshTableView();

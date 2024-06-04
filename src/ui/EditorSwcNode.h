@@ -102,7 +102,11 @@ public:
     void refreshByQueryOption();
 
     std::string getName() override {
-        return m_SwcName;
+        return "";
+    }
+
+    std::string getUuid() override {
+        return m_SwcUuid;
     }
 
     MetaInfoType getMetaInfoType() override {
@@ -119,6 +123,6 @@ private:
 
     Ui::EditorSwcNode *ui;
 
-    std::string m_SwcName;
+    std::string m_SwcUuid;
     proto::SwcDataV1 m_SwcData;
 };

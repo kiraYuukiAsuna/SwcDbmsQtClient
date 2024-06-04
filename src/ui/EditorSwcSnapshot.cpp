@@ -4,8 +4,8 @@
 #include "ViewExportSwcToFile.h"
 #include "src/framework/service/WrappedCall.h"
 
-EditorSwcSnapshot::EditorSwcSnapshot(const std::string& swcName, QWidget *parent) :
-    QDialog(parent), ui(new Ui::EditorSwcSnapshot),m_SwcName(swcName) {
+EditorSwcSnapshot::EditorSwcSnapshot(const std::string& swcUuid, QWidget *parent) :
+    QDialog(parent), ui(new Ui::EditorSwcSnapshot),m_SwcUuid(swcUuid) {
     ui->setupUi(this);
 
 
@@ -18,7 +18,7 @@ EditorSwcSnapshot::EditorSwcSnapshot(const std::string& swcName, QWidget *parent
         }
 
         proto::GetSwcMetaInfoResponse response;
-        if(!WrappedCall::getSwcMetaInfoByName(m_SwcName,response,this)) {
+        if(!WrappedCall::getSwcMetaInfoByUuid(m_SwcUuid,response,this)) {
             return;
         }
 
@@ -41,7 +41,7 @@ void EditorSwcSnapshot::getAllSnapshot() {
     proto::GetAllSnapshotMetaInfoRequest request;
     proto::GetAllSnapshotMetaInfoResponse response;
     WrappedCall::setCommonRequestField(request);
-    request.set_swcname(m_SwcName);
+    request.set_swcuuid(m_SwcUuid);
 
     auto status = RpcCall::getInstance().Stub()->GetAllSnapshotMetaInfo(&context,request,&response);
     if(status.ok()) {

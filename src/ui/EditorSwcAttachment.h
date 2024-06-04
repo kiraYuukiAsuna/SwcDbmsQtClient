@@ -92,12 +92,13 @@ class EditorSwcAttachment : public QDialog {
 Q_OBJECT
 
 public:
-    explicit EditorSwcAttachment(const std::string& swcName, QWidget *parent = nullptr);
+    explicit EditorSwcAttachment(const std::string& swcUuid, const std::string& swcName, QWidget *parent = nullptr);
     ~EditorSwcAttachment() override;
 
 private:
     Ui::EditorSwcAttachment *ui;
 
+    std::string m_SwcUuid;
     std::string m_SwcName;
     std::string m_SwcAttachmentUuid;
 

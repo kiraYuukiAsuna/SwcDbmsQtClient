@@ -6,22 +6,22 @@
 #include "EditorApoAttachment.h"
 #include "EditorSwcAttachment.h"
 
-EditorAttachmentView::EditorAttachmentView(const std::string& swcName, QWidget *parent) :
-    QDialog(parent), ui(new Ui::EditorAttachmentView) , m_SwcName(swcName){
+EditorAttachmentView::EditorAttachmentView(const std::string& swcUuid, const std::string& swcName, QWidget *parent) :
+    QDialog(parent), ui(new Ui::EditorAttachmentView) , m_SwcUuid(swcUuid),m_SwcName(swcName){
     ui->setupUi(this);
 
     connect(ui->AnoBtn,&QPushButton::clicked,this,[&]() {
-        EditorAnoAttachment view(m_SwcName,this);
+        EditorAnoAttachment view(m_SwcUuid, m_SwcName,this);
         view.exec();
     });
 
     connect(ui->ApoBtn,&QPushButton::clicked,this,[&]() {
-        EditorApoAttachment view(m_SwcName,this);
+        EditorApoAttachment view(m_SwcUuid, m_SwcName,this);
         view.exec();
     });
 
     connect(ui->SwcAttachmentBtn,&QPushButton::clicked,this,[&]() {
-        EditorSwcAttachment view(m_SwcName,this);
+        EditorSwcAttachment view(m_SwcUuid, m_SwcName,this);
         view.exec();
     });
 }

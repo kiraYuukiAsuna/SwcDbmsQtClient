@@ -118,7 +118,7 @@ LeftClientView::LeftClientView(MainWindow* mainWindow) : QWidget(mainWindow), ui
                     case MetaInfoType::eSwcContainer:
                         break;
                     case MetaInfoType::eSwc: {
-                        m_MainWindow->getRightClientView().openSwcMetaInfo(metaInfo.name);
+                        m_MainWindow->getRightClientView().openSwcMetaInfo(metaInfo.uuid,metaInfo.name);
                         break;
                     }
                     case MetaInfoType::eDailyStatisticsContainer:
@@ -169,6 +169,7 @@ void LeftClientView::getProjectMetaInfo() {
         LeftClientViewTreeWidgetItemMetaInfo metaInfo{};
         metaInfo.type = MetaInfoType::eProject;
         metaInfo.name = projectInfo.name();
+        metaInfo.uuid = projectInfo.base().uuid();
         item->setData(0, Qt::UserRole, QVariant::fromValue(metaInfo));
         m_TopProjectItem->addChild(item);
     }
@@ -186,6 +187,7 @@ void LeftClientView::getSwcMetaInfo() {
         LeftClientViewTreeWidgetItemMetaInfo metaInfo{};
         metaInfo.type = MetaInfoType::eSwc;
         metaInfo.name = swcInfo.name();
+        metaInfo.uuid = swcInfo.base().uuid();
         item->setData(0, Qt::UserRole, QVariant::fromValue(metaInfo));
         m_TopSwcItem->addChild(item);
     }
@@ -203,6 +205,7 @@ void LeftClientView::getAllDailyStatisticsMetaInfo() {
         LeftClientViewTreeWidgetItemMetaInfo metaInfo{};
         metaInfo.type = MetaInfoType::eDailyStatistics;
         metaInfo.name = dailyStatisticsMetaInfo.name();
+        metaInfo.uuid = dailyStatisticsMetaInfo.base().uuid();
         item->setData(0, Qt::UserRole, QVariant::fromValue(metaInfo));
         m_TopDailyStatisticsItem->addChild(item);
     }
@@ -246,7 +249,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
                 auto* userInfo = request.mutable_userverifyinfo();
                 userInfo->set_username(CachedProtoData::getInstance().UserName);
                 userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
-                request.set_projectname(curItem->text(0).toStdString());
+                request.set_projectuuid(data.uuid);
 
                 proto::DeleteProjectResponse response;
                 grpc::ClientContext context;
@@ -254,7 +257,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
                 if (status.ok()) {
                     if (response.metainfo().status()) {
                         QMessageBox::information(this, "Info", "Delete Project successfully!");
-                        m_MainWindow->getRightClientView().closeWithoutSavingProject(data.name);
+                        m_MainWindow->getRightClientView().closeWithoutSavingProject(data.uuid);
                         refreshTree();
                     }
                     else {
@@ -272,14 +275,14 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuEditProject->setText("Edit Project");
     MenuEditProject->setIcon(QIcon(Image::ImageEdit));
     connect(MenuEditProject, &QAction::triggered, this, [this,data](bool checked) {
-        m_MainWindow->getRightClientView().openProjectMetaInfo(data.name);
+        m_MainWindow->getRightClientView().openProjectMetaInfo(data.uuid);
     });
 
     auto* MenuEditProjectPermission = new QAction(this);
     MenuEditProjectPermission->setText("Edit Permission");
     MenuEditProjectPermission->setIcon(QIcon(Image::ImageACL));
     connect(MenuEditProjectPermission, &QAction::triggered, this, [this,data](bool checked) {
-        EditorPermission view(data.name, MetaInfoType::eProject, this);
+        EditorPermission view(data.uuid, MetaInfoType::eProject, this);
         view.exec();
     });
 
@@ -302,12 +305,12 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
         if (result == QMessageBox::StandardButton::Ok) {
             if (data.type == MetaInfoType::eSwc) {
                 proto::GetSwcMetaInfoResponse response1;
-                if (!WrappedCall::getSwcMetaInfoByName(data.name, response1, this)) {
+                if (!WrappedCall::getSwcMetaInfoByUuid(data.uuid, response1, this)) {
                     return;
                 }
 
                 proto::GetSwcFullNodeDataResponse response2;
-                if (!WrappedCall::getSwcFullNodeData(data.name, response2, this)) {
+                if (!WrappedCall::getSwcFullNodeDataByUuid(data.uuid, response2, this)) {
                     return;
                 }
 
@@ -338,7 +341,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
             }
             else if (data.type == MetaInfoType::eProject) {
                 proto::GetProjectResponse projectResponse;
-                if (!WrappedCall::getProjectMetaInfoByName(data.name, projectResponse, this)) {
+                if (!WrappedCall::getProjectMetaInfoByUuid(data.uuid, projectResponse, this)) {
                     return;
                 }
 
@@ -404,7 +407,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
             if (data.type == MetaInfoType::eSwc) {
                 proto::DeleteSwcRequest request;
                 WrappedCall::setCommonRequestField(request);
-                request.set_swcname(curItem->text(0).toStdString());
+                request.set_swcuuid(data.uuid);
 
                 proto::DeleteSwcResponse response;
                 grpc::ClientContext context;
@@ -412,7 +415,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
                 if (status.ok()) {
                     if (response.metainfo().status()) {
                         QMessageBox::information(this, "Info", "Delete Swc successfully!");
-                        m_MainWindow->getRightClientView().closeWithoutSavingSwc(data.name);
+                        m_MainWindow->getRightClientView().closeWithoutSavingSwc(data.uuid);
                         m_MainWindow->getRightClientView().refreshAllOpenedProjectMetaInfo();
                         refreshTree();
                     }
@@ -431,21 +434,21 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuEditSwc->setText("Edit Swc");
     MenuEditSwc->setIcon(QIcon(Image::ImageEdit));
     connect(MenuEditSwc, &QAction::triggered, this, [this,data](bool checked) {
-        m_MainWindow->getRightClientView().openSwcMetaInfo(data.name);
+        m_MainWindow->getRightClientView().openSwcMetaInfo(data.uuid, data.name);
     });
 
     auto* MenuEditSwcNodeData = new QAction(this);
     MenuEditSwcNodeData->setText("Edit SwcNodeData");
     MenuEditSwcNodeData->setIcon(QIcon(Image::ImageEdit));
     connect(MenuEditSwcNodeData, &QAction::triggered, this, [this,data](bool checked) {
-        m_MainWindow->getRightClientView().openSwcNodeData(data.name);
+        m_MainWindow->getRightClientView().openSwcNodeData(data.uuid, data.name);
     });
 
     auto* MenuEditSwcPermission = new QAction(this);
     MenuEditSwcPermission->setText("Edit Permission");
     MenuEditSwcPermission->setIcon(QIcon(Image::ImageACL));
     connect(MenuEditSwcPermission, &QAction::triggered, this, [this,data](bool checked) {
-        EditorPermission view(data.name, MetaInfoType::eSwc, this);
+        EditorPermission view(data.uuid, MetaInfoType::eSwc, this);
         view.exec();
     });
 
@@ -468,7 +471,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
                 if (status.ok()) {
                     if (response.metainfo().status()) {
                         QMessageBox::information(this, "Info", "Delete DailyStatistics successfully!");
-                        m_MainWindow->getRightClientView().closeWithoutSavingDailyStatistics(data.name);
+                        m_MainWindow->getRightClientView().closeWithoutSavingDailyStatistics(data.uuid);
                         refreshTree();
                     }
                     else {
@@ -486,14 +489,14 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuEditDailyStatistics->setText("Edit DailyStatistics");
     MenuEditDailyStatistics->setIcon(QIcon(Image::ImageDelete));
     connect(MenuEditDailyStatistics, &QAction::triggered, this, [this,data](bool checked) {
-        m_MainWindow->getRightClientView().openDailyStatisticsMetaInfo(data.name);
+        m_MainWindow->getRightClientView().openDailyStatisticsMetaInfo(data.uuid);
     });
 
     auto* MenuEditorAttachment = new QAction(this);
     MenuEditorAttachment->setText("Edit Attachment");
     MenuEditorAttachment->setIcon(QIcon(Image::ImageAttachment));
     connect(MenuEditorAttachment, &QAction::triggered, this, [this,data](bool checked) {
-        EditorAttachmentView view(data.name, this);
+        EditorAttachmentView view(data.uuid, data.name,this);
         view.exec();
     });
 
@@ -501,7 +504,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuCreateSnapshot->setText("Create Snapshot");
     MenuCreateSnapshot->setIcon(QIcon(Image::ImageSnapshot));
     connect(MenuCreateSnapshot, &QAction::triggered, this, [this,data](bool checked) {
-        CreateSwcSnapshotView view(data.name, this);
+        CreateSwcSnapshotView view(data.uuid, this);
         view.exec();
     });
 
@@ -509,7 +512,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuEditorSwcSnapshot->setText("View Snapshot");
     MenuEditorSwcSnapshot->setIcon(QIcon(Image::ImageSnapshot));
     connect(MenuEditorSwcSnapshot, &QAction::triggered, this, [this,data](bool checked) {
-        EditorSwcSnapshot view(data.name, this);
+        EditorSwcSnapshot view(data.uuid, this);
         view.exec();
     });
 
@@ -517,7 +520,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuEditorSwcIncrement->setText("View Increment Record");
     MenuEditorSwcIncrement->setIcon(QIcon(Image::ImageIncrement));
     connect(MenuEditorSwcIncrement, &QAction::triggered, this, [this,data](bool checked) {
-        EditorSwcIncrementRecord view(data.name, this);
+        EditorSwcIncrementRecord view(data.uuid, this);
         view.exec();
     });
 
@@ -525,7 +528,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuEditorVersionControl->setText("Version Control");
     MenuEditorVersionControl->setIcon(QIcon(Image::ImageVersionControl));
     connect(MenuEditorVersionControl, &QAction::triggered, this, [this,data](bool checked) {
-        EditorSwcVersionControl view(data.name, this);
+        EditorSwcVersionControl view(data.uuid, data.name,this);
         view.exec();
     });
 

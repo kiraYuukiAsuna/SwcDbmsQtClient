@@ -82,22 +82,22 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool getProjectMetaInfoByName(const std::string&projectName, proto::GetProjectResponse&response,
+    static bool getProjectMetaInfoByUuid(const std::string&projectUuid, proto::GetProjectResponse&response,
                                          QWidget* parent) {
         proto::GetProjectRequest request;
         setCommonRequestField(request);
-        request.set_projectname(projectName);
+        request.set_projectuuid(projectUuid);
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->GetProject(&context, request, &response);
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool getSwcMetaInfoByName(const std::string&swcName, proto::GetSwcMetaInfoResponse&response,
+    static bool getSwcMetaInfoByUuid(const std::string&swcUuid, proto::GetSwcMetaInfoResponse&response,
                                      QWidget* parent) {
         proto::GetSwcMetaInfoRequest request;
         setCommonRequestField(request);
-        request.set_swcname(swcName);
+        request.set_swcuuid(swcUuid);
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->GetSwcMetaInfo(&context, request, &response);
@@ -115,11 +115,11 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool getSwcFullNodeData(const std::string&swcName, proto::GetSwcFullNodeDataResponse&response,
+    static bool getSwcFullNodeDataByUuid(const std::string&swcUuid, proto::GetSwcFullNodeDataResponse&response,
                                    QWidget* parent) {
         proto::GetSwcFullNodeDataRequest request;
         setCommonRequestField(request);
-        request.set_swcname(swcName);
+        request.set_swcuuid(swcUuid);
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->GetSwcFullNodeData(&context, request, &response);
@@ -137,14 +137,14 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool getSwcNodeDataListByTimeAndUserResponse(const std::string&swcName, const std::string&userName,
+    static bool getSwcNodeDataListByTimeAndUserByUuid(const std::string&swcUuid, const std::string&userName,
                                                         google::protobuf::Timestamp&startTime,
                                                         google::protobuf::Timestamp&endTime,
                                                         proto::GetSwcNodeDataListByTimeAndUserResponse&response,
                                                         QWidget* parent) {
         proto::GetSwcNodeDataListByTimeAndUserRequest request;
         setCommonRequestField(request);
-        request.set_swcname(swcName);
+        request.set_swcuuid(swcUuid);
         request.set_username(userName);
         request.mutable_starttime()->CopyFrom(startTime);
         request.mutable_endtime()->CopyFrom(endTime);
@@ -154,11 +154,11 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool addSwcNodeData(const std::string&swcName, proto::SwcDataV1&swcData,
+    static bool addSwcNodeDataByUuid(const std::string&swcUuid, proto::SwcDataV1&swcData,
                                proto::CreateSwcNodeDataResponse&response, QWidget* parent) {
         proto::CreateSwcNodeDataRequest request;
         setCommonRequestField(request);
-        request.set_swcname(swcName);
+        request.set_swcuuid(swcUuid);
         request.mutable_swcdata()->CopyFrom(swcData);
 
         grpc::ClientContext context;
@@ -166,11 +166,11 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool modifySwcNodeData(const std::string&swcName, proto::SwcDataV1&swcData,
+    static bool modifySwcNodeDataByUuid(const std::string&swcUuid, proto::SwcDataV1&swcData,
                                   proto::UpdateSwcNodeDataResponse&response, QWidget* parent) {
         proto::UpdateSwcNodeDataRequest request;
         setCommonRequestField(request);
-        request.set_swcname(swcName);
+        request.set_swcuuid(swcUuid);
         request.mutable_swcdata()->CopyFrom(swcData);
 
         grpc::ClientContext context;
@@ -178,11 +178,11 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool deleteSwcNodeData(const std::string&swcName, proto::SwcDataV1&swcData,
+    static bool deleteSwcNodeDataByUuid(const std::string&swcUuid, proto::SwcDataV1&swcData,
                                   proto::DeleteSwcNodeDataResponse&response, QWidget* parent) {
         proto::DeleteSwcNodeDataRequest request;
         setCommonRequestField(request);
-        request.set_swcname(swcName);
+        request.set_swcuuid(swcUuid);
         request.mutable_swcdata()->CopyFrom(swcData);
 
         grpc::ClientContext context;
@@ -203,12 +203,12 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool getAllSwcIncrementRecord(const std::string&name,
+    static bool getAllSwcIncrementRecordByUuid(const std::string&swcUuid,
                                          proto::GetAllIncrementOperationMetaInfoResponse&response,
                                          QWidget* parent) {
         proto::GetAllIncrementOperationMetaInfoRequest request;
         setCommonRequestField(request);
-        request.set_swcname(name);
+        request.set_swcuuid(swcUuid);
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->GetAllIncrementOperationMetaInfo(&context, request, &response);
@@ -227,12 +227,12 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool getSwcAttachmentAno(const std::string&swcName, const std::string&attachmentUuid,
+    static bool getSwcAttachmentAnoByUuid(const std::string&swcUuid, const std::string&attachmentUuid,
                                     proto::GetSwcAttachmentAnoResponse&response,
                                     QWidget* parent) {
         proto::GetSwcAttachmentAnoRequest request;
         setCommonRequestField(request);
-        request.set_swcname(swcName);
+        request.set_swcuuid(swcUuid);
         request.set_anoattachmentuuid(attachmentUuid);
 
         grpc::ClientContext context;
@@ -240,13 +240,13 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool createSwcAttachmentAno(const std::string&name, const std::string&apoFileName,
+    static bool createSwcAttachmentAno(const std::string&swcUuid, const std::string&apoFileName,
                                        const std::string&swcFileName,
                                        proto::CreateSwcAttachmentAnoResponse&response,
                                        QWidget* parent) {
         proto::CreateSwcAttachmentAnoRequest request;
         setCommonRequestField(request);
-        request.set_swcname(name);
+        request.set_swcuuid(swcUuid);
         request.mutable_swcattachmentano()->set_apofile(apoFileName);
         request.mutable_swcattachmentano()->set_swcfile(swcFileName);
 
@@ -255,13 +255,13 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool updateSwcAttachmentAno(const std::string&name, const std::string&attachmentUuid,
+    static bool updateSwcAttachmentAnoByUuid(const std::string&swcUuid, const std::string&attachmentUuid,
                                        const std::string&apoFileName, const std::string&swcFileName,
                                        proto::UpdateSwcAttachmentAnoResponse&response,
                                        QWidget* parent) {
         proto::UpdateSwcAttachmentAnoRequest request;
         setCommonRequestField(request);
-        request.set_swcname(name);
+        request.set_swcuuid(swcUuid);
         request.set_anoattachmentuuid(attachmentUuid);
         request.mutable_newswcattachmentano()->set_apofile(apoFileName);
         request.mutable_newswcattachmentano()->set_swcfile(swcFileName);
@@ -271,12 +271,12 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool deleteSwcAttachmentAno(const std::string&name, const std::string&attachmentUuid,
+    static bool deleteSwcAttachmentAnoByUuid(const std::string&swcUuid, const std::string&attachmentUuid,
                                        proto::DeleteSwcAttachmentAnoResponse&response,
                                        QWidget* parent) {
         proto::DeleteSwcAttachmentAnoRequest request;
         setCommonRequestField(request);
-        request.set_swcname(name);
+        request.set_swcuuid(swcUuid);
         request.set_anoattachmentuuid(attachmentUuid);
 
         grpc::ClientContext context;
@@ -284,12 +284,12 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool getSwcAttachmentApo(const std::string&swcName, const std::string&attachmentUuid,
+    static bool getSwcAttachmentApoByUuid(const std::string&swcUuid, const std::string&attachmentUuid,
                                     proto::GetSwcAttachmentApoResponse&response,
                                     QWidget* parent) {
         proto::GetSwcAttachmentApoRequest request;
         setCommonRequestField(request);
-        request.set_swcname(swcName);
+        request.set_swcuuid(swcUuid);
         request.set_apoattachmentuuid(attachmentUuid);
 
         grpc::ClientContext context;
@@ -297,12 +297,12 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool createSwcAttachmentApo(const std::string&name, std::vector<proto::SwcAttachmentApoV1> attachments,
+    static bool createSwcAttachmentApo(const std::string&swcUuid, std::vector<proto::SwcAttachmentApoV1> attachments,
                                        proto::CreateSwcAttachmentApoResponse&response,
                                        QWidget* parent) {
         proto::CreateSwcAttachmentApoRequest request;
         setCommonRequestField(request);
-        request.set_swcname(name);
+        request.set_swcuuid(swcUuid);
         for (auto&attachment: attachments) {
             request.add_swcattachmentapo()->CopyFrom(attachment);
         }
@@ -312,13 +312,13 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool updateSwcAttachmentApo(const std::string&name, const std::string&attachmentUuid,
+    static bool updateSwcAttachmentApoByUuid(const std::string&swcUuid, const std::string&attachmentUuid,
                                        std::vector<proto::SwcAttachmentApoV1> attachments,
                                        proto::UpdateSwcAttachmentApoResponse&response,
                                        QWidget* parent) {
         proto::UpdateSwcAttachmentApoRequest request;
         setCommonRequestField(request);
-        request.set_swcname(name);
+        request.set_swcuuid(swcUuid);
         request.set_apoattachmentuuid(attachmentUuid);
         for (auto&attachment: attachments) {
             request.add_newswcattachmentapo()->CopyFrom(attachment);
@@ -329,12 +329,12 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool deleteSwcAttachmentApo(const std::string&name, const std::string&attachmentUuid,
+    static bool deleteSwcAttachmentApoByUuid(const std::string&swcUuid, const std::string&attachmentUuid,
                                        proto::DeleteSwcAttachmentApoResponse&response,
                                        QWidget* parent) {
         proto::DeleteSwcAttachmentApoRequest request;
         setCommonRequestField(request);
-        request.set_swcname(name);
+        request.set_swcuuid(swcUuid);
         request.set_apoattachmentuuid(attachmentUuid);
 
         grpc::ClientContext context;
@@ -342,12 +342,12 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool RevertSwcVersion(const std::string&name, google::protobuf::Timestamp&endTime,
+    static bool RevertSwcVersionByUuid(const std::string&swcUuid, google::protobuf::Timestamp&endTime,
                                  proto::RevertSwcVersionResponse&response,
                                  QWidget* parent) {
         proto::RevertSwcVersionRequest request;
         setCommonRequestField(request);
-        request.set_swcname(name);
+        request.set_swcuuid(swcUuid);
         request.mutable_versionendtime()->CopyFrom(endTime);
 
         grpc::ClientContext context;
@@ -523,12 +523,12 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-     static bool GetSwcAttachmentSwc(const std::string&swcName, const std::string&attachmentUuid,
+     static bool GetSwcAttachmentSwc(const std::string&swcUuid, const std::string&attachmentUuid,
                                     proto::GetSwcAttachmentSwcResponse&response,
                                     QWidget* parent) {
         proto::GetSwcAttachmentSwcRequest request;
         setCommonRequestField(request);
-        request.set_swcname(swcName);
+        request.set_swcuuid(swcUuid);
         request.set_swcattachmentuuid(attachmentUuid);
 
         grpc::ClientContext context;
@@ -536,12 +536,12 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool CreateSwcAttachmentSwc(const std::string&name, std::vector<proto::SwcNodeDataV1> attachments,
+    static bool CreateSwcAttachmentSwcByUuid(const std::string&swcUuid, std::vector<proto::SwcNodeDataV1> attachments,
                                        proto::CreateSwcAttachmentSwcResponse&response,
                                        QWidget* parent) {
         proto::CreateSwcAttachmentSwcRequest request;
         setCommonRequestField(request);
-        request.set_swcname(name);
+        request.set_swcuuid(swcUuid);
         for (auto&attachment: attachments) {
             request.add_swcdata()->CopyFrom(attachment);
         }
@@ -551,13 +551,13 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool UpdateSwcAttachmentSwc(const std::string&name, const std::string&attachmentUuid,
+    static bool UpdateSwcAttachmentSwcByUuid(const std::string&swcUuid, const std::string&attachmentUuid,
                                        std::vector<proto::SwcNodeDataV1> attachments,
                                        proto::UpdateSwcAttachmentSwcResponse&response,
                                        QWidget* parent) {
         proto::UpdateSwcAttachmentSwcRequest request;
         setCommonRequestField(request);
-        request.set_swcname(name);
+        request.set_swcuuid(swcUuid);
         request.set_swcattachmentuuid(attachmentUuid);
         for (auto&attachment: attachments) {
             request.add_newswcdata()->CopyFrom(attachment);
@@ -568,12 +568,12 @@ public:
         return defaultErrorHandler(__func__, status, response.metainfo(), parent);
     }
 
-    static bool DeleteSwcAttachmentSwc(const std::string&name, const std::string&attachmentUuid,
+    static bool DeleteSwcAttachmentSwcByUuid(const std::string&swcUuid, const std::string&attachmentUuid,
                                        proto::DeleteSwcAttachmentSwcResponse&response,
                                        QWidget* parent) {
         proto::DeleteSwcAttachmentSwcRequest request;
         setCommonRequestField(request);
-        request.set_swcname(name);
+        request.set_swcuuid(swcUuid);
         request.set_swcattachmentuuid(attachmentUuid);
 
         grpc::ClientContext context;

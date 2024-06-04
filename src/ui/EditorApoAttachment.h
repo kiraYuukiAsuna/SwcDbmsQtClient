@@ -114,13 +114,14 @@ class EditorApoAttachment : public QDialog {
 Q_OBJECT
 
 public:
-    explicit EditorApoAttachment(const std::string &swcName, QWidget *parent = nullptr);
+    explicit EditorApoAttachment(const std::string& swcUuid, const std::string &swcName, QWidget *parent = nullptr);
 
     ~EditorApoAttachment() override;
 
 private:
     Ui::EditorApoAttachment *ui;
 
+    std::string m_SwcUuid;
     std::string m_SwcName;
     std::string m_AttachmentUuid;
 

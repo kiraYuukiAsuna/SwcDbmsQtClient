@@ -58,7 +58,7 @@ void RightClientView::openProjectMetaInfo(const std::string& projectName) {
         if (!base) {
             return;
         }
-        if (WrappedCall::getProjectMetaInfoByName(projectName, response, this)) {
+        if (WrappedCall::getProjectMetaInfoByUuid(projectName, response, this)) {
             auto projectEditor = dynamic_cast<EditorProjectMetaInfo *>(base);
             if (!projectEditor) {
                 return;
@@ -68,7 +68,7 @@ void RightClientView::openProjectMetaInfo(const std::string& projectName) {
         return;
     }
 
-    if (WrappedCall::getProjectMetaInfoByName(projectName, response, this)) {
+    if (WrappedCall::getProjectMetaInfoByUuid(projectName, response, this)) {
         auto* editor = new EditorProjectMetaInfo(response, m_TabWidget);
         auto newIndex = m_TabWidget->addTab(editor, QIcon(Image::ImageProject),
                                             QString::fromStdString(response.projectinfo().name()));
@@ -97,7 +97,7 @@ void RightClientView::refreshProjectMetaInfo(const std::string& projectName) {
         if (!base) {
             return;
         }
-        if (WrappedCall::getProjectMetaInfoByName(projectName, response, this)) {
+        if (WrappedCall::getProjectMetaInfoByUuid(projectName, response, this)) {
             auto projectEditor = dynamic_cast<EditorProjectMetaInfo *>(base);
             if (!projectEditor) {
                 return;
@@ -107,8 +107,8 @@ void RightClientView::refreshProjectMetaInfo(const std::string& projectName) {
     }
 }
 
-void RightClientView::openSwcMetaInfo(const std::string& swcName) {
-    auto index = findIfTabAlreadOpenned(swcName, MetaInfoType::eSwc);
+void RightClientView::openSwcMetaInfo(const std::string& swcUuid, const std::string& swcName) {
+    auto index = findIfTabAlreadOpenned(swcUuid, MetaInfoType::eSwc);
 
     proto::GetSwcMetaInfoResponse response;
     if (index != -1) {
@@ -122,7 +122,7 @@ void RightClientView::openSwcMetaInfo(const std::string& swcName) {
         if (!base) {
             return;
         }
-        if (WrappedCall::getSwcMetaInfoByName(swcName, response, this)) {
+        if (WrappedCall::getSwcMetaInfoByUuid(swcUuid, response, this)) {
             auto swcEditor = dynamic_cast<EditorSwcMetaInfo *>(base);
             if (!swcEditor) {
                 return;
@@ -132,7 +132,7 @@ void RightClientView::openSwcMetaInfo(const std::string& swcName) {
         return;
     }
 
-    if (WrappedCall::getSwcMetaInfoByName(swcName, response, this)) {
+    if (WrappedCall::getSwcMetaInfoByUuid(swcUuid, response, this)) {
         auto* editor = new EditorSwcMetaInfo(response, m_TabWidget);
         auto newIndex = m_TabWidget->addTab(editor, QIcon(Image::ImageNode),
                                             QString::fromStdString(response.swcinfo().name()));
@@ -147,7 +147,7 @@ void RightClientView::closeWithoutSavingSwc(const std::string& swcName) {
     }
 }
 
-void RightClientView::refreshSwcMetaInfo(const std::string& swcName) {
+void RightClientView::refreshSwcMetaInfo(const std::string& swcUuid, const std::string& swcName) {
     auto index = findIfTabAlreadOpenned(swcName, MetaInfoType::eSwc);
 
     proto::GetSwcMetaInfoResponse response;
@@ -160,7 +160,7 @@ void RightClientView::refreshSwcMetaInfo(const std::string& swcName) {
         if (!base) {
             return;
         }
-        if (WrappedCall::getSwcMetaInfoByName(swcName, response, this)) {
+        if (WrappedCall::getSwcMetaInfoByUuid(swcUuid, response, this)) {
             auto swcEditor = dynamic_cast<EditorSwcMetaInfo *>(base);
             if (!swcEditor) {
                 return;
@@ -248,22 +248,22 @@ void RightClientView::refreshAllOpenedProjectMetaInfo() {
     }
 }
 
-int RightClientView::findIfTabAlreadOpenned(const std::string& name, MetaInfoType metaInfoType) {
+int RightClientView::findIfTabAlreadOpenned(const std::string& swcUuid, MetaInfoType metaInfoType) {
     for (int i = 0; i < m_TabWidget->count(); i++) {
         auto editorBase = dynamic_cast<EditorBase *>(m_TabWidget->widget(i));
         if (!editorBase) {
             continue;
         }
 
-        if (editorBase->getName() == name && editorBase->getMetaInfoType() == metaInfoType) {
+        if (editorBase->getUuid() == swcUuid && editorBase->getMetaInfoType() == metaInfoType) {
             return i;
         }
     }
     return -1;
 }
 
-void RightClientView::openSwcNodeData(const std::string &swcName) {
-    auto index = findIfTabAlreadOpenned(swcName, MetaInfoType::eSwcData);
+void RightClientView::openSwcNodeData(const std::string &swcUuid, const std::string &swcName) {
+    auto index = findIfTabAlreadOpenned(swcUuid, MetaInfoType::eSwcData);
 
     if (index != -1) {
         m_TabWidget->setCurrentIndex(index);
@@ -284,7 +284,7 @@ void RightClientView::openSwcNodeData(const std::string &swcName) {
         return;
     }
 
-    auto* editor = new EditorSwcNode(swcName, m_TabWidget);
+    auto* editor = new EditorSwcNode(swcUuid, m_TabWidget);
     auto newIndex = m_TabWidget->addTab(editor, QIcon(Image::ImageDaily),QString::fromStdString(swcName));
     m_TabWidget->setCurrentIndex(newIndex);
 }

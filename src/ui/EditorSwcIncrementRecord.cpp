@@ -5,8 +5,8 @@
 #include "ui_EditorSwcIncrementRecord.h"
 #include "src/framework/service/WrappedCall.h"
 
-EditorSwcIncrementRecord::EditorSwcIncrementRecord(const std::string&swcName, QWidget* parent) : QDialog(parent),
-    ui(new Ui::EditorSwcIncrementRecord), m_SwcName(swcName) {
+EditorSwcIncrementRecord::EditorSwcIncrementRecord(const std::string&swcUuid, QWidget* parent) : QDialog(parent),
+    ui(new Ui::EditorSwcIncrementRecord), m_SwcUuid(swcUuid) {
     ui->setupUi(this);
 
     connect(ui->DetailBtn,&QPushButton::clicked,this,[&]() {
@@ -24,7 +24,7 @@ EditorSwcIncrementRecord::~EditorSwcIncrementRecord() {
 void EditorSwcIncrementRecord::getAllSwcIncrementRecord() {
     proto::GetAllIncrementOperationMetaInfoResponse response;
 
-    if (WrappedCall::getAllSwcIncrementRecord(m_SwcName, response, this)) {
+    if (WrappedCall::getAllSwcIncrementRecordByUuid(m_SwcUuid, response, this)) {
         for (auto&incrementRecordCollection: response.swcincrementoperationmetainfo()) {
             m_SwcIncrements.push_back(incrementRecordCollection);
         }
