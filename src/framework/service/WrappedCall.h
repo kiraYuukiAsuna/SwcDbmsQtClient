@@ -117,25 +117,35 @@ public:
     }
 
     static bool getSwcFullNodeDataByUuid(const std::string&swcUuid, proto::GetSwcFullNodeDataResponse&response,
-                                         QWidget* parent) {
+                                         QWidget* parent, bool noMessageBoxWhenError = false) {
         proto::GetSwcFullNodeDataRequest request;
         setCommonRequestField(request);
         request.set_swcuuid(swcUuid);
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->GetSwcFullNodeData(&context, request, &response);
-        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+        if (noMessageBoxWhenError) {
+            return defaultErrorHandlerNoMessageBox(__func__, status, response.metainfo(), parent);
+        }
+        else {
+            return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+        }
     }
 
     static bool getSwcSnapshot(const std::string&swcSnapshotCollectioNname, proto::GetSnapshotResponse&response,
-                               QWidget* parent) {
+                               QWidget* parent, bool noMessageBoxWhenError = false) {
         proto::GetSnapshotRequest request;
         setCommonRequestField(request);
         request.set_swcsnapshotcollectionname(swcSnapshotCollectioNname);
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->GetSnapshot(&context, request, &response);
-        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+        if (noMessageBoxWhenError) {
+            return defaultErrorHandlerNoMessageBox(__func__, status, response.metainfo(), parent);
+        }
+        else {
+            return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+        }
     }
 
     static bool getSwcNodeDataListByTimeAndUserByUuid(const std::string&swcUuid, const std::string&userName,
@@ -156,7 +166,7 @@ public:
     }
 
     static bool addSwcNodeDataByUuid(const std::string&swcUuid, proto::SwcDataV1&swcData,
-                                     proto::CreateSwcNodeDataResponse&response, QWidget* parent) {
+                                     proto::CreateSwcNodeDataResponse&response, QWidget* parent, bool noMessageBoxWhenError = false) {
         proto::CreateSwcNodeDataRequest request;
         setCommonRequestField(request);
         request.set_swcuuid(swcUuid);
@@ -164,7 +174,11 @@ public:
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->CreateSwcNodeData(&context, request, &response);
-        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+        if(noMessageBoxWhenError) {
+            return defaultErrorHandlerNoMessageBox(__func__, status, response.metainfo(), parent);
+        }else {
+            return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+        }
     }
 
     static bool modifySwcNodeDataByUuid(const std::string&swcUuid, proto::SwcDataV1&swcData,
@@ -193,7 +207,7 @@ public:
 
     static bool createSwcMeta(const std::string&name, const std::string&description, std::string belongToProjectUuid,
                               proto::CreateSwcResponse&response,
-                              QWidget* parent) {
+                              QWidget* parent, bool noMessageBoxWhenError = false) {
         proto::CreateSwcRequest request;
         setCommonRequestField(request);
         request.mutable_swcinfo()->set_name(name);
@@ -203,7 +217,11 @@ public:
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->CreateSwc(&context, request, &response);
-        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+        if(noMessageBoxWhenError) {
+            return defaultErrorHandlerNoMessageBox(__func__, status, response.metainfo(), parent);
+        }else {
+            return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+        }
     }
 
     static bool getAllSwcIncrementRecordByUuid(const std::string&swcUuid,
@@ -232,7 +250,7 @@ public:
 
     static bool getSwcAttachmentAnoByUuid(const std::string&swcUuid, const std::string&attachmentUuid,
                                           proto::GetSwcAttachmentAnoResponse&response,
-                                          QWidget* parent) {
+                                          QWidget* parent, bool noMessageBoxWhenError = false) {
         proto::GetSwcAttachmentAnoRequest request;
         setCommonRequestField(request);
         request.set_swcuuid(swcUuid);
@@ -240,13 +258,18 @@ public:
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->GetSwcAttachmentAno(&context, request, &response);
-        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+        if (noMessageBoxWhenError) {
+            return defaultErrorHandlerNoMessageBox(__func__, status, response.metainfo(), parent);
+        }
+        else {
+            return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+        }
     }
 
     static bool createSwcAttachmentAno(const std::string&swcUuid, const std::string&apoFileName,
                                        const std::string&swcFileName,
                                        proto::CreateSwcAttachmentAnoResponse&response,
-                                       QWidget* parent) {
+                                       QWidget* parent, bool noMessageBoxWhenError = false) {
         proto::CreateSwcAttachmentAnoRequest request;
         setCommonRequestField(request);
         request.set_swcuuid(swcUuid);
@@ -255,7 +278,11 @@ public:
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->CreateSwcAttachmentAno(&context, request, &response);
-        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+        if(noMessageBoxWhenError) {
+            return defaultErrorHandlerNoMessageBox(__func__, status, response.metainfo(), parent);
+        }else {
+            return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+        }
     }
 
     static bool updateSwcAttachmentAnoByUuid(const std::string&swcUuid, const std::string&attachmentUuid,
@@ -289,7 +316,7 @@ public:
 
     static bool getSwcAttachmentApoByUuid(const std::string&swcUuid, const std::string&attachmentUuid,
                                           proto::GetSwcAttachmentApoResponse&response,
-                                          QWidget* parent) {
+                                          QWidget* parent, bool noMessageBoxWhenError = false) {
         proto::GetSwcAttachmentApoRequest request;
         setCommonRequestField(request);
         request.set_swcuuid(swcUuid);
@@ -297,12 +324,17 @@ public:
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->GetSwcAttachmentApo(&context, request, &response);
-        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+        if (noMessageBoxWhenError) {
+            return defaultErrorHandlerNoMessageBox(__func__, status, response.metainfo(), parent);
+        }
+        else {
+            return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+        }
     }
 
     static bool createSwcAttachmentApo(const std::string&swcUuid, std::vector<proto::SwcAttachmentApoV1> attachments,
                                        proto::CreateSwcAttachmentApoResponse&response,
-                                       QWidget* parent) {
+                                       QWidget* parent, bool noMessageBoxWhenError = false) {
         proto::CreateSwcAttachmentApoRequest request;
         setCommonRequestField(request);
         request.set_swcuuid(swcUuid);
@@ -312,7 +344,11 @@ public:
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->CreateSwcAttachmentApo(&context, request, &response);
-        return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+        if(noMessageBoxWhenError) {
+            return defaultErrorHandlerNoMessageBox(__func__, status, response.metainfo(), parent);
+        }else {
+            return defaultErrorHandler(__func__, status, response.metainfo(), parent);
+        }
     }
 
     static bool updateSwcAttachmentApoByUuid(const std::string&swcUuid, const std::string&attachmentUuid,

@@ -18,7 +18,7 @@ RightClientView::RightClientView(MainWindow* mainWindow) : QWidget(mainWindow), 
 
     m_TabWidget = new QTabWidget(this);
     m_TabWidget->setTabsClosable(true);
-    connect(m_TabWidget, &QTabWidget::tabCloseRequested, this, [this](int index) {
+    connect(m_TabWidget, &QTabWidget::tabCloseRequested, this, [this, mainWindow](int index) {
         auto editor = m_TabWidget->widget(index);
 
         if (!editor) {
@@ -29,6 +29,7 @@ RightClientView::RightClientView(MainWindow* mainWindow) : QWidget(mainWindow), 
         if (base) {
             if (base->save()) {
                 m_TabWidget->removeTab(index);
+                mainWindow->getLeftClientView().refreshTree();
             }
         }
         else {
@@ -322,10 +323,12 @@ void RightClientView::openSwcNodeData(const std::string&swcUuid) {
         editor->refreshUserArea();
         return;
     }
-
-    auto* editor = new EditorSwcNode(swcUuid, m_TabWidget);
-    auto newIndex = m_TabWidget->addTab(editor, QIcon(Image::ImageDaily), QString::fromStdString(swcUuid));
-    m_TabWidget->setCurrentIndex(newIndex);
+    proto::GetSwcMetaInfoResponse response;
+    if (WrappedCall::getSwcMetaInfoByUuid(swcUuid, response, this)) {
+        auto* editor = new EditorSwcNode(swcUuid, m_TabWidget);
+        auto newIndex = m_TabWidget->addTab(editor, QIcon(Image::ImageDaily), QString::fromStdString(response.swcinfo().name()));
+        m_TabWidget->setCurrentIndex(newIndex);
+    }
 }
 
 void RightClientView::closeWithoutSavingSwcNodeData(const std::string&swcUuid) {

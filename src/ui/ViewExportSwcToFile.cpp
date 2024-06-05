@@ -8,6 +8,7 @@
 #include "src/FileIo/ApoIo.hpp"
 #include "src/FileIo/AnoIo.hpp"
 #include <filesystem>
+#include "ProgressBar.h"
 
 ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcData, bool getDataFromServer,
                                          QWidget* parent) : QDialog(parent), ui(new Ui::ViewExportSwcToFile) {
@@ -59,7 +60,7 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcDat
                 std::filesystem::path saveDir = m_SavePath;
                 auto timestamp = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).
                         time_since_epoch();
-                auto exportDirName = ("ExportSwcResult_" + subreplace(timestampToString(timestamp.count()),":","-"));
+                auto exportDirName = ("ExportSwcResult_" + subreplace(timestampToString(timestamp.count()), ":", "-"));
                 saveDir = saveDir / exportDirName;
                 if (std::filesystem::exists(saveDir)) {
                     QMessageBox::information(this, "Warning",
@@ -96,266 +97,315 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcDat
             return;
         }
 
-        for (int i = 0; i < m_ExportSwcData.size(); i++) {
-            QApplication::processEvents();
 
-            ui->ResultTable->setItem(i, 0,
-                                     new QTableWidgetItem(
-                                         QString::fromStdString(m_ExportSwcData[i].swcMetaInfo.name())));
-            ui->ResultTable->setItem(i, 1,
-                                     new QTableWidgetItem(
-                                         QString::fromStdString(m_ExportSwcData[i].swcMetaInfo.swctype())));
-            ui->ResultTable->setItem(i, 2,
-                                     new QTableWidgetItem(
-                                         QString::fromStdString(
-                                             std::to_string(m_ExportSwcData[i].swcData.swcdata_size()))));
+        ProgressBar progressBar(this);
+        progressBar.setText("Export swc Files...");
+        auto task = [this, &progressBar]() {
+            for (int i = 0; i < m_ExportSwcData.size(); i++) {
+                QApplication::processEvents();
 
-            QString statusMessage = "Ignored";
-            QString fileSavePath = "";
+                QMetaObject::invokeMethod(this, [&progressBar, i, this]() {
+                    ui->ResultTable->setItem(i, 0,
+                                             new QTableWidgetItem(
+                                                 QString::fromStdString(m_ExportSwcData[i].swcMetaInfo.name())));
+                    ui->ResultTable->setItem(i, 1,
+                                             new QTableWidgetItem(
+                                                 QString::fromStdString(m_ExportSwcData[i].swcMetaInfo.swctype())));
+                    ui->ResultTable->setItem(i, 2,
+                                             new QTableWidgetItem(
+                                                 QString::fromStdString(
+                                                     std::to_string(m_ExportSwcData[i].swcData.swcdata_size()))));
+                });
 
+                QString statusMessage = "Ignored";
+                QString fileSavePath = "";
 
-            if (ui->SwcList->item(i)->checkState() == Qt::Checked) {
-                std::string apoExportName;
-                std::string swcExportName;
+                if (ui->SwcList->item(i)->checkState() == Qt::Checked) {
+                    std::string apoExportName;
+                    std::string swcExportName;
 
-                if (!m_ExportSwcData[i].swcMetaInfo.swcattachmentanometainfo().attachmentuuid().empty()) {
-                    proto::GetSwcAttachmentAnoResponse get_swc_attachment_ano_response;
-                    auto anoAttachmentUuid = m_ExportSwcData[i].swcMetaInfo.swcattachmentanometainfo().attachmentuuid();
-                    if (!WrappedCall::getSwcAttachmentAnoByUuid(m_ExportSwcData[i].swcMetaInfo.base().uuid(),
-                                                                anoAttachmentUuid,
-                                                                get_swc_attachment_ano_response,
-                                                                this)) {
-                        return;
-                    }
+                    if (!m_ExportSwcData[i].swcMetaInfo.swcattachmentanometainfo().attachmentuuid().empty()) {
+                        proto::GetSwcAttachmentAnoResponse get_swc_attachment_ano_response;
+                        auto anoAttachmentUuid = m_ExportSwcData[i].swcMetaInfo.swcattachmentanometainfo().
+                                attachmentuuid();
+                        if (WrappedCall::getSwcAttachmentAnoByUuid(m_ExportSwcData[i].swcMetaInfo.base().uuid(),
+                                                                   anoAttachmentUuid,
+                                                                   get_swc_attachment_ano_response,
+                                                                   this, true)) {
+                            auto apoData = get_swc_attachment_ano_response.swcattachmentano().apofile();
+                            auto swcData = get_swc_attachment_ano_response.swcattachmentano().swcfile();
 
-                    auto apoData = get_swc_attachment_ano_response.swcattachmentano().apofile();
-                    auto swcData = get_swc_attachment_ano_response.swcattachmentano().swcfile();
+                            apoExportName = apoData;
+                            swcExportName = swcData;
 
-                    apoExportName = apoData;
-                    swcExportName = swcData;
+                            std::filesystem::path swcPath(swcData);
+                            auto anoExportName = swcPath.stem();
 
-                    std::filesystem::path swcPath(swcData);
-                    auto anoExportName = swcPath.stem();
+                            std::filesystem::path anoSavePath(m_SavePath);
+                            anoSavePath = anoSavePath / anoExportName;
 
-                    std::filesystem::path anoSavePath(m_SavePath);
-                    anoSavePath = anoSavePath / anoExportName;
-
-                    AnoIo io(anoSavePath.string());
-                    AnoUnit unit;
-                    unit.APOFILE = apoData;
-                    unit.SWCFILE = swcData;
-                    io.setValue(unit);
-                    io.WriteToFile();
-                }
-                else {
-                    swcExportName = m_ExportSwcData[i].swcMetaInfo.name();
-                    apoExportName = m_ExportSwcData[i].swcMetaInfo.name() + ".ano.apo";
-                }
-
-                if (!m_ExportSwcData[i].swcMetaInfo.swcattachmentapometainfo().attachmentuuid().empty()) {
-                    std::filesystem::path apoSavePath = m_SavePath;
-                    apoSavePath = apoSavePath / apoExportName;
-                    proto::GetSwcAttachmentApoResponse response;
-                    auto attachmentUuid = m_ExportSwcData[i].swcMetaInfo.swcattachmentapometainfo().attachmentuuid();
-                    if (!WrappedCall::getSwcAttachmentApoByUuid(m_ExportSwcData[i].swcMetaInfo.base().uuid(),
-                                                                attachmentUuid,
-                                                                response, this)) {
-                        QMessageBox::critical(this, "Error",
-                                              QString::fromStdString(response.metainfo().message()));
-                        ui->ResultTable->setItem(i, 3,
-                                                 new QTableWidgetItem("Get Swc Attachment Apo Data Failed"));
-                        ui->ResultTable->setItem(i, 4,
-                                                 new QTableWidgetItem(fileSavePath));
-                        setAllGridColor(i, Qt::red);
-                    }
-
-                    std::vector<proto::SwcAttachmentApoV1> swcAttachmentApoData;
-                    for (auto&data: response.swcattachmentapo()) {
-                        swcAttachmentApoData.push_back(data);
-                    }
-
-                    ApoIo io(apoSavePath.string());
-                    std::vector<ApoUnit> units;
-                    std::for_each(swcAttachmentApoData.begin(), swcAttachmentApoData.end(),
-                                  [&](proto::SwcAttachmentApoV1&val) {
-                                      ApoUnit unit;
-                                      unit.n = val.n();
-                                      unit.orderinfo = val.orderinfo();
-                                      unit.name = val.name();
-                                      unit.comment = val.comment();
-                                      unit.z = val.z();
-                                      unit.x = val.x();
-                                      unit.y = val.y();
-                                      unit.pixmax = val.pixmax();
-                                      unit.intensity = val.intensity();
-                                      unit.sdev = val.sdev();
-                                      unit.volsize = val.volsize();
-                                      unit.mass = val.mass();
-                                      unit.color_r = val.colorr();
-                                      unit.color_g = val.colorg();
-                                      unit.color_b = val.colorb();
-                                      units.push_back(unit);
-                                  });
-
-                    io.setValue(units);
-                    io.WriteToFile();
-                }
-
-                if (m_ExportSwcData[i].swcMetaInfo.swctype() == "swc") {
-                    std::filesystem::path savePath(m_SavePath);
-                    savePath = savePath / swcExportName;
-
-                    if (m_GetDataFromServer) {
-                        if (!m_ExportSwcData[i].isSnapshot) {
-                            proto::GetSwcFullNodeDataResponse response;
-                            if (!WrappedCall::getSwcFullNodeDataByUuid(m_ExportSwcData[i].swcMetaInfo.base().uuid(),
-                                                                       response,
-                                                                       this)) {
-                                QMessageBox::critical(this, "Error",
-                                                      QString::fromStdString(response.metainfo().message()));
-                                ui->ResultTable->setItem(i, 3,
-                                                         new QTableWidgetItem("Get Data From Server Failed"));
-                                ui->ResultTable->setItem(i, 4,
-                                                         new QTableWidgetItem(fileSavePath));
-                                setAllGridColor(i, Qt::red);
-                                continue;
-                            }
-                            m_ExportSwcData[i].swcData = response.swcnodedata();
+                            AnoIo io(anoSavePath.string());
+                            AnoUnit unit;
+                            unit.APOFILE = apoData;
+                            unit.SWCFILE = swcData;
+                            io.setValue(unit);
+                            io.WriteToFile();
                         }
                         else {
-                            proto::GetSnapshotResponse response;
-                            if (!WrappedCall::getSwcSnapshot(m_ExportSwcData[i].swcMetaInfo.base().uuid(), response,
-                                                             this)) {
+                            swcExportName = m_ExportSwcData[i].swcMetaInfo.name();
+                            apoExportName = m_ExportSwcData[i].swcMetaInfo.name() + ".ano.apo";
+                        }
+                    }
+                    else {
+                        swcExportName = m_ExportSwcData[i].swcMetaInfo.name();
+                        apoExportName = m_ExportSwcData[i].swcMetaInfo.name() + ".ano.apo";
+                    }
+
+                    if (!m_ExportSwcData[i].swcMetaInfo.swcattachmentapometainfo().attachmentuuid().empty()) {
+                        std::filesystem::path apoSavePath = m_SavePath;
+                        apoSavePath = apoSavePath / apoExportName;
+                        proto::GetSwcAttachmentApoResponse response;
+                        auto attachmentUuid = m_ExportSwcData[i].swcMetaInfo.swcattachmentapometainfo().
+                                attachmentuuid();
+                        if (!WrappedCall::getSwcAttachmentApoByUuid(m_ExportSwcData[i].swcMetaInfo.base().uuid(),
+                                                                    attachmentUuid,
+                                                                    response, this, true)) {
+                            QMetaObject::invokeMethod(this, [this, &progressBar, i, response, fileSavePath]() {
                                 QMessageBox::critical(this, "Error",
                                                       QString::fromStdString(response.metainfo().message()));
                                 ui->ResultTable->setItem(i, 3,
-                                                         new QTableWidgetItem("Get Data From Server Failed"));
+                                                         new QTableWidgetItem("Get Swc Attachment Apo Data Failed"));
                                 ui->ResultTable->setItem(i, 4,
                                                          new QTableWidgetItem(fileSavePath));
                                 setAllGridColor(i, Qt::red);
-                                continue;
+                            });
+                        }
+
+                        std::vector<proto::SwcAttachmentApoV1> swcAttachmentApoData;
+                        for (auto&data: response.swcattachmentapo()) {
+                            swcAttachmentApoData.push_back(data);
+                        }
+
+                        ApoIo io(apoSavePath.string());
+                        std::vector<ApoUnit> units;
+                        std::for_each(swcAttachmentApoData.begin(), swcAttachmentApoData.end(),
+                                      [&](proto::SwcAttachmentApoV1&val) {
+                                          ApoUnit unit;
+                                          unit.n = val.n();
+                                          unit.orderinfo = val.orderinfo();
+                                          unit.name = val.name();
+                                          unit.comment = val.comment();
+                                          unit.z = val.z();
+                                          unit.x = val.x();
+                                          unit.y = val.y();
+                                          unit.pixmax = val.pixmax();
+                                          unit.intensity = val.intensity();
+                                          unit.sdev = val.sdev();
+                                          unit.volsize = val.volsize();
+                                          unit.mass = val.mass();
+                                          unit.color_r = val.colorr();
+                                          unit.color_g = val.colorg();
+                                          unit.color_b = val.colorb();
+                                          units.push_back(unit);
+                                      });
+
+                        io.setValue(units);
+                        io.WriteToFile();
+                    }
+
+                    if (m_ExportSwcData[i].swcMetaInfo.swctype() == "swc") {
+                        std::filesystem::path savePath(m_SavePath);
+                        savePath = savePath / swcExportName;
+
+                        if (m_GetDataFromServer) {
+                            if (!m_ExportSwcData[i].isSnapshot) {
+                                proto::GetSwcFullNodeDataResponse response;
+                                if (!WrappedCall::getSwcFullNodeDataByUuid(m_ExportSwcData[i].swcMetaInfo.base().uuid(),
+                                                                           response,
+                                                                           this, true)) {
+                                    QMetaObject::invokeMethod(this, [this, &progressBar, i, response, fileSavePath]() {
+                                        QMessageBox::critical(this, "Error",
+                                                              QString::fromStdString(response.metainfo().message()));
+                                        ui->ResultTable->setItem(i, 3,
+                                                                 new QTableWidgetItem("Get Data From Server Failed"));
+                                        ui->ResultTable->setItem(i, 4,
+                                                                 new QTableWidgetItem(fileSavePath));
+                                        setAllGridColor(i, Qt::red);
+                                    });
+
+                                    continue;
+                                }
+                                m_ExportSwcData[i].swcData = response.swcnodedata();
                             }
-                            m_ExportSwcData[i].swcData = response.swcnodedata();
+                            else {
+                                proto::GetSnapshotResponse response;
+                                if (!WrappedCall::getSwcSnapshot(m_ExportSwcData[i].swcMetaInfo.base().uuid(), response,
+                                                                 this, true)) {
+                                    QMetaObject::invokeMethod(this, [this, &progressBar, i, response, fileSavePath]() {
+                                        QMessageBox::critical(this, "Error",
+                                                              QString::fromStdString(response.metainfo().message()));
+                                        ui->ResultTable->setItem(i, 3,
+                                                                 new QTableWidgetItem("Get Data From Server Failed"));
+                                        ui->ResultTable->setItem(i, 4,
+                                                                 new QTableWidgetItem(fileSavePath));
+                                        setAllGridColor(i, Qt::red);
+                                    });
+
+                                    continue;
+                                }
+                                m_ExportSwcData[i].swcData = response.swcnodedata();
+                            }
+                        }
+
+                        std::vector<NeuronUnit> neurons;
+                        auto swcData = m_ExportSwcData[i].swcData;
+                        for (int j = 0; j < swcData.swcdata_size(); j++) {
+                            NeuronUnit unit;
+                            unit.n = swcData.swcdata(j).swcnodeinternaldata().n();
+                            unit.type = swcData.swcdata(j).swcnodeinternaldata().type();
+                            unit.x = swcData.swcdata(j).swcnodeinternaldata().x();
+                            unit.y = swcData.swcdata(j).swcnodeinternaldata().y();
+                            unit.z = swcData.swcdata(j).swcnodeinternaldata().z();
+                            unit.radius = swcData.swcdata(j).swcnodeinternaldata().radius();
+                            unit.parent = swcData.swcdata(j).swcnodeinternaldata().parent();
+                            neurons.push_back(unit);
+                        }
+
+                        Swc swc(savePath.string());
+                        swc.setValue(neurons);
+                        if (swc.WriteToFile()) {
+                            QMetaObject::invokeMethod(this, [this, &progressBar, i, fileSavePath, savePath]() {
+                                ui->ResultTable->setItem(i, 3,
+                                                         new QTableWidgetItem("Successfully"));
+                                ui->ResultTable->setItem(i, 4,
+                                                         new QTableWidgetItem(
+                                                             QString::fromStdString(savePath.string())));
+                                setAllGridColor(i, Qt::green);
+                                ui->ResultTable->item(i, 2)->setText(QString::fromStdString(
+                                    std::to_string(m_ExportSwcData[i].swcData.swcdata_size())));
+                            });
+
+                            QMetaObject::invokeMethod(this, [this, &progressBar, i]() {
+                                progressBar.setValue(i * 100 / m_ExportSwcData.size());
+                            });
+                            continue;
+                        }
+                        else {
+                            statusMessage = "Write Swc File Failed!";
+                            fileSavePath = "";
                         }
                     }
+                    else if (m_ExportSwcData[i].swcMetaInfo.swctype() == "eswc") {
+                        std::filesystem::path savePath(m_SavePath);
+                        savePath = savePath / swcExportName;
 
-                    std::vector<NeuronUnit> neurons;
-                    auto swcData = m_ExportSwcData[i].swcData;
-                    for (int j = 0; j < swcData.swcdata_size(); j++) {
-                        NeuronUnit unit;
-                        unit.n = swcData.swcdata(j).swcnodeinternaldata().n();
-                        unit.type = swcData.swcdata(j).swcnodeinternaldata().type();
-                        unit.x = swcData.swcdata(j).swcnodeinternaldata().x();
-                        unit.y = swcData.swcdata(j).swcnodeinternaldata().y();
-                        unit.z = swcData.swcdata(j).swcnodeinternaldata().z();
-                        unit.radius = swcData.swcdata(j).swcnodeinternaldata().radius();
-                        unit.parent = swcData.swcdata(j).swcnodeinternaldata().parent();
-                        neurons.push_back(unit);
-                    }
+                        if (m_GetDataFromServer) {
+                            if (!m_ExportSwcData[i].isSnapshot) {
+                                proto::GetSwcFullNodeDataResponse response;
+                                if (!WrappedCall::getSwcFullNodeDataByUuid(m_ExportSwcData[i].swcMetaInfo.base().uuid(),
+                                                                           response,
+                                                                           this, true)) {
+                                    QMetaObject::invokeMethod(this, [this, &progressBar, i, fileSavePath, response]() {
+                                        QMessageBox::critical(this, "Error",
+                                                              QString::fromStdString(response.metainfo().message()));
+                                        ui->ResultTable->setItem(i, 3,
+                                                                 new QTableWidgetItem("Get Data From Server Failed"));
+                                        ui->ResultTable->setItem(i, 4,
+                                                                 new QTableWidgetItem(fileSavePath));
+                                        setAllGridColor(i, Qt::red);
+                                    });
 
-                    Swc swc(savePath.string());
-                    swc.setValue(neurons);
-                    if (swc.WriteToFile()) {
-                        ui->ResultTable->setItem(i, 3,
-                                                 new QTableWidgetItem("Successfully"));
-                        ui->ResultTable->setItem(i, 4,
-                                                 new QTableWidgetItem(QString::fromStdString(savePath.string())));
-                        setAllGridColor(i, Qt::green);
-                        ui->ResultTable->item(i, 2)->setText(QString::fromStdString(
-                            std::to_string(m_ExportSwcData[i].swcData.swcdata_size())));
+                                    continue;
+                                }
+                                m_ExportSwcData[i].swcData = response.swcnodedata();
+                            }
+                            else {
+                                proto::GetSnapshotResponse response;
+                                if (!WrappedCall::getSwcSnapshot(m_ExportSwcData[i].swcSnapshotCollectionName, response,
+                                                                 this, true)) {
+                                    QMetaObject::invokeMethod(this, [this, &progressBar, i, fileSavePath, response]() {
+                                        QMessageBox::critical(this, "Error",
+                                                              QString::fromStdString(response.metainfo().message()));
+                                        ui->ResultTable->setItem(i, 3,
+                                                                 new QTableWidgetItem("Get Data From Server Failed"));
+                                        ui->ResultTable->setItem(i, 4,
+                                                                 new QTableWidgetItem(fileSavePath));
+                                        setAllGridColor(i, Qt::red);
+                                    });
+
+                                    continue;
+                                }
+                                m_ExportSwcData[i].swcData = response.swcnodedata();
+                            }
+                        }
+
+                        std::vector<NeuronUnit> neurons;
+                        auto swcData = m_ExportSwcData[i].swcData;
+                        for (int j = 0; j < swcData.swcdata_size(); j++) {
+                            NeuronUnit unit;
+                            unit.n = swcData.swcdata(j).swcnodeinternaldata().n();
+                            unit.type = swcData.swcdata(j).swcnodeinternaldata().type();
+                            unit.x = swcData.swcdata(j).swcnodeinternaldata().x();
+                            unit.y = swcData.swcdata(j).swcnodeinternaldata().y();
+                            unit.z = swcData.swcdata(j).swcnodeinternaldata().z();
+                            unit.radius = swcData.swcdata(j).swcnodeinternaldata().radius();
+                            unit.parent = swcData.swcdata(j).swcnodeinternaldata().parent();
+                            unit.seg_id = swcData.swcdata(j).swcnodeinternaldata().seg_id();
+                            unit.level = swcData.swcdata(j).swcnodeinternaldata().level();
+                            unit.mode = swcData.swcdata(j).swcnodeinternaldata().mode();
+                            unit.timestamp = swcData.swcdata(j).swcnodeinternaldata().timestamp();
+                            unit.feature_value = swcData.swcdata(j).swcnodeinternaldata().feature_value();
+                            neurons.push_back(unit);
+                        }
+
+                        ESwc eSwc(savePath.string());
+                        eSwc.setValue(neurons);
+                        if (eSwc.WriteToFile()) {
+                            QMetaObject::invokeMethod(this, [this, &progressBar, i, fileSavePath, savePath]() {
+                                ui->ResultTable->setItem(i, 3,
+                                                         new QTableWidgetItem("Successfully"));
+                                ui->ResultTable->setItem(i, 4,
+                                                         new QTableWidgetItem(
+                                                             QString::fromStdString(savePath.string())));
+                                setAllGridColor(i, Qt::green);
+                                ui->ResultTable->item(i, 2)->setText(QString::fromStdString(
+                                    std::to_string(m_ExportSwcData[i].swcData.swcdata_size())));
+                            });
+
+                            QMetaObject::invokeMethod(this, [this, &progressBar, i]() {
+                                progressBar.setValue(i * 100 / m_ExportSwcData.size());
+                            });
+                            continue;
+                        }
+                        else {
+                            statusMessage = "Write Swc File Failed!";
+                            fileSavePath = "";
+                        }
                     }
                     else {
-                        statusMessage = "Write Swc File Failed!";
+                        statusMessage = "Ignored, Unknown Swc Type";
                         fileSavePath = "";
                     }
                 }
-                else if (m_ExportSwcData[i].swcMetaInfo.swctype() == "eswc") {
-                    std::filesystem::path savePath(m_SavePath);
-                    savePath = savePath / swcExportName;
-
-                    if (m_GetDataFromServer) {
-                        if (!m_ExportSwcData[i].isSnapshot) {
-                            proto::GetSwcFullNodeDataResponse response;
-                            if (!WrappedCall::getSwcFullNodeDataByUuid(m_ExportSwcData[i].swcMetaInfo.base().uuid(),
-                                                                       response,
-                                                                       this)) {
-                                QMessageBox::critical(this, "Error",
-                                                      QString::fromStdString(response.metainfo().message()));
-                                ui->ResultTable->setItem(i, 3,
-                                                         new QTableWidgetItem("Get Data From Server Failed"));
-                                ui->ResultTable->setItem(i, 4,
-                                                         new QTableWidgetItem(fileSavePath));
-                                setAllGridColor(i, Qt::red);
-                                continue;
-                            }
-                            m_ExportSwcData[i].swcData = response.swcnodedata();
-                        }
-                        else {
-                            proto::GetSnapshotResponse response;
-                            if (!WrappedCall::getSwcSnapshot(m_ExportSwcData[i].swcSnapshotCollectionName, response,
-                                                             this)) {
-                                QMessageBox::critical(this, "Error",
-                                                      QString::fromStdString(response.metainfo().message()));
-                                ui->ResultTable->setItem(i, 3,
-                                                         new QTableWidgetItem("Get Data From Server Failed"));
-                                ui->ResultTable->setItem(i, 4,
-                                                         new QTableWidgetItem(fileSavePath));
-                                setAllGridColor(i, Qt::red);
-                                continue;
-                            }
-                            m_ExportSwcData[i].swcData = response.swcnodedata();
-                        }
-                    }
-
-                    std::vector<NeuronUnit> neurons;
-                    auto swcData = m_ExportSwcData[i].swcData;
-                    for (int j = 0; j < swcData.swcdata_size(); j++) {
-                        NeuronUnit unit;
-                        unit.n = swcData.swcdata(j).swcnodeinternaldata().n();
-                        unit.type = swcData.swcdata(j).swcnodeinternaldata().type();
-                        unit.x = swcData.swcdata(j).swcnodeinternaldata().x();
-                        unit.y = swcData.swcdata(j).swcnodeinternaldata().y();
-                        unit.z = swcData.swcdata(j).swcnodeinternaldata().z();
-                        unit.radius = swcData.swcdata(j).swcnodeinternaldata().radius();
-                        unit.parent = swcData.swcdata(j).swcnodeinternaldata().parent();
-                        unit.seg_id = swcData.swcdata(j).swcnodeinternaldata().seg_id();
-                        unit.level = swcData.swcdata(j).swcnodeinternaldata().level();
-                        unit.mode = swcData.swcdata(j).swcnodeinternaldata().mode();
-                        unit.timestamp = swcData.swcdata(j).swcnodeinternaldata().timestamp();
-                        unit.feature_value = swcData.swcdata(j).swcnodeinternaldata().feature_value();
-                        neurons.push_back(unit);
-                    }
-
-                    ESwc eSwc(savePath.string());
-                    eSwc.setValue(neurons);
-                    if (eSwc.WriteToFile()) {
-                        ui->ResultTable->setItem(i, 3,
-                                                 new QTableWidgetItem("Successfully"));
-                        ui->ResultTable->setItem(i, 4,
-                                                 new QTableWidgetItem(QString::fromStdString(savePath.string())));
-                        setAllGridColor(i, Qt::green);
-                        ui->ResultTable->item(i, 2)->setText(QString::fromStdString(
-                            std::to_string(m_ExportSwcData[i].swcData.swcdata_size())));
-                        continue;
-                    }
-                    else {
-                        statusMessage = "Write Swc File Failed!";
-                        fileSavePath = "";
-                    }
-                }
-                else {
-                    statusMessage = "Ignored, Unknown Swc Type";
-                    fileSavePath = "";
-                }
+                QMetaObject::invokeMethod(this, [this, &progressBar, i, fileSavePath, statusMessage]() {
+                    ui->ResultTable->setItem(i, 3,
+                                             new QTableWidgetItem(statusMessage));
+                    ui->ResultTable->setItem(i, 4,
+                                             new QTableWidgetItem(fileSavePath));
+                    setAllGridColor(i, Qt::red);
+                });
             }
-            ui->ResultTable->setItem(i, 3,
-                                     new QTableWidgetItem(statusMessage));
-            ui->ResultTable->setItem(i, 4,
-                                     new QTableWidgetItem(fileSavePath));
-            setAllGridColor(i, Qt::red);
-        }
+            QMetaObject::invokeMethod(this, [&progressBar]() {
+                progressBar.finish();
+            });
+        };
+
+        m_IoThread = std::thread(task);
+        m_IoThread.detach();
+
+        progressBar.exec();
+
         m_ActionExportComplete = true;
-        ui->ResultTable->resizeColumnsToContents();
     });
 }
 

@@ -29,5 +29,7 @@ private:
     std::string m_SavePath;
     bool m_ActionExportComplete = false;
 
+    std::thread m_IoThread;
+
     void setAllGridColor(int row, QColor color);
 };

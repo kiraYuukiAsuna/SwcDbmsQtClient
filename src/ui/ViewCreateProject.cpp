@@ -14,15 +14,19 @@ ViewCreateProject::ViewCreateProject(QWidget* parent) : QDialog(parent), ui(new 
     ui->listWidget->clear();
 
     std::string stylesheet = std::string("QListWidget::indicator:checked{image:url(")
-                                + Image::ImageCheckBoxChecked + ");}" +
-                                    "QListWidget::indicator:unchecked{image:url(" +
-                                        Image::ImageCheckBoxUnchecked+");}";
+                             + Image::ImageCheckBoxChecked + ");}" +
+                             "QListWidget::indicator:unchecked{image:url(" +
+                             Image::ImageCheckBoxUnchecked + ");}";
     ui->listWidget->setStyleSheet(QString::fromStdString(stylesheet));
 
     proto::GetAllSwcMetaInfoResponse responseAllSwc;
     WrappedCall::getAllSwcMetaInfo(responseAllSwc, this);
     for (int i = 0; i < responseAllSwc.swcinfo_size(); i++) {
         auto swcInfo = responseAllSwc.swcinfo().Get(i);
+        if (!swcInfo.belongingprojectuuid().empty()) {
+            continue;
+        }
+
         auto* item = new QListWidgetItem;
         item->setText(QString::fromStdString(swcInfo.name()));
         item->setCheckState(Qt::Unchecked);
@@ -62,16 +66,18 @@ ViewCreateProject::ViewCreateProject(QWidget* parent) : QDialog(parent), ui(new 
 
         proto::CreateProjectResponse response;
         grpc::ClientContext context;
-        auto status = RpcCall::getInstance().Stub()->CreateProject(&context,request,&response);
-        if(status.ok()) {
-            if(response.metainfo().status()) {
-                QMessageBox::information(parent,"Info","Create Project Successfully!");
+        auto status = RpcCall::getInstance().Stub()->CreateProject(&context, request, &response);
+        if (status.ok()) {
+            if (response.metainfo().status()) {
+                QMessageBox::information(parent, "Info", "Create Project Successfully!");
                 accept();
-            }else {
-                QMessageBox::critical(parent,"Error",QString::fromStdString(response.metainfo().message()));
             }
-        }else{
-            QMessageBox::critical(parent,"Error",QString::fromStdString(status.error_message()));
+            else {
+                QMessageBox::critical(parent, "Error", QString::fromStdString(response.metainfo().message()));
+            }
+        }
+        else {
+            QMessageBox::critical(parent, "Error", QString::fromStdString(status.error_message()));
         }
     });
 }

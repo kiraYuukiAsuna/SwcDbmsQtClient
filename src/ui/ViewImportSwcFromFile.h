@@ -83,7 +83,6 @@ private:
     std::vector<std::pair<ESwc, ExtraSwcImportAttribute>> m_ESwcList;
     bool m_ActionImportComplete = false;
 
-    asio::io_context m_IoContext;
     std::thread m_IoThread;
 
     void setAllGridColor(int row, const QColor &color);
