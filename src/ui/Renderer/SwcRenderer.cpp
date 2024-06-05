@@ -292,7 +292,7 @@ void SwcRenderer::renderDiffSwc() {
             glVertex3f(x2, y2, z2);
         }
 
-        if(childMap.find(node.n)!=childMap.end()) {
+        if (childMap.find(node.n) != childMap.end()) {
             auto childNode = childMap[node.n];
             // Normalize the coordinates to the range [-1, 1]
             float x1 = 2.0f * (node.x - minX) / (maxDim - minX) - 1.0f;
@@ -335,7 +335,7 @@ void SwcRenderer::renderDiffSwc() {
             glVertex3f(x2, y2, z2);
         }
 
-        if(childMap.find(node.n)!=childMap.end()) {
+        if (childMap.find(node.n) != childMap.end()) {
             auto childNode = childMap[node.n];
             // Normalize the coordinates to the range [-1, 1]
             float x1 = 2.0f * (node.x - minX) / (maxDim - minX) - 1.0f;
@@ -440,6 +440,7 @@ void SwcRenderer::paintGL() {
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+
     glRotatef(xRot / 16.0f, 1.0f, 0.0f, 0.0f);
     glRotatef(yRot / 16.0f, 0.0f, 1.0f, 0.0f);
     glRotatef(zRot / 16.0f, 0.0f, 0.0f, 1.0f);
@@ -498,7 +499,8 @@ void SwcRenderer::renderBoundingBox(float minX, float minY, float minZ, float ma
     // Draw bounding box
     glLineWidth(2.0f);
     glBegin(GL_LINES);
-    glColor4f(m_CreateInfo.style.boundingBoxLineColor[0], m_CreateInfo.style.boundingBoxLineColor[1], m_CreateInfo.style.boundingBoxLineColor[2], m_CreateInfo.style.boundingBoxLineColor[3]);
+    glColor4f(m_CreateInfo.style.boundingBoxLineColor[0], m_CreateInfo.style.boundingBoxLineColor[1],
+              m_CreateInfo.style.boundingBoxLineColor[2], m_CreateInfo.style.boundingBoxLineColor[3]);
     // Bottom square
     glVertex3f(2.0f * (minX - minX) / (maxDim - minX) - 1.0f, 2.0f * (minY - minY) / (maxDim - minY) - 1.0f,
                2.0f * (minZ - minZ) / (maxDim - minZ) - 1.0f);
