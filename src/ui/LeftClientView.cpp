@@ -435,7 +435,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
                                                "Are you sure to delete this Swc? This operation cannot be revert!",
                                                QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::Cancel);
         if (result == QMessageBox::StandardButton::Ok) {
-            if (data.type == MetaInfoType::eFreeSwc) {
+            if (data.type == MetaInfoType::eFreeSwc || data.type == MetaInfoType::eProjectSwc) {
                 proto::DeleteSwcRequest request;
                 WrappedCall::setCommonRequestField(request);
                 request.set_swcuuid(data.uuid);
