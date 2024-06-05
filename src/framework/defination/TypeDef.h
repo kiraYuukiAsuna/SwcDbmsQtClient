@@ -4,8 +4,9 @@
 enum class MetaInfoType{
     eProjectContainer = 0,
     eProject,
-    eSwcContainer,
-    eSwc,
+    eFreeSwcContainer,
+    eProjectSwc,
+    eFreeSwc,
     eDailyStatisticsContainer,
     eDailyStatistics,
     eUserMetaInfo,

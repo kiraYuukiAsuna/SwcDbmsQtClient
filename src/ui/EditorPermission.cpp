@@ -10,8 +10,10 @@
 #include "src/framework/defination/ImageDefination.h"
 #include "src/framework/service/WrappedCall.h"
 
-EditorPermission::EditorPermission(const std::string&uuid, MetaInfoType type, QWidget* parent) : QDialog(parent),
-    ui(new Ui::EditorPermission), m_Uuid(uuid), m_Type(type) {
+EditorPermission::EditorPermission(const std::string&uuid, MetaInfoType type, bool noSaveToCloud,
+                                   QWidget* parent) : QDialog(parent),
+                                                      ui(new Ui::EditorPermission), m_Uuid(uuid), m_Type(type),
+                                                      m_NoSaveToCloud(noSaveToCloud) {
     ui->setupUi(this);
 
     auto* layout = new QVBoxLayout;
@@ -50,51 +52,63 @@ EditorPermission::EditorPermission(const std::string&uuid, MetaInfoType type, QW
         }
 
         if (m_Type == MetaInfoType::eProject) {
-            proto::GetProjectResponse rsp2;
-            if (!WrappedCall::getProjectMetaInfoByUuid(m_Uuid, rsp2, this)) {
-                return;
-            }
-
             proto::UserPermissionAclV1 acl;
             acl.set_useruuid(rsp1.userinfo().base().uuid());
             for (int i = 0; i < acl.ace().GetDescriptor()->field_count(); i++) {
                 acl.ace().GetReflection()->SetBool(acl.mutable_ace(), acl.ace().GetDescriptor()->field(i), false);
             }
 
-            auto permission = rsp2.mutable_projectinfo()->mutable_permission();
-
-            auto ele = permission->mutable_users()->Add();
+            auto ele = m_PermissionMetaInfo.mutable_users()->Add();
             ele->CopyFrom(acl);
 
-            proto::UpdateProjectResponse response;
-            if (!WrappedCall::UpdateProjectMetaInfo(rsp2.projectinfo(), response, this)) {
-                return;
+            if (!m_NoSaveToCloud) {
+                proto::GetProjectResponse rsp2;
+                if (!WrappedCall::getProjectMetaInfoByUuid(m_Uuid, rsp2, this)) {
+                    return;
+                }
+
+                rsp2.mutable_projectinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
+
+                proto::UpdateProjectResponse response;
+                if (!WrappedCall::UpdateProjectMetaInfo(rsp2.projectinfo(), response, this)) {
+                    return;
+                }
+            }
+            else {
+                localRefresh();
             }
         }
-        else if (m_Type == MetaInfoType::eSwc) {
-            proto::GetSwcMetaInfoResponse rsp2;
-            if (!WrappedCall::getSwcMetaInfoByUuid(m_Uuid, rsp2, this)) {
-                return;
-            }
-
+        else if (m_Type == MetaInfoType::eFreeSwc || m_Type == MetaInfoType::eProjectSwc) {
             proto::UserPermissionAclV1 acl;
             acl.set_useruuid(rsp1.userinfo().base().uuid());
             for (int i = 0; i < acl.ace().GetDescriptor()->field_count(); i++) {
                 acl.ace().GetReflection()->SetBool(acl.mutable_ace(), acl.ace().GetDescriptor()->field(i), false);
             }
 
-            auto permission = rsp2.mutable_swcinfo()->mutable_permission();
-
-            auto ele = permission->mutable_users()->Add();
+            auto ele = m_PermissionMetaInfo.mutable_users()->Add();
             ele->CopyFrom(acl);
 
-            proto::UpdateSwcResponse response;
-            if (!WrappedCall::UpdateSwcMetaInfo(rsp2.swcinfo(), response, this)) {
-                return;
+            if (!m_NoSaveToCloud) {
+                proto::GetSwcMetaInfoResponse rsp2;
+                if (!WrappedCall::getSwcMetaInfoByUuid(m_Uuid, rsp2, this)) {
+                    return;
+                }
+
+                rsp2.mutable_swcinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
+
+                proto::UpdateSwcResponse response;
+                if (!WrappedCall::UpdateSwcMetaInfo(rsp2.swcinfo(), response, this)) {
+                    return;
+                }
+            }
+            else {
+                localRefresh();
             }
         }
 
-        refresh();
+        if (!m_NoSaveToCloud) {
+            refresh();
+        }
     });
 
     connect(btnDeleteUser, &QPushButton::clicked, [&]() {
@@ -117,31 +131,42 @@ EditorPermission::EditorPermission(const std::string&uuid, MetaInfoType type, QW
                     if (result == QMessageBox::Yes) {
                         m_PermissionMetaInfo.mutable_users()->erase(iter);
 
-
                         if (m_Type == MetaInfoType::eProject) {
-                            proto::GetProjectResponse rsp1;
-                            WrappedCall::getProjectMetaInfoByUuid(m_Uuid, rsp1, this);
+                            if (!m_NoSaveToCloud) {
+                                proto::GetProjectResponse rsp1;
+                                WrappedCall::getProjectMetaInfoByUuid(m_Uuid, rsp1, this);
 
-                            rsp1.mutable_projectinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
+                                rsp1.mutable_projectinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
 
-                            proto::UpdateProjectResponse rsp2;
-                            if (!WrappedCall::UpdateProjectMetaInfo(rsp1.projectinfo(), rsp2, this)) {
-                                return;
+                                proto::UpdateProjectResponse rsp2;
+                                if (!WrappedCall::UpdateProjectMetaInfo(rsp1.projectinfo(), rsp2, this)) {
+                                    return;
+                                }
+                            }
+                            else {
+                                localRefresh();
                             }
                         }
-                        else if (m_Type == MetaInfoType::eSwc) {
-                            proto::GetSwcMetaInfoResponse rsp1;
-                            WrappedCall::getSwcMetaInfoByUuid(m_Uuid, rsp1, this);
+                        else if (m_Type == MetaInfoType::eFreeSwc || m_Type == MetaInfoType::eProjectSwc) {
+                            if (!m_NoSaveToCloud) {
+                                proto::GetSwcMetaInfoResponse rsp1;
+                                WrappedCall::getSwcMetaInfoByUuid(m_Uuid, rsp1, this);
 
-                            rsp1.mutable_swcinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
+                                rsp1.mutable_swcinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
 
-                            proto::UpdateSwcResponse rsp2;
-                            if (!WrappedCall::UpdateSwcMetaInfo(rsp1.swcinfo(), rsp2, this)) {
-                                return;
+                                proto::UpdateSwcResponse rsp2;
+                                if (!WrappedCall::UpdateSwcMetaInfo(rsp1.swcinfo(), rsp2, this)) {
+                                    return;
+                                }
+                            }
+                            else {
+                                localRefresh();
                             }
                         }
 
-                        refresh();
+                        if (!m_NoSaveToCloud) {
+                            refresh();
+                        }
                     }
                     return;
                 }
@@ -170,51 +195,63 @@ EditorPermission::EditorPermission(const std::string&uuid, MetaInfoType type, QW
         }
 
         if (m_Type == MetaInfoType::eProject) {
-            proto::GetProjectResponse rsp2;
-            if (!WrappedCall::getProjectMetaInfoByUuid(m_Uuid, rsp2, this)) {
-                return;
-            }
-
             proto::GroupPermissionAclV1 acl;
             acl.set_groupuuid(rsp1.permissiongroup().base().uuid());
             for (int i = 0; i < acl.ace().GetDescriptor()->field_count(); i++) {
                 acl.ace().GetReflection()->SetBool(acl.mutable_ace(), acl.ace().GetDescriptor()->field(i), false);
             }
 
-            auto permission = rsp2.mutable_projectinfo()->mutable_permission();
-
-            auto ele = permission->mutable_groups()->Add();
+            auto ele = m_PermissionMetaInfo.mutable_groups()->Add();
             ele->CopyFrom(acl);
 
-            proto::UpdateProjectResponse response;
-            if (!WrappedCall::UpdateProjectMetaInfo(rsp2.projectinfo(), response, this)) {
-                return;
+            if (!m_NoSaveToCloud) {
+                proto::GetProjectResponse rsp2;
+                if (!WrappedCall::getProjectMetaInfoByUuid(m_Uuid, rsp2, this)) {
+                    return;
+                }
+
+                rsp2.mutable_projectinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
+
+                proto::UpdateProjectResponse response;
+                if (!WrappedCall::UpdateProjectMetaInfo(rsp2.projectinfo(), response, this)) {
+                    return;
+                }
+            }
+            else {
+                localRefresh();
             }
         }
-        else if (m_Type == MetaInfoType::eSwc) {
-            proto::GetSwcMetaInfoResponse rsp2;
-            if (!WrappedCall::getSwcMetaInfoByUuid(m_Uuid, rsp2, this)) {
-                return;
-            }
-
+        else if (m_Type == MetaInfoType::eFreeSwc || m_Type == MetaInfoType::eProjectSwc) {
             proto::GroupPermissionAclV1 acl;
             acl.set_groupuuid(rsp1.permissiongroup().base().uuid());
             for (int i = 0; i < acl.ace().GetDescriptor()->field_count(); i++) {
                 acl.ace().GetReflection()->SetBool(acl.mutable_ace(), acl.ace().GetDescriptor()->field(i), false);
             }
 
-            auto permission = rsp2.mutable_swcinfo()->mutable_permission();
-
-            auto ele = permission->mutable_groups()->Add();
+            auto ele = m_PermissionMetaInfo.mutable_groups()->Add();
             ele->CopyFrom(acl);
 
-            proto::UpdateSwcResponse response;
-            if (!WrappedCall::UpdateSwcMetaInfo(rsp2.swcinfo(), response, this)) {
-                return;
+            if (!m_NoSaveToCloud) {
+                proto::GetSwcMetaInfoResponse rsp2;
+                if (!WrappedCall::getSwcMetaInfoByUuid(m_Uuid, rsp2, this)) {
+                    return;
+                }
+
+                rsp2.mutable_swcinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
+
+                proto::UpdateSwcResponse response;
+                if (!WrappedCall::UpdateSwcMetaInfo(rsp2.swcinfo(), response, this)) {
+                    return;
+                }
+            }
+            else {
+                localRefresh();
             }
         }
 
-        refresh();
+        if (!m_NoSaveToCloud) {
+            refresh();
+        }
     });
 
     connect(btnDeleteGroup, &QPushButton::clicked, [&]() {
@@ -238,29 +275,41 @@ EditorPermission::EditorPermission(const std::string&uuid, MetaInfoType type, QW
                         m_PermissionMetaInfo.mutable_groups()->erase(iter);
 
                         if (m_Type == MetaInfoType::eProject) {
-                            proto::GetProjectResponse rsp1;
-                            WrappedCall::getProjectMetaInfoByUuid(m_Uuid, rsp1, this);
+                            if (!m_NoSaveToCloud) {
+                                proto::GetProjectResponse rsp1;
+                                WrappedCall::getProjectMetaInfoByUuid(m_Uuid, rsp1, this);
 
-                            rsp1.mutable_projectinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
+                                rsp1.mutable_projectinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
 
-                            proto::UpdateProjectResponse rsp2;
-                            if (!WrappedCall::UpdateProjectMetaInfo(rsp1.projectinfo(), rsp2, this)) {
-                                return;
+                                proto::UpdateProjectResponse rsp2;
+                                if (!WrappedCall::UpdateProjectMetaInfo(rsp1.projectinfo(), rsp2, this)) {
+                                    return;
+                                }
+                            }
+                            else {
+                                localRefresh();
                             }
                         }
-                        else if (m_Type == MetaInfoType::eSwc) {
-                            proto::GetSwcMetaInfoResponse rsp1;
-                            WrappedCall::getSwcMetaInfoByUuid(m_Uuid, rsp1, this);
+                        else if (m_Type == MetaInfoType::eFreeSwc || m_Type == MetaInfoType::eProjectSwc) {
+                            if (!m_NoSaveToCloud) {
+                                proto::GetSwcMetaInfoResponse rsp1;
+                                WrappedCall::getSwcMetaInfoByUuid(m_Uuid, rsp1, this);
 
-                            rsp1.mutable_swcinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
+                                rsp1.mutable_swcinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
 
-                            proto::UpdateSwcResponse rsp2;
-                            if (!WrappedCall::UpdateSwcMetaInfo(rsp1.swcinfo(), rsp2, this)) {
-                                return;
+                                proto::UpdateSwcResponse rsp2;
+                                if (!WrappedCall::UpdateSwcMetaInfo(rsp1.swcinfo(), rsp2, this)) {
+                                    return;
+                                }
+                            }
+                            else {
+                                localRefresh();
                             }
                         }
 
-                        refresh();
+                        if (!m_NoSaveToCloud) {
+                            refresh();
+                        }
                     }
                     return;
                 }
@@ -336,25 +385,37 @@ EditorPermission::EditorPermission(const std::string&uuid, MetaInfoType type, QW
         }
 
         if (m_Type == MetaInfoType::eProject) {
-            proto::GetProjectResponse rsp1;
-            WrappedCall::getProjectMetaInfoByUuid(m_Uuid, rsp1, this);
+            if (!m_NoSaveToCloud) {
+                proto::GetProjectResponse rsp1;
+                WrappedCall::getProjectMetaInfoByUuid(m_Uuid, rsp1, this);
 
-            rsp1.mutable_projectinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
+                rsp1.mutable_projectinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
 
-            proto::UpdateProjectResponse rsp2;
-            if (!WrappedCall::UpdateProjectMetaInfo(rsp1.projectinfo(), rsp2, this)) {
-                return;
+                proto::UpdateProjectResponse rsp2;
+                if (!WrappedCall::UpdateProjectMetaInfo(rsp1.projectinfo(), rsp2, this)) {
+                    return;
+                }
+                refresh();
+            }
+            else {
+                localRefresh();
             }
         }
-        else if (m_Type == MetaInfoType::eSwc) {
-            proto::GetSwcMetaInfoResponse rsp1;
-            WrappedCall::getSwcMetaInfoByUuid(m_Uuid, rsp1, this);
+        else if (m_Type == MetaInfoType::eFreeSwc || m_Type == MetaInfoType::eProjectSwc) {
+            if (!m_NoSaveToCloud) {
+                proto::GetSwcMetaInfoResponse rsp1;
+                WrappedCall::getSwcMetaInfoByUuid(m_Uuid, rsp1, this);
 
-            rsp1.mutable_swcinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
+                rsp1.mutable_swcinfo()->mutable_permission()->CopyFrom(m_PermissionMetaInfo);
 
-            proto::UpdateSwcResponse rsp2;
-            if (!WrappedCall::UpdateSwcMetaInfo(rsp1.swcinfo(), rsp2, this)) {
-                return;
+                proto::UpdateSwcResponse rsp2;
+                if (!WrappedCall::UpdateSwcMetaInfo(rsp1.swcinfo(), rsp2, this)) {
+                    return;
+                }
+                refresh();
+            }
+            else {
+                localRefresh();
             }
         }
     });
@@ -367,7 +428,12 @@ EditorPermission::EditorPermission(const std::string&uuid, MetaInfoType type, QW
 
     setLayout(layout);
 
-    refresh();
+    if (!m_NoSaveToCloud) {
+        refresh();
+    }
+    else {
+        localRefresh();
+    }
 }
 
 EditorPermission::~EditorPermission() {
@@ -375,32 +441,44 @@ EditorPermission::~EditorPermission() {
 }
 
 void EditorPermission::refresh() {
-    m_TreeWidget->getIndexMap().clear();
-    m_TreeWidget->getQTreeWidget()->clear();
-
     if (m_Type == MetaInfoType::eProject) {
         proto::GetProjectResponse response;
         WrappedCall::getProjectMetaInfoByUuid(m_Uuid, response, this);
         m_PermissionMetaInfo = response.projectinfo().permission();
     }
-    else if (m_Type == MetaInfoType::eSwc) {
+    else if (m_Type == MetaInfoType::eFreeSwc || m_Type == MetaInfoType::eProjectSwc) {
         proto::GetSwcMetaInfoResponse response;
         WrappedCall::getSwcMetaInfoByUuid(m_Uuid, response, this);
         m_PermissionMetaInfo = response.swcinfo().permission();
     }
 
-    auto&owner = m_PermissionMetaInfo.owner();
+    localRefresh();
+}
+
+void EditorPermission::localRefresh() {
+    m_TreeWidget->getIndexMap().clear();
+    m_TreeWidget->getQTreeWidget()->clear();
+
+    auto owner = m_PermissionMetaInfo.mutable_owner();
+    if (owner->useruuid().empty() && m_NoSaveToCloud) {
+        owner->set_useruuid(CachedProtoData::getInstance().UserUuid);
+         auto descriptor = owner->ace().GetDescriptor();
+        for (int permission = 0; permission < descriptor->field_count(); permission++) {
+            auto name = descriptor->field(permission)->name();
+            owner->ace().GetReflection()->SetBool(owner->mutable_ace(), descriptor->field(permission), true);
+        }
+    }
     proto::GetUserByUuidResponse ownerResponse;
-    WrappedCall::GetUserInfoByUuid(owner.useruuid(), ownerResponse, this);
-    m_TreeWidget->addTopItem(owner.useruuid(), "Owner: " + ownerResponse.userinfo().name(),
+    WrappedCall::GetUserInfoByUuid(owner->useruuid(), ownerResponse, this);
+    m_TreeWidget->addTopItem(owner->useruuid(), "Owner: " + ownerResponse.userinfo().name(),
                              QIcon(Image::ImageUser), {});
-    auto ownerDescriptor = owner.ace().GetDescriptor();
+    auto ownerDescriptor = owner->ace().GetDescriptor();
     for (int permission = 0; permission < ownerDescriptor->field_count(); permission++) {
         auto name = ownerDescriptor->field(permission)->name();
-        auto* item = m_TreeWidget->addItem(owner.useruuid(), owner.useruuid() + name, name,
+        auto* item = m_TreeWidget->addItem(owner->useruuid(), owner->useruuid() + name, name,
                                            QIcon(Image::ImageACE), {});
         item->setDisabled(true);
-        if (owner.ace().GetReflection()->GetBool(owner.ace(), ownerDescriptor->field(permission))) {
+        if (owner->ace().GetReflection()->GetBool(owner->ace(), ownerDescriptor->field(permission))) {
             item->setCheckState(0, Qt::Checked);
         }
         else {

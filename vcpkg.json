@@ -1,27 +1,21 @@
 {
   "name": "swcdmsqtcliet",
   "version-string": "1.0.0",
-  "builtin-baseline": "9760ce6194ef51aa4faf77b6321e1280daa4545c",
   "dependencies": [
     {
-      "name": "protobuf",
-      "version>=": "3.21.12#2"
+      "name": "protobuf"
     },
     {
-      "name": "grpc",
-      "version>=": "1.51.1#3"
+      "name": "grpc"
     },
     {
-      "name": "spdlog",
-      "version>=": "1.14.0"
+      "name": "spdlog"
     },
     {
-      "name": "asio-grpc",
-      "version>=": "3.1.0"
+      "name": "asio-grpc"
     },
     {
-      "name": "asio",
-      "version>=": "1.30.2"
+      "name": "asio"
     }
   ]
 }

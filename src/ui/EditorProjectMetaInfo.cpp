@@ -80,6 +80,9 @@ void EditorProjectMetaInfo::refresh(proto::GetProjectResponse &response) {
 
     for (int i = 0; i < responseAllSwc.swcinfo_size(); i++) {
         auto swcInfo = responseAllSwc.swcinfo().Get(i);
+        if(!swcInfo.belongingprojectuuid().empty()) {
+            continue;
+        }
         bool bFind = false;
         auto *item = new QListWidgetItem;
         item->setText(QString::fromStdString(swcInfo.name()));

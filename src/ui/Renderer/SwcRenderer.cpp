@@ -386,7 +386,7 @@ void SwcRenderer::initializeGL() {
     initializeOpenGLFunctions();
     glEnable(GL_DEPTH_TEST); // Enable depth testing
     glDepthRange(0, 1); // Adjust the depth range
-    glClearColor(0, 0, 0, 1);
+    glClearColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
 
     glEnable(GL_BLEND); // Enable color blending
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Set blend function

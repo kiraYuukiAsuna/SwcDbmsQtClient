@@ -2,13 +2,18 @@
 #include <QTimer>
 
 #include "MainWindow.h"
+
+#include <qdesktopservices.h>
+
 #include "ui_MainWindow.h"
 #include "src/framework/defination/ImageDefination.h"
 #include <QTimer>
+#include <qurl.h>
 #include <grpcpp/client_context.h>
 #include <Message/Request.pb.h>
 #include <Message/Response.pb.h>
 
+#include "About.h"
 #include "EditorAdminUserManager.h"
 #include "EditorPermissionGroup.h"
 #include "ViewImportSwcFromFile.h"
@@ -46,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
     menuImportSwcFile->setIcon(QIcon(Image::ImageImport));
     menuFile->addAction(menuImportSwcFile);
     connect(menuImportSwcFile, &QAction::triggered, this, [&]() {
-        ViewImportSwcFromFile view(this);
+        ViewImportSwcFromFile view(this,"");
         view.exec();
         m_LeftClientView->refreshTree();
     });
@@ -85,7 +90,8 @@ MainWindow::MainWindow(QWidget *parent) :
     menuAbout->setIcon(QIcon(Image::ImageHelp));
     menuHelp->addAction(menuAbout);
     connect(menuAbout, &QAction::triggered, this, [&]() {
-
+        About view(this);
+        view.exec();
     });
 
     auto *menuOnlineHelp = new QAction(menuHelp);
@@ -93,7 +99,7 @@ MainWindow::MainWindow(QWidget *parent) :
     menuOnlineHelp->setIcon(QIcon(Image::ImageHelp));
     menuHelp->addAction(menuOnlineHelp);
     connect(menuOnlineHelp, &QAction::triggered, this, [&]() {
-
+        QDesktopServices::openUrl(QUrl("https://github.com/Hi5App/SwcDbmsQtClient"));
     });
 
     setMenuBar(menuBar);

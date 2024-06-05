@@ -23,6 +23,8 @@ enum class DataSource {
     eLoadFromMemory
 };
 
+inline float backgroundColor[4] = {204.0/255.0, 229.0/255.0, 1.0f, 1.0f};
+
 struct SwcStyle {
     float lineWidth = 2.0f;
     float pointSize = 6.0f;

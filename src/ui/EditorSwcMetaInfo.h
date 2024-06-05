@@ -26,7 +26,7 @@ public:
     }
 
     MetaInfoType getMetaInfoType() override {
-        return MetaInfoType::eSwc;
+        return MetaInfoType::eFreeSwc;
     }
 
     bool save() override;

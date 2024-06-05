@@ -72,17 +72,7 @@ LeftClientView::LeftClientView(MainWindow* mainWindow) : QWidget(mainWindow), ui
             proto::UserLogoutResponse response;
 
             grpc::ClientContext context;
-            auto status = RpcCall::getInstance().Stub()->UserLogout(&context, request, &response);
-            if (status.ok()) {
-                if (response.metainfo().status()) {
-                }
-                else {
-                }
-                // QMessageBox::critical(this,"Error",QString::fromStdString(response.metainfo().message()));
-            }
-            else {
-                // QMessageBox::critical(this,"Error",QString::fromStdString(status.error_message()));
-            }
+            RpcCall::getInstance().Stub()->UserLogout(&context, request, &response);
             AppConfig::getInstance().setSecurityConfig(AppConfig::SecurityConfigItem::eCachedUserName, "");
             AppConfig::getInstance().setSecurityConfig(AppConfig::SecurityConfigItem::eCachedPassword, "");
             AppConfig::getInstance().setSecurityConfig(AppConfig::SecurityConfigItem::eAccountExpiredTime, "");
@@ -115,9 +105,9 @@ LeftClientView::LeftClientView(MainWindow* mainWindow) : QWidget(mainWindow), ui
                         m_MainWindow->getRightClientView().openProjectMetaInfo(metaInfo.uuid);
                         break;
                     }
-                    case MetaInfoType::eSwcContainer:
+                    case MetaInfoType::eFreeSwcContainer:
                         break;
-                    case MetaInfoType::eSwc: {
+                    case MetaInfoType::eFreeSwc: {
                         m_MainWindow->getRightClientView().openSwcMetaInfo(metaInfo.uuid);
                         break;
                     }
@@ -163,28 +153,44 @@ void LeftClientView::getProjectMetaInfo() {
     auto projectInfoList = response.mutable_projectinfo();
     for (int i = 0; i < projectInfoList->size(); i++) {
         auto&projectInfo = projectInfoList->Get(i);
-        auto* item = new QTreeWidgetItem;
-        item->setText(0, QString::fromStdString(projectInfo.name()));
-        item->setIcon(0, QIcon(Image::ImageProject));
+        auto* projectItem = new QTreeWidgetItem;
+        projectItem->setText(0, QString::fromStdString(projectInfo.name()));
+        projectItem->setIcon(0, QIcon(Image::ImageProject));
         LeftClientViewTreeWidgetItemMetaInfo metaInfo{};
         metaInfo.type = MetaInfoType::eProject;
         metaInfo.uuid = projectInfo.base().uuid();
-        item->setData(0, Qt::UserRole, QVariant::fromValue(metaInfo));
-        m_TopProjectItem->addChild(item);
+        projectItem->setData(0, Qt::UserRole, QVariant::fromValue(metaInfo));
+        m_TopProjectItem->addChild(projectItem);
+
+        proto::GetProjectSwcNamesByProjectUuidResponse swcNamesResponse;
+        if (WrappedCall::GetProjectSwcNamesByProjectUuid(projectInfo.base().uuid(), swcNamesResponse, this)) {
+            for (auto&swcuuidname: swcNamesResponse.swcuuidname()) {
+                auto* swcItem = new QTreeWidgetItem;
+                swcItem->setText(0, QString::fromStdString(swcuuidname.swcname()));
+                swcItem->setIcon(0, QIcon(Image::ImageNode));
+                metaInfo.type = MetaInfoType::eProjectSwc;
+                metaInfo.uuid = swcuuidname.swcuuid();
+                swcItem->setData(0, Qt::UserRole, QVariant::fromValue(metaInfo));
+                projectItem->addChild(swcItem);
+            }
+        }
     }
 }
 
-void LeftClientView::getSwcMetaInfo() {
+void LeftClientView::getFreeSwcMetaInfo() {
     proto::GetAllSwcMetaInfoResponse response;
     WrappedCall::getAllSwcMetaInfo(response, this);
     auto swcMetaInfo = response.mutable_swcinfo();
     for (int i = 0; i < swcMetaInfo->size(); i++) {
         auto&swcInfo = swcMetaInfo->Get(i);
+        if (!swcInfo.belongingprojectuuid().empty()) {
+            continue;
+        }
         auto* item = new QTreeWidgetItem;
         item->setText(0, QString::fromStdString(swcInfo.name()));
         item->setIcon(0, QIcon(Image::ImageNode));
         LeftClientViewTreeWidgetItemMetaInfo metaInfo{};
-        metaInfo.type = MetaInfoType::eSwc;
+        metaInfo.type = MetaInfoType::eFreeSwc;
         metaInfo.uuid = swcInfo.base().uuid();
         item->setData(0, Qt::UserRole, QVariant::fromValue(metaInfo));
         m_TopSwcItem->addChild(item);
@@ -280,17 +286,24 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuEditProjectPermission->setText("Edit Permission");
     MenuEditProjectPermission->setIcon(QIcon(Image::ImageACL));
     connect(MenuEditProjectPermission, &QAction::triggered, this, [this,data](bool checked) {
-        EditorPermission view(data.uuid, MetaInfoType::eProject, this);
+        EditorPermission view(data.uuid, MetaInfoType::eProject, false,this);
         view.exec();
     });
 
     auto* MenuImportSwcFile = new QAction(this);
     MenuImportSwcFile->setText("Import Swc File");
     MenuImportSwcFile->setIcon(QIcon(Image::ImageImport));
-    connect(MenuImportSwcFile, &QAction::triggered, this, [this](bool checked) {
-        ViewImportSwcFromFile view(m_MainWindow);
-        view.exec();
-        refreshTree();
+    connect(MenuImportSwcFile, &QAction::triggered, this, [this, data](bool checked) {
+        if (data.type == MetaInfoType::eFreeSwc) {
+            ViewImportSwcFromFile view(m_MainWindow,"");
+            view.exec();
+            refreshTree();
+        }
+        else if (data.type == MetaInfoType::eProject) {
+            ViewImportSwcFromFile view(m_MainWindow,data.uuid);
+            view.exec();
+            refreshTree();
+        }
     });
 
     auto* MenuExportToSwcFile = new QAction(this);
@@ -301,7 +314,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
                                                "Exporting action may takes few time please waiting for export steps finish!",
                                                QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::Cancel);
         if (result == QMessageBox::StandardButton::Ok) {
-            if (data.type == MetaInfoType::eSwc) {
+            if (data.type == MetaInfoType::eFreeSwc) {
                 proto::GetSwcMetaInfoResponse response1;
                 if (!WrappedCall::getSwcMetaInfoByUuid(data.uuid, response1, this)) {
                     return;
@@ -321,7 +334,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
                 ViewExportSwcToFile view(dataList, false, this);
                 view.exec();
             }
-            else if (data.type == MetaInfoType::eSwcContainer) {
+            else if (data.type == MetaInfoType::eFreeSwcContainer) {
                 proto::GetAllSwcMetaInfoResponse response;
                 if (!WrappedCall::getAllSwcMetaInfo(response, this)) {
                     return;
@@ -387,22 +400,42 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     auto* MenuBatchManageSwc = new QAction(this);
     MenuBatchManageSwc->setText("Batch Manage Swc");
     MenuBatchManageSwc->setIcon(QIcon(Image::ImageBatchManage));
-    connect(MenuBatchManageSwc, &QAction::triggered, this, [this](bool checked) {
-        EditorBatchManageSwc view;
-        if (view.exec() == QDialog::Accepted) {
-            refreshTree();
+    connect(MenuBatchManageSwc, &QAction::triggered, this, [this, data](bool checked) {
+        if (data.type == MetaInfoType::eProject) {
+            std::vector<std::string> uuids;
+
+            proto::GetProjectSwcNamesByProjectUuidResponse responseSwc;
+            if(!WrappedCall::GetProjectSwcNamesByProjectUuid(data.uuid,responseSwc, this)) {
+                return;
+            }
+
+            for(auto& swcuuidname: responseSwc.swcuuidname()) {
+                uuids.push_back(swcuuidname.swcuuid());
+            }
+
+            EditorBatchManageSwc view(uuids, this);
+            if (view.exec() == QDialog::Accepted) {
+                refreshTree();
+            }
+        }
+        else if (data.type == MetaInfoType::eFreeSwcContainer) {
+            std::vector<std::string> uuids;
+            EditorBatchManageSwc view(uuids, this);
+            if (view.exec() == QDialog::Accepted) {
+                refreshTree();
+            }
         }
     });
 
     auto* MenuDeleteSwc = new QAction(this);
     MenuDeleteSwc->setText("Delete Swc");
     MenuDeleteSwc->setIcon(QIcon(Image::ImageDelete));
-    connect(MenuDeleteSwc, &QAction::triggered, this, [this,data,curItem](bool checked) {
+    connect(MenuDeleteSwc, &QAction::triggered, this, [this,data](bool checked) {
         auto result = QMessageBox::information(this, "Warning",
                                                "Are you sure to delete this Swc? This operation cannot be revert!",
                                                QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::Cancel);
         if (result == QMessageBox::StandardButton::Ok) {
-            if (data.type == MetaInfoType::eSwc) {
+            if (data.type == MetaInfoType::eFreeSwc) {
                 proto::DeleteSwcRequest request;
                 WrappedCall::setCommonRequestField(request);
                 request.set_swcuuid(data.uuid);
@@ -446,7 +479,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuEditSwcPermission->setText("Edit Permission");
     MenuEditSwcPermission->setIcon(QIcon(Image::ImageACL));
     connect(MenuEditSwcPermission, &QAction::triggered, this, [this,data](bool checked) {
-        EditorPermission view(data.uuid, MetaInfoType::eSwc, this);
+        EditorPermission view(data.uuid, MetaInfoType::eFreeSwc, false,this);
         view.exec();
     });
 
@@ -537,15 +570,17 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
         }
         case MetaInfoType::eProject: {
             popMenu->addAction(MenuEditProject);
+            popMenu->addAction(MenuBatchManageSwc);
             popMenu->addSeparator();
             popMenu->addAction(MenuEditProjectPermission);
             popMenu->addSeparator();
+            popMenu->addAction(MenuImportSwcFile);
             popMenu->addAction(MenuExportToSwcFile);
             popMenu->addSeparator();
             popMenu->addAction(MenuDeleteProject);
             break;
         }
-        case MetaInfoType::eSwcContainer: {
+        case MetaInfoType::eFreeSwcContainer: {
             popMenu->addAction(MenuImportSwcFile);
             popMenu->addAction(MenuExportToSwcFile);
             popMenu->addSeparator();
@@ -554,7 +589,8 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
             popMenu->addAction(MenuBatchManageSwc);
             break;
         }
-        case MetaInfoType::eSwc: {
+        case MetaInfoType::eFreeSwc:
+        case MetaInfoType::eProjectSwc: {
             popMenu->addAction(MenuEditSwc);
             popMenu->addAction(MenuEditSwcNodeData);
             popMenu->addAction(MenuEditSwcPermission);
@@ -598,7 +634,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
 void LeftClientView::refreshTree() {
     clearAll();
     getProjectMetaInfo();
-    getSwcMetaInfo();
+    getFreeSwcMetaInfo();
     getAllDailyStatisticsMetaInfo();
 }
 
@@ -613,14 +649,14 @@ void LeftClientView::clearAll() {
     m_TopProjectItem->setData(0, Qt::UserRole, QVariant::fromValue(metaInfoProject));
 
     m_TopSwcItem = new QTreeWidgetItem(m_TreeWidget);
-    m_TopSwcItem->setText(0, "Swc");
+    m_TopSwcItem->setText(0, "Free Swc (Does not belong to any project)");
     m_TopSwcItem->setIcon(0, QIcon(Image::ImageNode));
     LeftClientViewTreeWidgetItemMetaInfo metaInfoSwc{};
-    metaInfoSwc.type = MetaInfoType::eSwcContainer;
+    metaInfoSwc.type = MetaInfoType::eFreeSwcContainer;
     m_TopSwcItem->setData(0, Qt::UserRole, QVariant::fromValue(metaInfoSwc));
 
     m_TopDailyStatisticsItem = new QTreeWidgetItem(m_TreeWidget);
-    m_TopDailyStatisticsItem->setText(0, "DailyStatistics");
+    m_TopDailyStatisticsItem->setText(0, "Daily Statistics");
     m_TopDailyStatisticsItem->setIcon(0, QIcon(Image::ImageDaily));
     LeftClientViewTreeWidgetItemMetaInfo metaInfoDailyStatistic{};
     metaInfoDailyStatistic.type = MetaInfoType::eDailyStatisticsContainer;

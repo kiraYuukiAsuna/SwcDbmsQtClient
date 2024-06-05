@@ -82,12 +82,6 @@
         <file>styles/qt_material_modified/themes/light_red.xml</file>
         <file>styles/qt_material_modified/themes/light_teal.xml</file>
         <file>styles/qt_material_modified/themes/light_yellow.xml</file>
-        <file>fonts/SourceHanSansCN/SourceHanSansCN-Bold.ttf</file>
-        <file>fonts/SourceHanSansCN/SourceHanSansCN-ExtraLight.ttf</file>
-        <file>fonts/SourceHanSansCN/SourceHanSansCN-Heavy.ttf</file>
-        <file>fonts/SourceHanSansCN/SourceHanSansCN-Light.ttf</file>
-        <file>fonts/SourceHanSansCN/SourceHanSansCN-Medium.ttf</file>
-        <file>fonts/SourceHanSansCN/SourceHanSansCN-Normal.ttf</file>
         <file>fonts/SourceHanSansCN/SourceHanSansCN-Regular.ttf</file>
         <file>images/daily.png</file>
         <file>images/node.png</file>

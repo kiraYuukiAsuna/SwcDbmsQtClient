@@ -22,7 +22,7 @@ public:
 
     void clearAll();
     void getProjectMetaInfo();
-    void getSwcMetaInfo();
+    void getFreeSwcMetaInfo();
     void getAllDailyStatisticsMetaInfo();
     void refreshTree();
 

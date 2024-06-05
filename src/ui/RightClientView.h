@@ -19,18 +19,18 @@ public:
     explicit RightClientView(MainWindow *mainWindow);
     ~RightClientView() override;
 
-    void openProjectMetaInfo(const std::string& projectName);
-    void closeWithoutSavingProject(const std::string& projectName);
-    void refreshProjectMetaInfo(const std::string& projectName);
+    void openProjectMetaInfo(const std::string& projectUuid);
+    void closeWithoutSavingProject(const std::string& projectUuid);
+    void refreshProjectMetaInfo(const std::string& projectUuid);
     void openSwcMetaInfo(const std::string& swcUuid);
-    void closeWithoutSavingSwc(const std::string& swcName);
-    void refreshSwcMetaInfo(const std::string& swcUuid, const std::string& swcName);
+    void closeWithoutSavingSwc(const std::string& swcUuid);
+    void refreshSwcMetaInfo(const std::string& swcUuid);
     void openDailyStatisticsMetaInfo(const std::string& dailyStatisticsName);
     void closeWithoutSavingDailyStatistics(const std::string& dailyStatisticsName);
     void refreshDailyStatisticsMetaInfo(const std::string& dailyStatisticsName);
 
     void openSwcNodeData(const std::string& swcUuid);
-    void closeWithoutSavingSwcNodeData(const std::string& swcName);
+    void closeWithoutSavingSwcNodeData(const std::string& swcUuid);
 
     void refreshAllOpenedProjectMetaInfo();
 

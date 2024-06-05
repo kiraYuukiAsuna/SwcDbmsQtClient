@@ -69,7 +69,7 @@ class ViewImportSwcFromFile : public QDialog {
 Q_OBJECT
 
 public:
-    explicit ViewImportSwcFromFile(MainWindow *mainWindow);
+    explicit ViewImportSwcFromFile(MainWindow *mainWindow, const std::string& belongToProjectUuid);
 
     ~ViewImportSwcFromFile() override;
 
