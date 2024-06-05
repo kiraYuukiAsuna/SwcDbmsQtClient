@@ -16,6 +16,15 @@ inline std::vector<std::string> stringSplit(const std::string&str, char delim) {
     return elems;
 }
 
+inline std::string subreplace(std::string resource_str, std::string sub_str, std::string new_str) {
+    std::string::size_type pos = 0;
+    while ((pos = resource_str.find(sub_str)) != std::string::npos) //替换所有指定子串
+    {
+        resource_str.replace(pos, sub_str.length(), new_str);
+    }
+    return resource_str;
+}
+
 inline bool isEarlier(const google::protobuf::Timestamp&t1, const google::protobuf::Timestamp&t2) {
     if (t1.seconds() < t2.seconds()) {
         return true;

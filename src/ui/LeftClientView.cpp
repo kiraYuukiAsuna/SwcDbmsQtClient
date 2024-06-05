@@ -124,7 +124,7 @@ LeftClientView::LeftClientView(MainWindow* mainWindow) : QWidget(mainWindow), ui
                     case MetaInfoType::eDailyStatisticsContainer:
                         break;
                     case MetaInfoType::eDailyStatistics: {
-                        m_MainWindow->getRightClientView().openDailyStatisticsMetaInfo(metaInfo.uuid);
+                        m_MainWindow->getRightClientView().openDailyStatisticsMetaInfo(metaInfo.name);
                         break;
                     }
                     case MetaInfoType::eUserMetaInfo:
@@ -203,6 +203,7 @@ void LeftClientView::getAllDailyStatisticsMetaInfo() {
         LeftClientViewTreeWidgetItemMetaInfo metaInfo{};
         metaInfo.type = MetaInfoType::eDailyStatistics;
         metaInfo.uuid = dailyStatisticsMetaInfo.base().uuid();
+        metaInfo.name = dailyStatisticsMetaInfo.name();
         item->setData(0, Qt::UserRole, QVariant::fromValue(metaInfo));
         m_TopDailyStatisticsItem->addChild(item);
     }
@@ -486,7 +487,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuEditDailyStatistics->setText("Edit DailyStatistics");
     MenuEditDailyStatistics->setIcon(QIcon(Image::ImageDelete));
     connect(MenuEditDailyStatistics, &QAction::triggered, this, [this,data](bool checked) {
-        m_MainWindow->getRightClientView().openDailyStatisticsMetaInfo(data.uuid);
+        m_MainWindow->getRightClientView().openDailyStatisticsMetaInfo(data.name);
     });
 
     auto* MenuEditorAttachment = new QAction(this);

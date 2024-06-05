@@ -18,6 +18,7 @@ enum class MetaInfoType{
 struct LeftClientViewTreeWidgetItemMetaInfo{
     MetaInfoType type;
     std::string uuid;
+    std::string name;
 };
 Q_DECLARE_METATYPE(LeftClientViewTreeWidgetItemMetaInfo)
 
