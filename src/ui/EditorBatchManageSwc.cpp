@@ -46,15 +46,20 @@ EditorBatchManageSwc::EditorBatchManageSwc(const std::vector<std::string>&swcUui
     }
 
     connect(ui->DeleteSelectedSwc, &QPushButton::clicked, this, [this] {
-        for (int i = 0; i < ui->SwcList->count(); i++) {
-            QListWidgetItem* item = ui->SwcList->item(i);
-            if (item->checkState() == Qt::Checked) {
-                proto::DeleteSwcResponse response;
-                auto uuid = item->data(Qt::UserRole).value<QString>().toStdString();
-                if (!WrappedCall::DeleteSwc(uuid, response, this)) {
-                    continue;
+        QMessageBox::StandardButton reply = QMessageBox::question(this, "Delete Selected Swc",
+                                                                  "Are you sure to delete the selected Swc?",
+                                                                  QMessageBox::Yes | QMessageBox::No);
+        if (reply == QMessageBox::Yes) {
+            for (int i = 0; i < ui->SwcList->count(); i++) {
+                QListWidgetItem* item = ui->SwcList->item(i);
+                if (item->checkState() == Qt::Checked) {
+                    proto::DeleteSwcResponse response;
+                    auto uuid = item->data(Qt::UserRole).value<QString>().toStdString();
+                    if (!WrappedCall::DeleteSwc(uuid, response, this)) {
+                        continue;
+                    }
+                    delete item;
                 }
-                delete item;
             }
         }
     });
