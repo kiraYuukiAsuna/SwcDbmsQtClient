@@ -2,6 +2,7 @@
 
 #include <QDialog>
 #include "Message/Message.pb.h"
+#include <thread>
 
 struct ExportSwcData{
     proto::SwcMetaInfoV1 swcMetaInfo;
