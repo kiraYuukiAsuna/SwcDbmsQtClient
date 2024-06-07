@@ -3,19 +3,13 @@
   "version-string": "1.0.0",
   "dependencies": [
     {
-      "name": "protobuf"
-    },
-    {
-      "name": "grpc"
-    },
-    {
-      "name": "spdlog"
-    },
-    {
       "name": "asio-grpc"
     },
     {
       "name": "asio"
+    },
+    {
+      "name": "spdlog"
     }
   ]
 }

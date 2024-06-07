@@ -17,6 +17,20 @@ EditorProjectMetaInfo::EditorProjectMetaInfo(proto::GetProjectResponse&response,
                              Image::ImageCheckBoxUnchecked + ");}";
     ui->SwcList->setStyleSheet(QString::fromStdString(stylesheet));
 
+    connect(ui->SelectAllSwc, &QPushButton::clicked, [this]() {
+        for (int i = 0; i < ui->SwcList->count(); i++) {
+            auto* item = ui->SwcList->item(i);
+            item->setCheckState(Qt::Checked);
+        }
+    });
+
+    connect(ui->UnselectAllSwc, &QPushButton::clicked, [this]() {
+        for (int i = 0; i < ui->SwcList->count(); i++) {
+            auto* item = ui->SwcList->item(i);
+            item->setCheckState(Qt::Unchecked);
+        }
+    });
+
     refresh(response);
 }
 
