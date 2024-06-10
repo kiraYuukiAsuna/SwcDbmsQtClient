@@ -294,7 +294,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuImportSwcFile->setText("Import Swc File");
     MenuImportSwcFile->setIcon(QIcon(Image::ImageImport));
     connect(MenuImportSwcFile, &QAction::triggered, this, [this, data](bool checked) {
-        if (data.type == MetaInfoType::eFreeSwc) {
+        if (data.type == MetaInfoType::eFreeSwcContainer) {
             ViewImportSwcFromFile view(m_MainWindow,"");
             view.exec();
             refreshTree();
