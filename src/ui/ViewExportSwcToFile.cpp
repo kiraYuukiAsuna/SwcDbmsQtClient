@@ -44,6 +44,18 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcDat
     ui->ResultTable->setRowCount(m_ExportSwcData.size());
     ui->ResultTable->resizeColumnsToContents();
 
+    connect(ui->SelectAll, &QPushButton::clicked, this, [this]() {
+        for (int i = 0; i < ui->SwcList->count(); i++) {
+            ui->SwcList->item(i)->setCheckState(Qt::Checked);
+        }
+    });
+
+    connect(ui->UnselectAll, &QPushButton::clicked, this, [this]() {
+        for (int i = 0; i < ui->SwcList->count(); i++) {
+            ui->SwcList->item(i)->setCheckState(Qt::Unchecked);
+        }
+    });
+
     connect(ui->SelectSavePathBtn, &QPushButton::clicked, this, [this]() {
         QFileDialog fileDialog(this);
         fileDialog.setWindowTitle("Select Swc Files");
@@ -206,6 +218,58 @@ ViewExportSwcToFile::ViewExportSwcToFile(std::vector<ExportSwcData>&exportSwcDat
                                           unit.color_r = val.colorr();
                                           unit.color_g = val.colorg();
                                           unit.color_b = val.colorb();
+                                          units.push_back(unit);
+                                      });
+
+                        io.setValue(units);
+                        io.WriteToFile();
+                    }
+
+                    if (!m_ExportSwcData[i].swcMetaInfo.swcattachmentswcuuid().empty()) {
+                        std::filesystem::path path(m_SavePath);
+                        path = path / (swcExportName + ".attachment.eswc");
+
+                        std::vector<proto::SwcNodeDataV1> swcAttachmentSwcData;
+
+                        proto::GetSwcAttachmentSwcResponse response;
+                        auto swcAttachmentUuid = m_ExportSwcData[i].swcMetaInfo.swcattachmentswcuuid();
+                        if (!WrappedCall::GetSwcAttachmentSwc(m_ExportSwcData[i].swcMetaInfo.base().uuid(),
+                                                              swcAttachmentUuid, response, this)) {
+                            QMetaObject::invokeMethod(this, [this, &progressBar, i, response, fileSavePath]() {
+                                QMessageBox::critical(this, "Error",
+                                                      QString::fromStdString(response.metainfo().message()));
+                                ui->ResultTable->setItem(i, 3,
+                                                         new QTableWidgetItem(
+                                                             "Get Swc Attachment Data From Server Failed"));
+                                ui->ResultTable->setItem(i, 4,
+                                                         new QTableWidgetItem(fileSavePath));
+                                setAllGridColor(i, Qt::red);
+                            });
+
+                            continue;
+                        }
+
+                        for (auto&data: response.swcdata()) {
+                            swcAttachmentSwcData.push_back(data);
+                        }
+
+                        ESwc io(path.string());
+                        std::vector<NeuronUnit> units;
+                        std::for_each(swcAttachmentSwcData.begin(), swcAttachmentSwcData.end(),
+                                      [&](proto::SwcNodeDataV1&val) {
+                                          NeuronUnit unit;
+                                          unit.n = val.swcnodeinternaldata().n();
+                                          unit.type = val.swcnodeinternaldata().type();
+                                          unit.x = val.swcnodeinternaldata().x();
+                                          unit.y = val.swcnodeinternaldata().y();
+                                          unit.z = val.swcnodeinternaldata().z();
+                                          unit.radius = val.swcnodeinternaldata().radius();
+                                          unit.parent = val.swcnodeinternaldata().parent();
+                                          unit.seg_id = val.swcnodeinternaldata().seg_id();
+                                          unit.level = val.swcnodeinternaldata().level();
+                                          unit.mode = val.swcnodeinternaldata().mode();
+                                          unit.timestamp = val.swcnodeinternaldata().timestamp();
+                                          unit.feature_value = val.swcnodeinternaldata().feature_value();
                                           units.push_back(unit);
                                       });
 

@@ -314,7 +314,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
                                                "Exporting action may takes few time please waiting for export steps finish!",
                                                QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::Cancel);
         if (result == QMessageBox::StandardButton::Ok) {
-            if (data.type == MetaInfoType::eFreeSwc) {
+            if (data.type == MetaInfoType::eFreeSwc || data.type == MetaInfoType::eProjectSwc) {
                 proto::GetSwcMetaInfoResponse response1;
                 if (!WrappedCall::getSwcMetaInfoByUuid(data.uuid, response1, this)) {
                     return;
