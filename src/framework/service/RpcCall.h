@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <agrpc/grpc_context.hpp>
 #include <grpcpp/grpcpp.h>
 #include <Service/Service.grpc.pb.h>
 
@@ -20,6 +21,9 @@ public:
 
         m_Stub = proto::DBMS::NewStub(m_Channel);
 
+        m_GrpcContextThread = std::thread([this]() {
+            m_GrpcContext.run();
+        });
     }
 
     static RpcCall& getInstance() {
@@ -39,13 +43,24 @@ public:
         return m_Stub;
     }
 
+    auto& GrpcContext() {
+        return m_GrpcContext;
+    }
+
     inline static std::string ApiVersion = "2024.05.06";
 
 private:
     RpcCall() {
     }
 
+    ~RpcCall() {
+        m_GrpcContext.stop();
+        m_GrpcContextThread.join();
+    }
+
     std::string m_Endpoint;
     std::shared_ptr<grpc::Channel> m_Channel;
     std::unique_ptr<proto::DBMS::Stub> m_Stub;
+    agrpc::GrpcContext m_GrpcContext;
+    std::thread m_GrpcContextThread;
 };

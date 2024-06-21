@@ -96,7 +96,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <spacer name="horizontalSpacer_3">
+      <spacer name="horizontalSpacer_31">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>

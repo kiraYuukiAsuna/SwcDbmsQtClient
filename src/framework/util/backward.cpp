@@ -50,7 +50,7 @@ namespace backward {
 
             std::stringstream ss;
             printer.print(st, ss);
-            SEELE_ERROR_TAG("StaackTrace", "{}", ss.str());
+            SeeleInfoTag("StaackTrace", "{}", ss.str());
             Seele::Log::Flush();
         }
     }

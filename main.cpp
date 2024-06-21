@@ -8,6 +8,7 @@
 #include "src/framework/config/AppConfig.h"
 #include "src/framework/core/log/Log.h"
 #include "src/framework/defination/ImageDefination.h"
+#include "src/framework/service/WrappedCall.h"
 #include "src/framework/util/util.hpp"
 
 int main(int argc, char* argv[]) {
@@ -15,7 +16,7 @@ int main(int argc, char* argv[]) {
 
     auto timestamp = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).
             time_since_epoch();
-    SEELE_INFO_TAG("Main", "App Start At: {}", timestampToString(timestamp.count()));
+    SeeleInfoTag("Main", "App Start At: {}", timestampToString(timestamp.count()));
 
     QApplication app(argc, argv);
 
@@ -63,6 +64,12 @@ int main(int argc, char* argv[]) {
     auto endPoint = serverIP + ":" + serverPort;
 
     RpcCall::getInstance().initialize(endPoint);
+
+    auto fu = asio::co_spawn(RpcCall::getInstance().GrpcContext(), []() -> asio::awaitable<grpc::Status> {
+        co_return co_await WrappedCall::UserLoginAsync();
+    }, asio::use_future);
+
+    std::cout<<"UserLoginAsync: "<<fu.get().ok()<<std::endl;
 
     if (LoginWindow loginWindow{}; loginWindow.exec() != QDialog::Accepted) {
         return -1;

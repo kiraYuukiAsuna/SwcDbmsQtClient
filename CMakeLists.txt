@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.28)
 project(SwcManagerClient)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -20,9 +20,9 @@ find_package(Qt6 COMPONENTS
         OpenGL
         OpenGLWidgets
         REQUIRED)
-find_package(protobuf CONFIG REQUIRED)
-find_package(gRPC CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(asio-grpc CONFIG REQUIRED)
+find_package(asio CONFIG REQUIRED)
 
 include_directories(
         SwcDbmsCommon/Generated/cpp
@@ -137,7 +137,6 @@ set(PROJECT_SOURCES
         SwcDbmsCommon/Generated/cpp/Service/Service.pb.cc
 
 
-
         app_win32.rc
 )
 
@@ -152,9 +151,8 @@ if (WIN32)
             Qt::OpenGL
             Qt::OpenGLWidgets
             opengl32
-            PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
             PRIVATE spdlog::spdlog
-            PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts
+            PRIVATE asio-grpc::asio-grpc-standalone-asio asio::asio
     )
 elseif (UNIX)
     target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -164,14 +162,13 @@ elseif (UNIX)
             Qt::Svg
             Qt::OpenGL
             Qt::OpenGLWidgets
-            PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite
             PRIVATE spdlog::spdlog
-            PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts
+            PRIVATE asio-grpc::asio-grpc-standalone-asio asio::asio
     )
 endif ()
 
 target_compile_definitions(${PROJECT_NAME}
-        PUBLIC
+        PRIVATE
         NODE_EDITOR_STATIC
         NODE_EDITOR_EXPORTS
         NOMINMAX

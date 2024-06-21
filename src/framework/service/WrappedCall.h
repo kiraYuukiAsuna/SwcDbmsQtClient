@@ -7,15 +7,73 @@
 #include "RpcCall.h"
 #include "CachedProtoData.h"
 #include "src/framework/core/log/Log.h"
+#include <asio.hpp>
+#include <grpcpp/grpcpp.h>
+#include <agrpc/asio_grpc.hpp>
+#include "Service/Service.grpc.pb.h"
+
+// concept约束实现 //
+// 定义一个辅助模板结构来提取Request和Response类型
+template<typename T>
+struct RPCTraits;
+
+template<typename StubT, typename RequestT, typename ResponseT,
+    std::unique_ptr<grpc::ClientAsyncResponseReader<ResponseT>> (StubT::*PrepareAsyncUnary)(
+        grpc::ClientContext*, const RequestT&, grpc::CompletionQueue*),
+    typename Executor>
+struct RPCTraits<agrpc::ClientRPC<PrepareAsyncUnary, Executor>> {
+    using Request = RequestT;
+    using Response = ResponseT;
+};
+
+// 定义一个concept来约束模板参数B
+template<typename T>
+concept RPCConcept = requires {
+    typename RPCTraits<T>::Request;
+    typename RPCTraits<T>::Response;
+};
+
+template<auto A, typename B = asio::use_awaitable_t<>::as_default_on_t<
+        agrpc::ClientRPC<A>>>
+requires RPCConcept<B>
+typename RPCTraits<B>::Response func(typename RPCTraits<B>::Request req) {
+    // 函数体
+    typename RPCTraits<B>::Response response;
+    return response;
+}
 
 class WrappedCall {
 public:
     template<typename T>
+        requires std::is_base_of_v<google::protobuf::Message, T>
     static void setCommonRequestField(T&type) {
         type.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
         auto* userInfo = type.mutable_userverifyinfo();
         userInfo->set_username(CachedProtoData::getInstance().UserName);
         userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
+    }
+
+    template<auto A, typename B = asio::use_awaitable_t<>::as_default_on_t<
+            agrpc::ClientRPC<A>>>
+    requires RPCConcept<B>
+    static asio::awaitable<grpc::Status> commonReqRsp(typename RPCTraits<B>::Request&request,
+                                              typename RPCTraits<B>::Response&response) {
+        grpc::ClientContext clientContext;
+        clientContext.set_deadline(std::chrono::system_clock::now() +
+                            std::chrono::seconds(5));
+        grpc::Status status = co_await B::request(RpcCall::getInstance().GrpcContext(), *RpcCall::getInstance().Stub(),
+                                               clientContext, request, response);
+        co_return status;
+    }
+
+    static asio::awaitable<grpc::Status> UserLoginAsync() {
+        proto::UserLoginRequest request;
+        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
+        request.set_username("Hanasaka");
+        request.set_password("Hanasaka2");
+        proto::UserLoginResponse response;
+        auto status = co_await commonReqRsp<&proto::DBMS::Stub::PrepareAsyncUserLogin>(request,response);
+        co_return status;
     }
 
     static bool defaultErrorHandler(const std::string&actionName, const grpc::Status&status,
@@ -40,10 +98,10 @@ public:
             if (rspMeta.status()) {
                 return true;
             }
-            SEELE_ERROR_TAG("WrappedCall", "{}", actionName + " Failed! " + rspMeta.message());
+            SeeleErrorTag("WrappedCall", "{}", actionName + " Failed! " + rspMeta.message());
             return false;
         }
-        SEELE_ERROR_TAG("WrappedCall", "{}", actionName + " Failed! " + status.error_message());
+        SeeleErrorTag("WrappedCall", "{}", actionName + " Failed! " + status.error_message());
         return false;
     }
 
@@ -166,7 +224,8 @@ public:
     }
 
     static bool addSwcNodeDataByUuid(const std::string&swcUuid, proto::SwcDataV1&swcData,
-                                     proto::CreateSwcNodeDataResponse&response, QWidget* parent, bool noMessageBoxWhenError = false) {
+                                     proto::CreateSwcNodeDataResponse&response, QWidget* parent,
+                                     bool noMessageBoxWhenError = false) {
         proto::CreateSwcNodeDataRequest request;
         setCommonRequestField(request);
         request.set_swcuuid(swcUuid);
@@ -174,9 +233,10 @@ public:
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->CreateSwcNodeData(&context, request, &response);
-        if(noMessageBoxWhenError) {
+        if (noMessageBoxWhenError) {
             return defaultErrorHandlerNoMessageBox(__func__, status, response.metainfo(), parent);
-        }else {
+        }
+        else {
             return defaultErrorHandler(__func__, status, response.metainfo(), parent);
         }
     }
@@ -217,9 +277,10 @@ public:
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->CreateSwc(&context, request, &response);
-        if(noMessageBoxWhenError) {
+        if (noMessageBoxWhenError) {
             return defaultErrorHandlerNoMessageBox(__func__, status, response.metainfo(), parent);
-        }else {
+        }
+        else {
             return defaultErrorHandler(__func__, status, response.metainfo(), parent);
         }
     }
@@ -278,9 +339,10 @@ public:
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->CreateSwcAttachmentAno(&context, request, &response);
-        if(noMessageBoxWhenError) {
+        if (noMessageBoxWhenError) {
             return defaultErrorHandlerNoMessageBox(__func__, status, response.metainfo(), parent);
-        }else {
+        }
+        else {
             return defaultErrorHandler(__func__, status, response.metainfo(), parent);
         }
     }
@@ -344,9 +406,10 @@ public:
 
         grpc::ClientContext context;
         auto status = RpcCall::getInstance().Stub()->CreateSwcAttachmentApo(&context, request, &response);
-        if(noMessageBoxWhenError) {
+        if (noMessageBoxWhenError) {
             return defaultErrorHandlerNoMessageBox(__func__, status, response.metainfo(), parent);
-        }else {
+        }
+        else {
             return defaultErrorHandler(__func__, status, response.metainfo(), parent);
         }
     }

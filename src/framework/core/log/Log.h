@@ -1,7 +1,6 @@
 #pragma once
 
 #include "spdlog/spdlog.h"
-#include "spdlog/fmt/ostr.h"
 
 #include <map>
 
@@ -38,7 +37,7 @@ namespace Seele {
 
         template<typename... Args>
         static void PrintMessage(Log::Type type, Log::Level level, std::string_view tag,
-                                 fmt::format_string<Args...> format, Args&&... args);
+                                 const std::format_string<Args...>& format, Args&&... args);
 
         // Enum utils
         static const char* LevelToString(Level level) {
@@ -91,53 +90,147 @@ namespace Seele {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Core logging
-#define SEELE_CORE_TRACE_TAG(tag, ...) ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Trace, tag, __VA_ARGS__)
-#define SEELE_CORE_INFO_TAG(tag, ...)  ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Info, tag, __VA_ARGS__)
-#define SEELE_CORE_WARN_TAG(tag, ...)  ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Warn, tag, __VA_ARGS__)
-#define SEELE_CORE_ERROR_TAG(tag, ...) ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Error, tag, __VA_ARGS__)
-#define SEELE_CORE_FATAL_TAG(tag, ...) ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Fatal, tag, __VA_ARGS__)
+template<typename... Args>
+void SeeleCoreTraceTag(const char* tag, const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Trace, tag, format, std::forward<Args>(args)...);
+}
 
+template<typename... Args>
+void SeeleCoreInfoTag(const char* tag, const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Info, tag, format, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleCoreWarnTag(const char* tag, const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Warn, tag, format, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleCoreErrorTag(const char* tag, const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Error, tag, format, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleCoreFatalTag(const char* tag, const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Fatal, tag, format, std::forward<Args>(args)...);
+}
 // App logging
-#define SEELE_TRACE_TAG(tag, ...) ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Trace, tag, __VA_ARGS__)
-#define SEELE_INFO_TAG(tag, ...)  ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Info, tag, __VA_ARGS__)
-#define SEELE_WARN_TAG(tag, ...)  ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Warn, tag, __VA_ARGS__)
-#define SEELE_ERROR_TAG(tag, ...) ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Error, tag, __VA_ARGS__)
-#define SEELE_FATAL_TAG(tag, ...) ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Fatal, tag, __VA_ARGS__)
+template<typename... Args>
+void SeeleTraceTag(const char* tag, const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Trace, tag, format, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleInfoTag(const char* tag, const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Info, tag, format, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleWarnTag(const char* tag, const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Warn, tag, format, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleErrorTag(const char* tag, const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Error, tag, format, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleFatalTag(const char* tag, const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Fatal, tag, format, std::forward<Args>(args)...);
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Core Logging
-#define SEELE_CORE_TRACE(...)  ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Trace, "", __VA_ARGS__)
-#define SEELE_CORE_INFO(...)   ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Info, "", __VA_ARGS__)
-#define SEELE_CORE_WARN(...)   ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Warn, "", __VA_ARGS__)
-#define SEELE_CORE_ERROR(...)  ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Error, "", __VA_ARGS__)
-#define SEELE_CORE_FATAL(...)  ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Fatal, "", __VA_ARGS__)
+template<typename... Args>
+void SeeleCoreTrace(const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Trace, "", format, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleCoreInfo(const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Info, "", format, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleCoreWarn(const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Warn, "", format, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleCoreError(const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Error, "", format, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleCoreFatal(const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::Core, ::Seele::Log::Level::Fatal, "", format, std::forward<Args>(args)...);
+}
 
 // App Logging
-#define SEELE_TRACE(...)   ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Trace, "", __VA_ARGS__)
-#define SEELE_INFO(...)    ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Info, "", __VA_ARGS__)
-#define SEELE_WARN(...)    ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Warn, "", __VA_ARGS__)
-#define SEELE_ERROR(...)   ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Error, "", __VA_ARGS__)
-#define SEELE_FATAL(...)   ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Fatal, "", __VA_ARGS__)
+template<typename... Args>
+void SeeleTrace(const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Trace, "", format, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleInfo(const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Info, "", format, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleWarn(const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Warn, "", format, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleError(const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Error, "", format, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleFatal(const std::format_string<Args...>& format, Args&&... args) {
+    ::Seele::Log::PrintMessage(::Seele::Log::Type::App, ::Seele::Log::Level::Fatal, "", format, std::forward<Args>(args)...);
+}
 
 // Editor Console Logging Macros
-#define SEELE_CONSOLE_LOG_TRACE(...)   Seele::Log::GetEditorConsoleLogger()->trace(__VA_ARGS__)
-#define SEELE_CONSOLE_LOG_INFO(...)    Seele::Log::GetEditorConsoleLogger()->info(__VA_ARGS__)
-#define SEELE_CONSOLE_LOG_WARN(...)    Seele::Log::GetEditorConsoleLogger()->warn(__VA_ARGS__)
-#define SEELE_CONSOLE_LOG_ERROR(...)   Seele::Log::GetEditorConsoleLogger()->error(__VA_ARGS__)
-#define SEELE_CONSOLE_LOG_FATAL(...)   Seele::Log::GetEditorConsoleLogger()->critical(__VA_ARGS__)
+template<typename... Args>
+void SeeleConsoleLogTrace(Args&&... args) {
+    Seele::Log::GetEditorConsoleLogger()->trace(std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleConsoleLogInfo(Args&&... args) {
+    Seele::Log::GetEditorConsoleLogger()->info(std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleConsoleLogWarn(Args&&... args) {
+    Seele::Log::GetEditorConsoleLogger()->warn(std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleConsoleLogError(Args&&... args) {
+    Seele::Log::GetEditorConsoleLogger()->error(std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void SeeleConsoleLogFatal(Args&&... args) {
+    Seele::Log::GetEditorConsoleLogger()->critical(std::forward<Args>(args)...);
+}
 
 namespace Seele {
     template<typename... Args>
-    void Log::PrintMessage(Log::Type type, Log::Level level, std::string_view tag, fmt::format_string<Args...> format,
+    void Log::PrintMessage(Log::Type type, Log::Level level, std::string_view tag, const std::format_string<Args...>& format,
                            Args&&... args) {
         auto detail = s_EnabledTags[std::string(tag)];
         if (detail.Enabled && detail.LevelFilter <= level) {
             auto logger = (type == Type::Core) ? GetCoreLogger() : GetAppLogger();
-            auto userLogString = fmt::format(format, std::forward<Args>(args)...);
+            auto userLogString = std::format(format, std::forward<Args>(args)...);
             auto finaLogString = tag.empty()
-                                     ? fmt::format("{}{}", tag, userLogString)
-                                     : fmt::format("[{}] {}", tag, userLogString);
+                                     ? std::format("{}{}", tag, userLogString)
+                                     : std::format("[{}] {}", tag, userLogString);
             switch (level) {
                 case Level::Trace:
                     logger->trace(finaLogString);
