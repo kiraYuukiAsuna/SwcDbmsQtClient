@@ -3,6 +3,7 @@
 #include <agrpc/grpc_context.hpp>
 #include <grpcpp/grpcpp.h>
 #include <Service/Service.grpc.pb.h>
+#include <thread>
 
 class RpcCall {
 public:
