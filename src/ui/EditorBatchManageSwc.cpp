@@ -50,7 +50,7 @@ EditorBatchManageSwc::EditorBatchManageSwc(const std::vector<std::string>&swcUui
                                                                   "Are you sure to delete the selected Swc?",
                                                                   QMessageBox::Yes | QMessageBox::No);
         if (reply == QMessageBox::Yes) {
-            for (int i = 0; i < ui->SwcList->count(); i++) {
+            for (int i = ui->SwcList->count() - 1; i >= 0 ; i--) {
                 QListWidgetItem* item = ui->SwcList->item(i);
                 if (item->checkState() == Qt::Checked) {
                     proto::DeleteSwcResponse response;

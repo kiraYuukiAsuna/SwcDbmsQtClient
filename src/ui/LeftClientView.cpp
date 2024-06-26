@@ -234,9 +234,8 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuCreateProject->setIcon(QIcon(Image::ImageCreate));
     connect(MenuCreateProject, &QAction::triggered, this, [this](bool checked) {
         ViewCreateProject view;
-        if (view.exec() == QDialog::Accepted) {
-            refreshTree();
-        }
+        view.exec();
+        refreshTree();
     });
 
     auto* MenuDeleteProject = new QAction(this);
@@ -286,7 +285,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuEditProjectPermission->setText("Edit Permission");
     MenuEditProjectPermission->setIcon(QIcon(Image::ImageACL));
     connect(MenuEditProjectPermission, &QAction::triggered, this, [this,data](bool checked) {
-        EditorPermission view(data.uuid, MetaInfoType::eProject, false,this);
+        EditorPermission view(data.uuid, MetaInfoType::eProject, false, this);
         view.exec();
     });
 
@@ -295,12 +294,12 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuImportSwcFile->setIcon(QIcon(Image::ImageImport));
     connect(MenuImportSwcFile, &QAction::triggered, this, [this, data](bool checked) {
         if (data.type == MetaInfoType::eFreeSwcContainer) {
-            ViewImportSwcFromFile view(m_MainWindow,"");
+            ViewImportSwcFromFile view(m_MainWindow, "");
             view.exec();
             refreshTree();
         }
         else if (data.type == MetaInfoType::eProject) {
-            ViewImportSwcFromFile view(m_MainWindow,data.uuid);
+            ViewImportSwcFromFile view(m_MainWindow, data.uuid);
             view.exec();
             refreshTree();
         }
@@ -392,9 +391,8 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuCreateSwc->setIcon(QIcon(Image::ImageCreate));
     connect(MenuCreateSwc, &QAction::triggered, this, [this](bool checked) {
         ViewCreateSwc view;
-        if (view.exec() == QDialog::Accepted) {
-            refreshTree();
-        }
+        view.exec();
+        refreshTree();
     });
 
     auto* MenuBatchManageSwc = new QAction(this);
@@ -405,25 +403,34 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
             std::vector<std::string> uuids;
 
             proto::GetProjectSwcNamesByProjectUuidResponse responseSwc;
-            if(!WrappedCall::GetProjectSwcNamesByProjectUuid(data.uuid,responseSwc, this)) {
+            if (!WrappedCall::GetProjectSwcNamesByProjectUuid(data.uuid, responseSwc, this)) {
                 return;
             }
 
-            for(auto& swcuuidname: responseSwc.swcuuidname()) {
+            for (auto&swcuuidname: responseSwc.swcuuidname()) {
                 uuids.push_back(swcuuidname.swcuuid());
             }
 
             EditorBatchManageSwc view(uuids, this);
-            if (view.exec() == QDialog::Accepted) {
-                refreshTree();
-            }
+            view.exec();
+            refreshTree();
         }
         else if (data.type == MetaInfoType::eFreeSwcContainer) {
             std::vector<std::string> uuids;
-            EditorBatchManageSwc view(uuids, this);
-            if (view.exec() == QDialog::Accepted) {
-                refreshTree();
+            proto::GetAllSwcMetaInfoResponse response;
+            if (!WrappedCall::getAllSwcMetaInfo(response, this)) {
+                return;
             }
+
+            for (auto&info: response.swcinfo()) {
+                if (info.belongingprojectuuid().empty()) {
+                    uuids.push_back(info.base().uuid());
+                }
+            }
+
+            EditorBatchManageSwc view(uuids, this);
+            view.exec();
+            refreshTree();
         }
     });
 
@@ -479,7 +486,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint&pos) {
     MenuEditSwcPermission->setText("Edit Permission");
     MenuEditSwcPermission->setIcon(QIcon(Image::ImageACL));
     connect(MenuEditSwcPermission, &QAction::triggered, this, [this,data](bool checked) {
-        EditorPermission view(data.uuid, MetaInfoType::eFreeSwc, false,this);
+        EditorPermission view(data.uuid, MetaInfoType::eFreeSwc, false, this);
         view.exec();
     });
 

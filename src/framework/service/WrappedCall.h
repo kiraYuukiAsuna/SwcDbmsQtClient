@@ -12,34 +12,37 @@
 #include <agrpc/asio_grpc.hpp>
 #include "Service/Service.grpc.pb.h"
 
-// concept约束实现 //
-// 定义一个辅助模板结构来提取Request和Response类型
 template<typename T>
-struct RPCTraits;
+struct RPCTraitsAbstract;
 
 template<typename StubT, typename RequestT, typename ResponseT,
     std::unique_ptr<grpc::ClientAsyncResponseReader<ResponseT>> (StubT::*PrepareAsyncUnary)(
         grpc::ClientContext*, const RequestT&, grpc::CompletionQueue*),
     typename Executor>
-struct RPCTraits<agrpc::ClientRPC<PrepareAsyncUnary, Executor>> {
+struct RPCTraitsAbstract<agrpc::ClientRPC<PrepareAsyncUnary, Executor>> {
     using Request = RequestT;
     using Response = ResponseT;
+    using RequestClient = asio::use_awaitable_t<>::as_default_on_t<agrpc::ClientRPC<PrepareAsyncUnary, Executor>>;
 };
 
-// 定义一个concept来约束模板参数B
-template<typename T>
-concept RPCConcept = requires {
-    typename RPCTraits<T>::Request;
-    typename RPCTraits<T>::Response;
+template<auto A, typename B = asio::use_awaitable_t<>::as_default_on_t<agrpc::ClientRPC<A>>>
+struct RPCTraits {
+    using RequestType = typename RPCTraitsAbstract<B>::Request;
+    using ResponseType = typename RPCTraitsAbstract<B>::Response;
+    using RequestClient = B;
+
+    RequestType request;
+    ResponseType response;
 };
 
-template<auto A, typename B = asio::use_awaitable_t<>::as_default_on_t<
-        agrpc::ClientRPC<A>>>
-requires RPCConcept<B>
-typename RPCTraits<B>::Response func(typename RPCTraits<B>::Request req) {
-    // 函数体
-    typename RPCTraits<B>::Response response;
-    return response;
+template<typename RPCTraits>
+static asio::awaitable<grpc::Status> commonReqRsp(agrpc::GrpcContext&grpc_context, proto::DBMS::Stub&stub,
+                                                  RPCTraits&rpc) {
+    grpc::ClientContext clientContext;
+    clientContext.set_deadline(std::chrono::system_clock::now() + std::chrono::seconds(5));
+    grpc::Status status = co_await RPCTraits::RequestClient::request(grpc_context, stub, clientContext, rpc.request,
+                                                                     rpc.response);
+    co_return status;
 }
 
 class WrappedCall {
@@ -53,26 +56,12 @@ public:
         userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
     }
 
-    template<auto A, typename B = asio::use_awaitable_t<>::as_default_on_t<
-            agrpc::ClientRPC<A>>>
-    requires RPCConcept<B>
-    static asio::awaitable<grpc::Status> commonReqRsp(typename RPCTraits<B>::Request&request,
-                                              typename RPCTraits<B>::Response&response) {
-        grpc::ClientContext clientContext;
-        clientContext.set_deadline(std::chrono::system_clock::now() +
-                            std::chrono::seconds(5));
-        grpc::Status status = co_await B::request(RpcCall::getInstance().GrpcContext(), *RpcCall::getInstance().Stub(),
-                                               clientContext, request, response);
-        co_return status;
-    }
-
     static asio::awaitable<grpc::Status> UserLoginAsync() {
-        proto::UserLoginRequest request;
-        request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
-        request.set_username("Hanasaka");
-        request.set_password("Hanasaka2");
-        proto::UserLoginResponse response;
-        auto status = co_await commonReqRsp<&proto::DBMS::Stub::PrepareAsyncUserLogin>(request,response);
+        RPCTraits<&proto::DBMS::Stub::PrepareAsyncUserLogin> rpc;
+        rpc.request.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
+        rpc.request.set_username("Hanasaka");
+        rpc.request.set_password("Hanasaka2");
+        auto status = co_await commonReqRsp(RpcCall::getInstance().GrpcContext(), *RpcCall::getInstance().Stub(), rpc);
         co_return status;
     }
 
