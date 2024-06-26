@@ -63,13 +63,16 @@ int main(int argc, char* argv[]) {
 
     auto endPoint = serverIP + ":" + serverPort;
 
+    SeeleInfoTag("main", "Server IP: {}", serverIP);
+    SeeleInfoTag("main", "Server Port: {}", serverPort);
+
     RpcCall::getInstance().initialize(endPoint);
 
-    auto fu = asio::co_spawn(RpcCall::getInstance().GrpcContext(), []() -> asio::awaitable<grpc::Status> {
-        co_return co_await WrappedCall::UserLoginAsync();
-    }, asio::use_future);
-
-    std::cout<<"UserLoginAsync: "<<fu.get().ok()<<std::endl;
+    // auto fu = asio::co_spawn(RpcCall::getInstance().GrpcContext(), []() -> asio::awaitable<grpc::Status> {
+    //     co_return co_await WrappedCall::UserLoginAsync();
+    // }, asio::use_future);
+    //
+    // std::cout<<"UserLoginAsync: "<<fu.get().ok()<<std::endl;
 
     if (LoginWindow loginWindow{}; loginWindow.exec() != QDialog::Accepted) {
         return -1;

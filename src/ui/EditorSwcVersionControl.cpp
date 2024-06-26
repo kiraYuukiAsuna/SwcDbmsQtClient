@@ -379,14 +379,25 @@ void EditorSwcVersionControl::promoteOperation(std::vector<proto::SwcNodeDataV1>
             }
             case proto::Delete: {
                 for (auto&deletedData: op.swcdata().swcdata()) {
-                    std::erase_if(nodeData, [&](proto::SwcNodeDataV1&node) {
-                        if (node.base().uuid() == deletedData.base().uuid()) {
-                            return true;
-                        }
-                        return false;
+                    auto it = std::find_if(nodeData.begin(), nodeData.end(), [&](proto::SwcNodeDataV1&node) {
+                        return node.base().uuid() == deletedData.base().uuid();
                     });
+                    if (it != nodeData.end()) {
+                        nodeData.erase(it);
+                    }
                 }
 
+                int counter = 1;
+                proto::SwcNodeDataV1* lastNode = nullptr;
+                for (auto&node: nodeData) {
+                    node.mutable_swcnodeinternaldata()->set_n(counter++);
+                    if (lastNode != nullptr) {
+                        if (lastNode->swcnodeinternaldata().parent() != -1) {
+                            lastNode->mutable_swcnodeinternaldata()->set_parent(node.swcnodeinternaldata().n());
+                        }
+                    }
+                    lastNode = &node;
+                }
                 break;
             }
             case proto::Update: {
@@ -396,6 +407,32 @@ void EditorSwcVersionControl::promoteOperation(std::vector<proto::SwcNodeDataV1>
                             node.CopyFrom(updateData);
                         }
                     }
+                }
+                break;
+            }
+            case proto::UpdateNParent: {
+                std::unordered_map<std::string, int> indexMap;
+                for (auto&node: nodeData) {
+                    indexMap[node.base().uuid()] = node.swcnodeinternaldata().n();
+                }
+
+                for (auto&updateData: op.nodenparent()) {
+                    auto iter = indexMap.find(updateData.nodeuuid());
+                    if (iter != indexMap.end()) {
+                        nodeData.at(iter->second).mutable_swcnodeinternaldata()->set_n(updateData.n());
+                        nodeData.at(iter->second).mutable_swcnodeinternaldata()->set_parent(updateData.parent());
+                    }
+                }
+                break;
+            }
+            case proto::ClearAll: {
+                nodeData.clear();
+                break;
+            }
+            case proto::OverwriteAll: {
+                nodeData.clear();
+                for (auto&newData: op.swcdata().swcdata()) {
+                    nodeData.push_back(newData);
                 }
                 break;
             }
