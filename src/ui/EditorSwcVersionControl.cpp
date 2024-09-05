@@ -16,6 +16,7 @@ EditorSwcVersionControl::EditorSwcVersionControl(const std::string&swcUuid, QWid
     ui->setupUi(this);
 
     m_DataFlowGraphicsScene = new QtNodes::DataFlowGraphicsScene(m_DataFlowGraphModel, this);
+    m_DataFlowGraphicsScene->setOrientation(Qt::Vertical);
     m_GraphicsView.setScene(m_DataFlowGraphicsScene);
 
     ui->GraphicsViewLayout->addWidget(&m_GraphicsView);
@@ -204,9 +205,12 @@ void EditorSwcVersionControl::refreshVersionGraph() {
         m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::Position,
                                          QPointF{static_cast<qreal>(idx * 900), 0});
         m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::Caption,
-                                         QString::fromStdString(m_SwcSnapshots[idx].swcsnapshotcollectionname()));
-        m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::Size,
-                                         QSize{360, 100});
+                                         QString::fromStdString("Snapshot id=" + std::to_string(idx+1)+
+                                                                + " at " + timestampToString(m_SwcSnapshots[idx].createtime().seconds())));
+        // m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::Size,
+        //                                  QSize{360, 100});
+        m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::InternalData,
+                                         QVariant::fromValue(std::any(m_SwcSnapshots[idx])));
         snapshotNodeMap.insert({m_SwcSnapshots[idx].swcsnapshotcollectionname(), newId});
     }
 
@@ -215,10 +219,11 @@ void EditorSwcVersionControl::refreshVersionGraph() {
         m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::Position,
                                          QPointF{static_cast<qreal>(400 + idx * 900), 300});
         m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::Caption,
-                                         QString::fromStdString(
-                                             m_SwcIncrements[idx].incrementoperationcollectionname()));
-        m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::Size,
-                                         QSize{300, 100});
+                                         QString::fromStdString("Increment: from " + std::to_string(idx+1) + " to " + std::to_string(idx+2)));
+        // m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::Size,
+        //                                  QSize{300, 100});
+        m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::InternalData,
+                                         QVariant::fromValue(std::any(m_SwcIncrements[idx])));
         for (int idx2 = 0; idx2 < m_SwcSnapshots.size(); idx2++) {
             auto snap = m_SwcSnapshots[idx2];
             if (m_SwcIncrements[idx].startsnapshot() == snap.swcsnapshotcollectionname()) {

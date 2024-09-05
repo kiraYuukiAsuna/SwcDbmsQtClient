@@ -14,6 +14,11 @@ EditorApoAttachment::EditorApoAttachment(const std::string& swcUuid, QWidget *pa
                                                                                          {
     ui->setupUi(this);
 
+    auto font = QApplication::font();
+    font.setBold(true);
+    font.setPixelSize(22);
+    ui->tableView->setFont(font);
+
     connect(ui->OKBtn, &QPushButton::clicked, this, [&]() {
         if (m_IsApoAttachmentExist) {
             proto::UpdateSwcAttachmentApoResponse response;

@@ -27,18 +27,19 @@ int main(int argc, char* argv[]) {
         const QString&sansCNFamily = loadedFontFamilies.at(0);
         QFont defaultFont = QApplication::font();
         defaultFont.setFamily(sansCNFamily);
-        defaultFont.setPixelSize(14);
+        defaultFont.setPixelSize(20);
+        defaultFont.setBold(true);
         QApplication::setFont(defaultFont);
     }
-
+    
     const QString appDir = QApplication::applicationDirPath();
     acss::QtAdvancedStylesheet styleManager;
     styleManager.setStylesDirPath(R"(:/styles)");
     styleManager.setOutputDirPath(appDir + "/StylesOutput");
     styleManager.setCurrentStyle("qt_material_modified");
     styleManager.setCurrentTheme("light_blue");
-    styleManager.updateStylesheet();
-    qApp->setStyleSheet(styleManager.styleSheet());
+    // styleManager.updateStylesheet();
+    // qApp->setStyleSheet(styleManager.styleSheet());
     // setWindowIcon(advancedStyleSheet.styleIcon());
     // qApp->setStyleSheet(advancedStyleSheet.styleSheet());
     // connect(&advancedStyleSheet, SIGNAL(stylesheetChanged()), this,

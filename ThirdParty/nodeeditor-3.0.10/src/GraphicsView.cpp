@@ -373,12 +373,12 @@ void GraphicsView::drawBackground(QPainter *painter, const QRectF &r)
     QPen pfine(flowViewStyle.FineGridColor, 1.0);
 
     painter->setPen(pfine);
-    drawGrid(15);
+    // drawGrid(15);
 
     QPen p(flowViewStyle.CoarseGridColor, 1.0);
 
     painter->setPen(p);
-    drawGrid(150);
+    // drawGrid(150);
 }
 
 void GraphicsView::showEvent(QShowEvent *event)

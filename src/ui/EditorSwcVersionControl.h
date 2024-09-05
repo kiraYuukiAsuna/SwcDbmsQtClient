@@ -7,21 +7,25 @@
 #include <QtNodes/DataFlowGraphicsScene>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class EditorSwcVersionControl; }
+
+namespace Ui {
+    class EditorSwcVersionControl;
+}
+
 QT_END_NAMESPACE
 
 class EditorSwcVersionControl : public QDialog {
-Q_OBJECT
+    Q_OBJECT
 
 public:
-    explicit EditorSwcVersionControl(const std::string&swcUuid, QWidget *parent = nullptr);
+    explicit EditorSwcVersionControl(const std::string&swcUuid, QWidget* parent = nullptr);
 
     ~EditorSwcVersionControl() override;
 
     void refreshVersionGraph();
 
 private:
-    Ui::EditorSwcVersionControl *ui;
+    Ui::EditorSwcVersionControl* ui;
 
     std::string m_SwcUuid;
 
@@ -37,7 +41,7 @@ private:
 
     void getSwcIncrementRecord(proto::SwcSnapshotMetaInfoV1 snapshot, int64_t endTime);
 
-    void promoteOperation(std::vector<proto::SwcNodeDataV1> &nodeData, const proto::SwcIncrementOperationV1 &op,
+    void promoteOperation(std::vector<proto::SwcNodeDataV1>&nodeData, const proto::SwcIncrementOperationV1&op,
                           int64_t endTime);
 
     void getAllSnapshot();
@@ -46,6 +50,5 @@ private:
 
     QtNodes::DataFlowGraphModel m_DataFlowGraphModel;
     QtNodes::GraphicsView m_GraphicsView;
-    QtNodes::DataFlowGraphicsScene *m_DataFlowGraphicsScene;
+    QtNodes::DataFlowGraphicsScene* m_DataFlowGraphicsScene;
 };
-
