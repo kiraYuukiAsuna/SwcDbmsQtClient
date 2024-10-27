@@ -6,6 +6,15 @@
 #include <google/protobuf/timestamp.pb.h>
 #include <QStandardPaths>
 
+inline std::string replaceAll(std::string str, const std::string&from, const std::string&to) {
+    size_t startPos = 0;
+    while ((startPos = str.find(from, startPos)) != std::string::npos) {
+        str.replace(startPos, from.length(), to);
+        startPos += to.length(); // Move past the last replaced substring
+    }
+    return str;
+}
+
 inline std::vector<std::string> stringSplit(const std::string&str, char delim) {
     std::stringstream ss(str);
     std::string item;
