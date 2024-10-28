@@ -38,8 +38,8 @@ int main(int argc, char* argv[]) {
     styleManager.setOutputDirPath(appDir + "/StylesOutput");
     styleManager.setCurrentStyle("qt_material_modified");
     styleManager.setCurrentTheme("light_blue");
-    // styleManager.updateStylesheet();
-    // qApp->setStyleSheet(styleManager.styleSheet());
+    styleManager.updateStylesheet();
+    qApp->setStyleSheet(styleManager.styleSheet());
     // setWindowIcon(advancedStyleSheet.styleIcon());
     // qApp->setStyleSheet(advancedStyleSheet.styleSheet());
     // connect(&advancedStyleSheet, SIGNAL(stylesheetChanged()), this,

@@ -128,7 +128,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_HeartBeatTimer->start();
 
     m_OnlineStatusTimer = new QTimer;
-    m_OnlineStatusTimer->setInterval(30000);
+    m_OnlineStatusTimer->setInterval(60000);
     connect(m_OnlineStatusTimer, &QTimer::timeout, this, [this]() {
         if (!CachedProtoData::getInstance().OnlineStatus) {
             QMessageBox::critical(this, "Error", "Timeout! You may have disconnected from server!");

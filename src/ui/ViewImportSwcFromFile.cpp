@@ -95,6 +95,13 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow* mainWindow,
                             attribute.m_ApoPath = apoPath;
                         }
 
+                        if (!std::filesystem::exists(anoPath) && !std::filesystem::exists(apoPath)) {
+                            anoPath = (filePath.parent_path() / (filePath.filename().string() + ".ano")).string();
+                            if (std::filesystem::exists(anoPath)) {
+                                attribute.m_AnoPath = anoPath;
+                            }
+                        }
+
                         m_SwcList.emplace_back(swc, attribute);
 
                         QApplication::postEvent(this, new UpdateImportUiEvent(i,
@@ -226,6 +233,13 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow* mainWindow,
                                 attribute.m_ApoPath = apoPath;
                             }
 
+                            if (!std::filesystem::exists(anoPath) && !std::filesystem::exists(apoPath)) {
+                                anoPath = (filePath.parent_path() / (filePath.filename().string() + ".ano")).string();
+                                if (std::filesystem::exists(anoPath)) {
+                                    attribute.m_AnoPath = anoPath;
+                                }
+                            }
+
                             m_SwcList.emplace_back(swc, attribute);
 
                             QApplication::postEvent(this, new UpdateImportUiEvent(currentRow,
@@ -290,6 +304,34 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow* mainWindow,
                 QMetaObject::invokeMethod(this, [&progressBar, currentRow, totalFileCount]() {
                     progressBar.finish();
                 });
+
+                int totalAnoFileCount = 0;
+                for (auto&swc: m_SwcList) {
+                    if (!swc.second.m_AnoPath.empty()) {
+                        totalAnoFileCount++;
+                    }
+                }
+                for (auto&swc: m_ESwcList) {
+                    if (!swc.second.m_AnoPath.empty()) {
+                        totalAnoFileCount++;
+                    }
+                }
+                int totalApoFileCount = 0;
+                for (auto&swc: m_SwcList) {
+                    if (!swc.second.m_ApoPath.empty()) {
+                        totalApoFileCount++;
+                    }
+                }
+                for (auto&swc: m_ESwcList) {
+                    if (!swc.second.m_ApoPath.empty()) {
+                        totalApoFileCount++;
+                    }
+                }
+
+                ui->SummaryLabel->setText(QString::fromStdString(
+                    "Total Swc File: " + std::to_string(m_SwcList.size() + m_ESwcList.size()) +
+                    ", Total Ano File: " + std::to_string(totalAnoFileCount) +
+                    ", Total Apo File: " + std::to_string(totalApoFileCount)));
             };
 
             m_IoThread = std::thread(task);
@@ -318,6 +360,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow* mainWindow,
             int processedESwcNumber = 0;
             for (int i = 0; i < ui->SwcFileInfo->rowCount(); i++) {
                 auto swcName = ui->SwcFileInfo->item(i, 5)->text().toStdString();
+
                 bool errorDetected = false;
 
                 std::string belongToProjectUuid;
@@ -355,7 +398,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow* mainWindow,
                         if (WrappedCall::addSwcNodeDataByUuid(response.swcinfo().base().uuid(), swcData, response1,
                                                               this, true)) {
                             QMetaObject::invokeMethod(this, [this,i]() {
-                                ui->SwcFileInfo->item(i, 6)->setText("Import Success!");
+                                ui->SwcFileInfo->item(i, 6)->setText("Create Swc Node Success!");
                                 setAllGridColor(i, Qt::green);
                             });
                         }
@@ -368,7 +411,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow* mainWindow,
                     }
                     else {
                         QMetaObject::invokeMethod(this, [this,i]() {
-                            ui->SwcFileInfo->item(i, 6)->setText("Create Swc Meta Info failed!");
+                            ui->SwcFileInfo->item(i, 6)->setText("Create Swc Node Meta Info failed!");
                             setAllGridColor(i, Qt::red);
                         });
                     }
@@ -424,6 +467,26 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow* mainWindow,
                             });
                         }
                     }
+                    else {
+                        proto::CreateSwcAttachmentApoResponse response1;
+                        std::vector<proto::SwcAttachmentApoV1> swcAttachmentApoData;
+                        if (WrappedCall::createSwcAttachmentApo(response.swcinfo().base().uuid(), swcAttachmentApoData,
+                                                                response1, this)) {
+                            QMetaObject::invokeMethod(this, [this,i, response1]() {
+                                ui->SwcFileInfo->item(i, 6)->setText(
+                                    "Create Swc Apo attachment successfully! ");
+                                setAllGridColor(i, Qt::green);
+                            });
+                        }
+                        else {
+                            QMetaObject::invokeMethod(this, [this,i, response1]() {
+                                ui->SwcFileInfo->item(i, 6)->setText(
+                                    "Create Swc Apo attachment Failed! " + QString::fromStdString(
+                                        response1.metainfo().message()));
+                                setAllGridColor(i, Qt::red);
+                            });
+                        }
+                    }
 
                     if (!m_SwcList[processedSwcNumber].second.m_AnoPath.empty()) {
                         AnoIo io(m_SwcList[processedSwcNumber].second.m_AnoPath);
@@ -431,7 +494,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow* mainWindow,
                         proto::CreateSwcAttachmentAnoResponse responseAno;
                         if (!WrappedCall::createSwcAttachmentAno(response.swcinfo().base().uuid(),
                                                                  io.getValue().APOFILE,
-                                                                 io.getValue().SWCFILE, responseAno, this, true
+                                                                 io.getValue().SWCFILE, responseAno, nullptr, true
                         )) {
                             if (!errorDetected) {
                                 QMetaObject::invokeMethod(this, [this,i,responseAno]() {
@@ -441,6 +504,25 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow* mainWindow,
                                     setAllGridColor(i, Qt::red);
                                 });
                             }
+                        }
+                    }
+                    else {
+                        proto::CreateSwcAttachmentAnoResponse response1;
+                        if (WrappedCall::createSwcAttachmentAno(response.swcinfo().base().uuid(), "", "", response1,
+                                                                nullptr, true
+                        )) {
+                            QMetaObject::invokeMethod(this, [this,i,response1]() {
+                                ui->SwcFileInfo->item(i, 6)->setText("Create Swc Ano attachment successfully!");
+                                setAllGridColor(i, Qt::green);
+                            });
+                        }
+                        else {
+                            QMetaObject::invokeMethod(this, [this,i,response1]() {
+                                ui->SwcFileInfo->item(i, 6)->setText(
+                                    "Create Swc Ano attachment Failed! " + QString::fromStdString(
+                                        response1.metainfo().message()));
+                                setAllGridColor(i, Qt::red);
+                            });
                         }
                     }
 
@@ -473,7 +555,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow* mainWindow,
                         if (WrappedCall::addSwcNodeDataByUuid(response.swcinfo().base().uuid(), swcData, response1,
                                                               this, true)) {
                             QMetaObject::invokeMethod(this, [this,i]() {
-                                ui->SwcFileInfo->item(i, 6)->setText("Import Success!");
+                                ui->SwcFileInfo->item(i, 6)->setText("Create Swc Node Success!");
                                 setAllGridColor(i, Qt::green);
                             });
                         }
@@ -486,7 +568,7 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow* mainWindow,
                     }
                     else {
                         QMetaObject::invokeMethod(this, [this,i]() {
-                            ui->SwcFileInfo->item(i, 6)->setText("Create Swc Meta Info failed!");
+                            ui->SwcFileInfo->item(i, 6)->setText("Create Swc Node Meta Info failed!");
                             setAllGridColor(i, Qt::red);
                         });
                     }
@@ -542,6 +624,26 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow* mainWindow,
                             });
                         }
                     }
+                    else {
+                        proto::CreateSwcAttachmentApoResponse response1;
+                        std::vector<proto::SwcAttachmentApoV1> swcAttachmentApoData;
+                        if (WrappedCall::createSwcAttachmentApo(response.swcinfo().base().uuid(), swcAttachmentApoData,
+                                                                response1, nullptr, true)) {
+                            QMetaObject::invokeMethod(this, [this,i, response1]() {
+                                ui->SwcFileInfo->item(i, 6)->setText(
+                                    "Create Swc Apo attachment successfully! ");
+                                setAllGridColor(i, Qt::green);
+                            });
+                        }
+                        else {
+                            QMetaObject::invokeMethod(this, [this,i, response1]() {
+                                ui->SwcFileInfo->item(i, 6)->setText(
+                                    "Create Swc Apo attachment Failed! " + QString::fromStdString(
+                                        response1.metainfo().message()));
+                                setAllGridColor(i, Qt::red);
+                            });
+                        }
+                    }
 
                     if (!m_ESwcList[processedESwcNumber].second.m_AnoPath.empty()) {
                         AnoIo io(m_ESwcList[processedESwcNumber].second.m_AnoPath);
@@ -559,6 +661,25 @@ ViewImportSwcFromFile::ViewImportSwcFromFile(MainWindow* mainWindow,
                                     setAllGridColor(i, Qt::red);
                                 });
                             }
+                        }
+                    }
+                    else {
+                        proto::CreateSwcAttachmentAnoResponse response1;
+                        if (WrappedCall::createSwcAttachmentAno(response.swcinfo().base().uuid(), "", "", response1,
+                                                                nullptr, true
+                        )) {
+                            QMetaObject::invokeMethod(this, [this,i,response1]() {
+                                ui->SwcFileInfo->item(i, 6)->setText("Create Swc Ano attachment successfully!");
+                                setAllGridColor(i, Qt::green);
+                            });
+                        }
+                        else {
+                            QMetaObject::invokeMethod(this, [this,i,response1]() {
+                                ui->SwcFileInfo->item(i, 6)->setText(
+                                    "Create Swc Ano attachment Failed! " + QString::fromStdString(
+                                        response1.metainfo().message()));
+                                setAllGridColor(i, Qt::red);
+                            });
                         }
                     }
 
@@ -610,10 +731,10 @@ bool ViewImportSwcFromFile::event(QEvent* e) {
         ui->SwcFileInfo->setItem(ev->currentRow, 4,
                                  new QTableWidgetItem(
                                      QString::fromStdString(std::to_string(ev->nodeSize))));
+        auto swcName = std::filesystem::path(ev->swcFilePath).filename().string();
+        swcName = replaceAll(swcName, ".swc", ".eswc");
         ui->SwcFileInfo->setItem(ev->currentRow, 5,
-                                 new QTableWidgetItem(
-                                     QString::fromStdString(
-                                         std::filesystem::path(ev->swcFilePath).filename().string())));
+                                 new QTableWidgetItem(QString::fromStdString(swcName)));
         ui->SwcFileInfo->setItem(ev->currentRow, 6,
                                  new QTableWidgetItem(QString::fromStdString("Unprocessed")));
     }
