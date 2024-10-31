@@ -71,8 +71,16 @@ EditorSwcVersionControl::EditorSwcVersionControl(const std::string&swcUuid, QWid
             return;
         }
 
+        QString snapShotCName;
+
         auto selectedNode = selectedNodes[0];
-        auto snapShotCName = m_DataFlowGraphModel.nodeData(selectedNode, QtNodes::NodeRole::Caption).toString();
+        auto internalData = m_DataFlowGraphModel.nodeData(selectedNode, QtNodes::NodeRole::InternalData).value<
+            std::any>();
+        if (internalData.has_value()) {
+            auto snapshot = std::any_cast<proto::SwcSnapshotMetaInfoV1>(internalData);
+            snapShotCName = QString::fromStdString(snapshot.swcsnapshotcollectionname());
+        }
+
         auto status = QMessageBox::information(this, "Info", "Export this snapshot? Snapshot: " + snapShotCName);
         if (status != QMessageBox::StandardButton::Ok) {
             return;
@@ -97,8 +105,16 @@ EditorSwcVersionControl::EditorSwcVersionControl(const std::string&swcUuid, QWid
             return;
         }
 
+        QString snapShotCName;
+
         auto selectedNode = selectedNodes[0];
-        auto snapShotCName = m_DataFlowGraphModel.nodeData(selectedNode, QtNodes::NodeRole::Caption).toString();
+        auto internalData = m_DataFlowGraphModel.nodeData(selectedNode, QtNodes::NodeRole::InternalData).value<
+            std::any>();
+        if (internalData.has_value()) {
+            auto snapshot = std::any_cast<proto::SwcSnapshotMetaInfoV1>(internalData);
+            snapShotCName = QString::fromStdString(snapshot.swcsnapshotcollectionname());
+        }
+
         auto status = QMessageBox::information(this, "Info", "Visualize this snapshot? Snapshot: " + snapShotCName);
         if (status != QMessageBox::StandardButton::Ok) {
             return;
@@ -123,13 +139,25 @@ EditorSwcVersionControl::EditorSwcVersionControl(const std::string&swcUuid, QWid
             return;
         }
 
+        std::string snapShotCName1;
+
         auto selectedNode1 = selectedNodes[0];
-        auto snapShotCName1 = m_DataFlowGraphModel.nodeData(selectedNode1, QtNodes::NodeRole::Caption).toString().
-                toStdString();
+        auto internalData1 = m_DataFlowGraphModel.nodeData(selectedNode1, QtNodes::NodeRole::InternalData).value<
+            std::any>();
+        if (internalData1.has_value()) {
+            auto snapshot = std::any_cast<proto::SwcSnapshotMetaInfoV1>(internalData1);
+            snapShotCName1 = snapshot.swcsnapshotcollectionname();
+        }
+
+        std::string snapShotCName2;
 
         auto selectedNode2 = selectedNodes[1];
-        auto snapShotCName2 = m_DataFlowGraphModel.nodeData(selectedNode2, QtNodes::NodeRole::Caption).toString().
-                toStdString();
+        auto internalData2 = m_DataFlowGraphModel.nodeData(selectedNode2, QtNodes::NodeRole::InternalData).value<
+            std::any>();
+        if (internalData2.has_value()) {
+            auto snapshot = std::any_cast<proto::SwcSnapshotMetaInfoV1>(internalData2);
+            snapShotCName2 = snapshot.swcsnapshotcollectionname();
+        }
 
         google::protobuf::Timestamp selectedNode1Time;
         google::protobuf::Timestamp selectedNode2Time;
@@ -205,8 +233,9 @@ void EditorSwcVersionControl::refreshVersionGraph() {
         m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::Position,
                                          QPointF{static_cast<qreal>(idx * 900), 0});
         m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::Caption,
-                                         QString::fromStdString("Snapshot id=" + std::to_string(idx+1)+
-                                                                + " at " + timestampToString(m_SwcSnapshots[idx].createtime().seconds())));
+                                         QString::fromStdString("Snapshot id=" + std::to_string(idx + 1) +
+                                                                +" at " + timestampToString(
+                                                                    m_SwcSnapshots[idx].createtime().seconds())));
         // m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::Size,
         //                                  QSize{360, 100});
         m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::InternalData,
@@ -219,7 +248,9 @@ void EditorSwcVersionControl::refreshVersionGraph() {
         m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::Position,
                                          QPointF{static_cast<qreal>(400 + idx * 900), 300});
         m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::Caption,
-                                         QString::fromStdString("Increment: from " + std::to_string(idx+1) + " to " + std::to_string(idx+2)));
+                                         QString::fromStdString(
+                                             "Increment: from " + std::to_string(idx + 1) + " to " + std::to_string(
+                                                 idx + 2)));
         // m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::Size,
         //                                  QSize{300, 100});
         m_DataFlowGraphModel.setNodeData(newId, QtNodes::NodeRole::InternalData,
@@ -259,6 +290,15 @@ void EditorSwcVersionControl::getSwcLastSnapshot() {
             }
             else {
                 auto queryEndTime = ui->dateTimeEdit->dateTime().toSecsSinceEpoch();
+
+                if (ui->secondEdit->text().isEmpty()) {
+                    QMessageBox::critical(this, "Error", "Please provide the second time!");
+                    return;
+                }
+                int sec = ui->secondEdit->text().toInt();
+                queryEndTime += sec;
+
+
                 int64_t currentSnapTime = 0;
                 proto::SwcSnapshotMetaInfoV1 currentSnap;
                 for (auto&snap: response.swcsnapshotlist()) {
@@ -417,8 +457,8 @@ void EditorSwcVersionControl::promoteOperation(std::vector<proto::SwcNodeDataV1>
             }
             case proto::UpdateNParent: {
                 std::unordered_map<std::string, int> indexMap;
-                for (auto&node: nodeData) {
-                    indexMap[node.base().uuid()] = node.swcnodeinternaldata().n();
+                for (int i = 0; i < nodeData.size(); i++) {
+                    indexMap[nodeData[i].base().uuid()] = i;
                 }
 
                 for (auto&updateData: op.nodenparent()) {

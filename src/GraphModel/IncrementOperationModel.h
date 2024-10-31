@@ -108,6 +108,16 @@ public:
         _caption = caption;
     }
 
+    virtual void setInternalData(QVariant data) {
+        m_InternalData = data;
+    }
+
+    virtual QVariant getInternalData() {
+        return m_InternalData;
+    }
+
+    QVariant m_InternalData;
+
     // slots
 //    virtual void inputConnectionCreated(ConnectionId const &) {}
 //

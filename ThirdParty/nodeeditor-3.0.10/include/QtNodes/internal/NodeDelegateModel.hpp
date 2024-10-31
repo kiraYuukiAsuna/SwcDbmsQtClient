@@ -44,6 +44,9 @@ public:
     /// Name makes this model unique
     virtual QString name() const = 0;
 
+    virtual void setInternalData(QVariant data) = 0;
+    virtual QVariant getInternalData() = 0;
+
 public:
     QJsonObject save() const override;
 

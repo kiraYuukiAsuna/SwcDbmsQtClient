@@ -216,11 +216,7 @@ QVariant DataFlowGraphModel::nodeData(NodeId nodeId, NodeRole role) const
     } break;
 
     case NodeRole::InternalData: {
-        QJsonObject nodeJson;
-
-        nodeJson["internal-data"] = _models.at(nodeId)->save();
-
-        result = nodeJson.toVariantMap();
+        result = model->getInternalData();
         break;
     }
 
@@ -289,9 +285,14 @@ bool DataFlowGraphModel::setNodeData(NodeId nodeId, NodeRole role, QVariant valu
     case NodeRole::Style:
         break;
 
-    case NodeRole::InternalData:
+    case NodeRole::InternalData: {
+        auto it = _models.find(nodeId);
+        if (it != _models.end()) {
+            it->second->setInternalData(value);
+            result = true;
+        }
         break;
-
+    }
     case NodeRole::InPortCount:
         break;
 
