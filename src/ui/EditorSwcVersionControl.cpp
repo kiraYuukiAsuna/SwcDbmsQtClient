@@ -291,13 +291,12 @@ void EditorSwcVersionControl::getSwcLastSnapshot() {
             else {
                 auto queryEndTime = ui->dateTimeEdit->dateTime().toSecsSinceEpoch();
 
-                if (ui->secondEdit->text().isEmpty()) {
-                    QMessageBox::critical(this, "Error", "Please provide the second time!");
-                    return;
-                }
-                int sec = ui->secondEdit->text().toInt();
-                queryEndTime += sec;
-
+                // if (ui->secondEdit->text().isEmpty()) {
+                //     QMessageBox::critical(this, "Error", "Please provide the second time!");
+                //     return;
+                // }
+                // int sec = ui->secondEdit->text().toInt();
+                // queryEndTime += sec;
 
                 int64_t currentSnapTime = 0;
                 proto::SwcSnapshotMetaInfoV1 currentSnap;

@@ -29,7 +29,7 @@ RightClientView::RightClientView(MainWindow* mainWindow) : QWidget(mainWindow), 
         if (base) {
             if (base->save()) {
                 m_TabWidget->removeTab(index);
-                mainWindow->getLeftClientView().refreshTree();
+                // mainWindow->getLeftClientView().refreshTree();
             }
         }
         else {
