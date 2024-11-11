@@ -209,7 +209,12 @@ void EditorAdminUserManager::refresh() {
             item->setText(1, QString::fromStdString(userInfo.permissiongroupuuid()));
         }
 
-        item->setText(2, QString::fromStdString(timestampToString(userInfo.createtime().seconds())));
+        if(userInfo.createtime().seconds()<0) {
+            item->setText(2, "N/A");
+        }else {
+            item->setText(2, QString::fromStdString(timestampToString(userInfo.createtime().seconds())));
+        }
+
         item->setText(3, QString::fromStdString(userInfo.description()));
     }
 
