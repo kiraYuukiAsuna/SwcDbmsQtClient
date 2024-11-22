@@ -51,6 +51,7 @@ EditorBatchManageSwc::EditorBatchManageSwc(const std::vector<std::string>&swcUui
                                                                   QMessageBox::Yes | QMessageBox::No);
         if (reply == QMessageBox::Yes) {
             for (int i = ui->SwcList->count() - 1; i >= 0 ; i--) {
+                QApplication::processEvents();
                 QListWidgetItem* item = ui->SwcList->item(i);
                 if (item->checkState() == Qt::Checked) {
                     proto::DeleteSwcResponse response;
@@ -69,6 +70,7 @@ EditorBatchManageSwc::EditorBatchManageSwc(const std::vector<std::string>&swcUui
         editor.exec();
         auto permission = editor.getPermissionMetaInfo();
         for (int i = 0; i < ui->SwcList->count(); i++) {
+            QApplication::processEvents();
             QListWidgetItem* item = ui->SwcList->item(i);
             if (item->checkState() == Qt::Checked) {
                 proto::GetSwcMetaInfoResponse rsp1;
