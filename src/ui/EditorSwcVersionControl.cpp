@@ -127,7 +127,7 @@ EditorSwcVersionControl::EditorSwcVersionControl(const std::string&swcUuid, QWid
 
         SwcRendererCreateInfo createInfo;
         createInfo.swcData = snapResponse.swcnodedata();
-        SwcRendererDailog renderer(createInfo, this);;
+        SwcRendererDailog renderer(createInfo, nullptr);;
         renderer.exec();
     });
 
