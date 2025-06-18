@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <agrpc/grpc_context.hpp>
+#include <agrpc/grpc_executor.hpp>
 #include <grpcpp/grpcpp.h>
 #include <Service/Service.grpc.pb.h>
 #include <thread>
@@ -8,9 +8,10 @@
 class RpcCall {
 public:
     RpcCall(RpcCall&) = delete;
+
     RpcCall& operator=(RpcCall&) = delete;
 
-    void initialize(const std::string& endpoint) {
+    void initialize(const std::string&endpoint) {
         m_Endpoint = endpoint;
         grpc::ChannelArguments channelArgs;
         channelArgs.SetCompressionAlgorithm(GRPC_COMPRESS_GZIP);
@@ -18,12 +19,12 @@ public:
         channelArgs.SetInt(GRPC_ARG_MAX_SEND_MESSAGE_LENGTH, 256 * 1024 * 1024); // 256mb
 
         m_Channel = grpc::CreateCustomChannel(
-                m_Endpoint, grpc::InsecureChannelCredentials(), channelArgs);
+            m_Endpoint, grpc::InsecureChannelCredentials(), channelArgs);
 
         m_Stub = proto::DBMS::NewStub(m_Channel);
 
         m_GrpcContextThread = std::thread([this]() {
-            m_GrpcContext.run();
+            m_GrpcContext->run();
         });
     }
 
@@ -51,17 +52,13 @@ public:
     inline static std::string ApiVersion = "2024.05.06";
 
 private:
-    RpcCall() {
-    }
+    RpcCall();
 
-    ~RpcCall() {
-        m_GrpcContext.stop();
-        m_GrpcContextThread.join();
-    }
+    ~RpcCall();
 
     std::string m_Endpoint;
     std::shared_ptr<grpc::Channel> m_Channel;
     std::unique_ptr<proto::DBMS::Stub> m_Stub;
-    agrpc::GrpcContext m_GrpcContext;
+    std::shared_ptr<agrpc::GrpcContext> m_GrpcContext;
     std::thread m_GrpcContextThread;
 };

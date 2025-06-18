@@ -36,11 +36,11 @@ struct RPCTraits {
 };
 
 template<typename RPCTraits>
-static asio::awaitable<grpc::Status> commonReqRsp(agrpc::GrpcContext&grpc_context, proto::DBMS::Stub&stub,
+static asio::awaitable<grpc::Status> commonReqRsp(std::shared_ptr<agrpc::GrpcContext> grpc_context, proto::DBMS::Stub&stub,
                                                   RPCTraits&rpc) {
     grpc::ClientContext clientContext;
     clientContext.set_deadline(std::chrono::system_clock::now() + std::chrono::seconds(5));
-    grpc::Status status = co_await RPCTraits::RequestClient::request(grpc_context, stub, clientContext, rpc.request,
+    grpc::Status status = co_await RPCTraits::RequestClient::request(*grpc_context, stub, clientContext, rpc.request,
                                                                      rpc.response);
     co_return status;
 }
