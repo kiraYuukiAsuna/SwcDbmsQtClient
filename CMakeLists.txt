@@ -26,7 +26,6 @@ find_package(Protobuf REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
 
 include_directories(
-        SwcDbmsCommon/Generated/cpp
         src/styles
         ThirdParty/nlohmann_json
         ThirdParty/nodeeditor-3.0.10/src

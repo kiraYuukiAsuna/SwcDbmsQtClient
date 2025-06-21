@@ -163,6 +163,10 @@ void LeftClientView::getProjectMetaInfo() {
         m_TopProjectItem->addChild(projectItem);
 
         proto::GetProjectSwcNamesByProjectUuidResponse swcNamesResponse;
+        std::sort(swcNamesResponse.mutable_swcuuidname()->begin(), swcNamesResponse.mutable_swcuuidname()->end(),
+                  [](const proto::SwcUuidName& a, const proto::SwcUuidName& b) {
+                      return a.swcname() < b.swcname();
+                  });
         if (WrappedCall::GetProjectSwcNamesByProjectUuid(projectInfo.base().uuid(), swcNamesResponse, this)) {
             for (auto&swcuuidname: swcNamesResponse.swcuuidname()) {
                 auto* swcItem = new QTreeWidgetItem;
