@@ -1,6 +1,3 @@
 #include "CachedProtoData.h"
 
-
-CachedProtoData::CachedProtoData() {
-
-}
+CachedProtoData::CachedProtoData() {}

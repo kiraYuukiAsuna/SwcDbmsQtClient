@@ -2,31 +2,33 @@
 
 #include <QMainWindow>
 #include <QSplitter>
-#include "LeftClientView.h"
-#include "RightClientView.h"
 #include <QTimer>
 
+#include "LeftClientView.h"
+#include "RightClientView.h"
+
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui {
+	class MainWindow;
+}
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow {
-Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow() override;
+	explicit MainWindow(QWidget* parent = nullptr);
+	~MainWindow() override;
 
-    LeftClientView& getLeftClientView();
-    RightClientView& getRightClientView();
+	LeftClientView& getLeftClientView();
+	RightClientView& getRightClientView();
 
 private:
-    Ui::MainWindow *ui;
-    QTimer* m_HeartBeatTimer;
-    QTimer* m_OnlineStatusTimer;
+	Ui::MainWindow* ui;
+	QTimer* m_HeartBeatTimer;
+	QTimer* m_OnlineStatusTimer;
 
-    QSplitter* m_Splitter;
-    LeftClientView* m_LeftClientView;
-    RightClientView* m_RightClientView;
-
+	QSplitter* m_Splitter;
+	LeftClientView* m_LeftClientView;
+	RightClientView* m_RightClientView;
 };

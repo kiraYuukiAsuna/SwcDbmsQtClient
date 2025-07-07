@@ -5,19 +5,19 @@
 QT_BEGIN_NAMESPACE
 
 namespace Ui {
-    class About;
+	class About;
 }
 
 QT_END_NAMESPACE
 
 class About : public QDialog {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit About(QWidget* parent = nullptr);
+	explicit About(QWidget* parent = nullptr);
 
-    ~About() override;
+	~About() override;
 
 private:
-    Ui::About* ui;
+	Ui::About* ui;
 };

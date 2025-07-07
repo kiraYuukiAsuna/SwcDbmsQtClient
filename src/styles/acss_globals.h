@@ -16,7 +16,6 @@
 ** License along with this library; If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-
 //============================================================================
 /// \file   ACSS_globals.h
 /// \author Uwe Kindler
@@ -28,8 +27,8 @@
 //============================================================================
 //                                   INCLUDES
 //============================================================================
-#include <QtCore/QtGlobal>
 #include <QDebug>
+#include <QtCore/QtGlobal>
 
 #define ACSS_STATIC
 
@@ -53,7 +52,5 @@
 // Set ACSS_DEBUG_LEVEL to enable additional debug output and to enable layout
 // dumps to qDebug and std::cout after layout changes
 #define ACSS_DEBUG_LEVEL 0
-
-
 
 //---------------------------------------------------------------------------

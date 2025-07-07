@@ -5,22 +5,22 @@
 QT_BEGIN_NAMESPACE
 
 namespace Ui {
-    class EditorBatchManageSwc;
+	class EditorBatchManageSwc;
 }
 
 QT_END_NAMESPACE
 
 class EditorBatchManageSwc : public QDialog {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit EditorBatchManageSwc(const std::vector<std::string>&swcUuidList, QWidget* parent = nullptr);
+	explicit EditorBatchManageSwc(const std::vector<std::string>& swcUuidList,
+								  QWidget* parent = nullptr);
 
-    ~EditorBatchManageSwc() override;
-
+	~EditorBatchManageSwc() override;
 
 private:
-    Ui::EditorBatchManageSwc* ui;
+	Ui::EditorBatchManageSwc* ui;
 
-    std::vector<std::string> m_SwcUuidList;
+	std::vector<std::string> m_SwcUuidList;
 };

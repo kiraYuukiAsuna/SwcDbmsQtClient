@@ -1,41 +1,38 @@
 #pragma once
 
-#include <QWidget>
 #include <QDialog>
+#include <QWidget>
+
 #include "EditorBase.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class EditorUserSettings; }
+namespace Ui {
+	class EditorUserSettings;
+}
 QT_END_NAMESPACE
 
 class LeftClientView;
 
-class EditorUserSettings : public QDialog, public EditorBase{
-Q_OBJECT
+class EditorUserSettings : public QDialog, public EditorBase {
+	Q_OBJECT
 
 public:
-    explicit EditorUserSettings(LeftClientView *leftClientView);
-    ~EditorUserSettings() override;
+	explicit EditorUserSettings(LeftClientView *leftClientView);
+	~EditorUserSettings() override;
 
-    std::string getName() override {
-        return "EditorUserSettings";
-    }
+	std::string getName() override { return "EditorUserSettings"; }
 
-    std::string getUuid() override {
-        return "";
-    }
+	std::string getUuid() override { return ""; }
 
-    MetaInfoType getMetaInfoType() override {
-        return MetaInfoType::eUserMetaInfo;
-    }
+	MetaInfoType getMetaInfoType() override {
+		return MetaInfoType::eUserMetaInfo;
+	}
 
-    bool save() override {
-        return false;
-    }
+	bool save() override { return false; }
 
-    void getUserMetaInfo();
+	void getUserMetaInfo();
 
 private:
-    Ui::EditorUserSettings *ui;
-    LeftClientView* m_LeftClientView;
+	Ui::EditorUserSettings *ui;
+	LeftClientView *m_LeftClientView;
 };

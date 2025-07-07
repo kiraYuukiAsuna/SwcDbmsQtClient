@@ -1,20 +1,26 @@
 #include <QApplication>
 #include <QFontDatabase>
 #include <QProcess>
-#include "src/styles/QtAdvancedStylesheet.h"
-#include "src/ui/MainWindow.h"
-#include "src/ui/LoginWindow.h"
-#include "src/framework/service/RpcCall.h"
+
 #include "src/framework/config/AppConfig.h"
 #include "src/framework/core/log/Log.h"
 #include "src/framework/defination/ImageDefination.h"
-#include "src/framework/service/WrappedCall.h"
+#include "src/framework/service/RpcCall.h"
 #include "src/framework/util/util.hpp"
+#include "src/styles/QtAdvancedStylesheet.h"
+#include "src/ui/LoginWindow.h"
+#include "src/ui/MainWindow.h"
+#include "version.h"
+
 
 int main(int argc, char* argv[]) {
     Seele::Log::Init("logs", "Core.log", "App.log", "EditorConsole.log", true, false);
+	SeeleInfo("Application Version: {}", version::VERSION_STRING);
+	SeeleInfo("Git Commit Hash: {}", version::GIT_COMMIT_HASH);
+	SeeleInfo("Git Branch: {}", version::GIT_BRANCH);
+	SeeleInfo("Git Commit Date: {}", version::GIT_COMMIT_DATE);
 
-    auto timestamp = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).
+	auto timestamp = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).
             time_since_epoch();
     SeeleInfoTag("Main", "App Start At: {}", timestampToString(timestamp.count()));
 
@@ -27,8 +33,8 @@ int main(int argc, char* argv[]) {
         const QString&sansCNFamily = loadedFontFamilies.at(0);
         QFont defaultFont = QApplication::font();
         defaultFont.setFamily(sansCNFamily);
-        defaultFont.setPixelSize(20);
-        defaultFont.setBold(true);
+		defaultFont.setPixelSize(16);
+		defaultFont.setBold(true);
         QApplication::setFont(defaultFont);
     }
     

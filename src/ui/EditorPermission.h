@@ -3,59 +3,54 @@
 #include <QDialog>
 
 #include "EditorBase.h"
-#include "src/framework/defination/TypeDef.h"
-#include "TreeWidget/TreeWidget.h"
 #include "Message/Message.pb.h"
+#include "TreeWidget/TreeWidget.h"
+#include "src/framework/defination/TypeDef.h"
 
 QT_BEGIN_NAMESPACE
 
 namespace Ui {
-    class EditorPermission;
+	class EditorPermission;
 }
 
 QT_END_NAMESPACE
 
 class EditorPermission : public QDialog, public EditorBase {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit EditorPermission(const std::string&uuid, MetaInfoType type, bool noSaveToCloud, QWidget* parent = nullptr);
+	explicit EditorPermission(const std::string& uuid, MetaInfoType type,
+							  bool noSaveToCloud, QWidget* parent = nullptr);
 
-    ~EditorPermission() override;
+	~EditorPermission() override;
 
-    std::string getName() override {
-        return "";
-    }
+	std::string getName() override { return ""; }
 
-    std::string getUuid() override {
-        return "";
-    }
+	std::string getUuid() override { return ""; }
 
-    MetaInfoType getMetaInfoType() override {
-        return MetaInfoType::ePermissionGroupMetaInfo;
-    }
+	MetaInfoType getMetaInfoType() override {
+		return MetaInfoType::ePermissionGroupMetaInfo;
+	}
 
-    bool save() override {
-        return true;
-    }
+	bool save() override { return true; }
 
-    void refresh();
+	void refresh();
 
-    void localRefresh();
+	void localRefresh();
 
-    proto::PermissionMetaInfoV1 getPermissionMetaInfo() {
-        return m_PermissionMetaInfo;
-    }
+	proto::PermissionMetaInfoV1 getPermissionMetaInfo() {
+		return m_PermissionMetaInfo;
+	}
 
 private:
-    Ui::EditorPermission* ui;
+	Ui::EditorPermission* ui;
 
-    TreeWidget* m_TreeWidget;
+	TreeWidget* m_TreeWidget;
 
-    bool m_NoSaveToCloud;
+	bool m_NoSaveToCloud;
 
-    std::string m_Uuid;
-    MetaInfoType m_Type;
+	std::string m_Uuid;
+	MetaInfoType m_Type;
 
-    proto::PermissionMetaInfoV1 m_PermissionMetaInfo;
+	proto::PermissionMetaInfoV1 m_PermissionMetaInfo;
 };

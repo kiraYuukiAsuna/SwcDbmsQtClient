@@ -1,41 +1,37 @@
 #pragma once
 
-#include <QWidget>
 #include <Message/Response.pb.h>
+
+#include <QWidget>
 
 #include "EditorBase.h"
 
-
 QT_BEGIN_NAMESPACE
-namespace Ui { class EditorSwcMetaInfo; }
+namespace Ui {
+	class EditorSwcMetaInfo;
+}
 QT_END_NAMESPACE
 
-class EditorSwcMetaInfo : public QWidget, public EditorBase{
-Q_OBJECT
+class EditorSwcMetaInfo : public QWidget, public EditorBase {
+	Q_OBJECT
 
 public:
-    explicit EditorSwcMetaInfo(proto::GetSwcMetaInfoResponse& response, QWidget *parent = nullptr);
-    ~EditorSwcMetaInfo() override;
+	explicit EditorSwcMetaInfo(proto::GetSwcMetaInfoResponse& response,
+							   QWidget* parent = nullptr);
+	~EditorSwcMetaInfo() override;
 
-    std::string getName() override {
-        return m_SwcMetaInfo.name();
-    }
+	std::string getName() override { return m_SwcMetaInfo.name(); }
 
-    std::string getUuid() override {
-        return m_SwcMetaInfo.base().uuid();
-    }
+	std::string getUuid() override { return m_SwcMetaInfo.base().uuid(); }
 
-    MetaInfoType getMetaInfoType() override {
-        return MetaInfoType::eFreeSwc;
-    }
+	MetaInfoType getMetaInfoType() override { return MetaInfoType::eFreeSwc; }
 
-    bool save() override;
+	bool save() override;
 
-    void refresh(proto::GetSwcMetaInfoResponse& response);
+	void refresh(proto::GetSwcMetaInfoResponse& response);
 
 private:
-    Ui::EditorSwcMetaInfo *ui;
+	Ui::EditorSwcMetaInfo* ui;
 
-    proto::SwcMetaInfoV1 m_SwcMetaInfo;
+	proto::SwcMetaInfoV1 m_SwcMetaInfo;
 };
-

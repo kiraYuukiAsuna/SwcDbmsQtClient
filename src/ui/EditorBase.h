@@ -3,19 +3,14 @@
 
 class EditorBase {
 public:
-    EditorBase() = default;
-    virtual ~EditorBase() = default;
+	EditorBase() = default;
+	virtual ~EditorBase() = default;
 
-    virtual MetaInfoType getMetaInfoType() {
-        return MetaInfoType::eUnknown;
-    }
+	virtual MetaInfoType getMetaInfoType() { return MetaInfoType::eUnknown; }
 
-    virtual std::string getName() {
-        return "";
-    }
+	virtual std::string getName() { return ""; }
 
-    virtual std::string getUuid() = 0;
+	virtual std::string getUuid() = 0;
 
-    virtual bool save() = 0;
-
+	virtual bool save() = 0;
 };

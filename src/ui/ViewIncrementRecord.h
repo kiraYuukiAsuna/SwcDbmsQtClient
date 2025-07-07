@@ -7,21 +7,21 @@
 
 #include <QDialog>
 
-
 QT_BEGIN_NAMESPACE
-namespace Ui { class ViewIncrementRecord; }
+namespace Ui {
+	class ViewIncrementRecord;
+}
 QT_END_NAMESPACE
 
 class ViewIncrementRecord : public QDialog {
-Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit ViewIncrementRecord(QWidget *parent = nullptr);
-    ~ViewIncrementRecord() override;
+	explicit ViewIncrementRecord(QWidget *parent = nullptr);
+	~ViewIncrementRecord() override;
 
 private:
-    Ui::ViewIncrementRecord *ui;
+	Ui::ViewIncrementRecord *ui;
 };
 
-
-#endif //VIEWINCREMENTRECORD_H
+#endif	// VIEWINCREMENTRECORD_H

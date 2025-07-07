@@ -4,20 +4,18 @@
 
 class DefaultNodeData : public QtNodes::NodeData {
 public:
-    DefaultNodeData()
-            : _number(0.0)
-    {}
+	DefaultNodeData() : _number(0.0) {}
 
-    DefaultNodeData(double const number)
-            : _number(number)
-    {}
+	DefaultNodeData(double const number) : _number(number) {}
 
-    QtNodes::NodeDataType type() const override { return {"decimal", "Decimal"}; }
+	QtNodes::NodeDataType type() const override {
+		return {"decimal", "Decimal"};
+	}
 
-    double number() const { return _number; }
+	double number() const { return _number; }
 
-    QString numberAsText() const { return QString::number(_number, 'f'); }
+	QString numberAsText() const { return QString::number(_number, 'f'); }
 
 private:
-    double _number;
+	double _number;
 };

@@ -3,18 +3,18 @@
 
 class CachedProtoData {
 public:
-    static CachedProtoData& getInstance() {
-        static CachedProtoData instance;
-        return instance;
-    }
+	static CachedProtoData& getInstance() {
+		static CachedProtoData instance;
+		return instance;
+	}
 
-    proto::UserMetaInfoV1 CachedUserMetaInfo;
-    bool OnlineStatus = false;
+	proto::UserMetaInfoV1 CachedUserMetaInfo;
+	bool OnlineStatus = false;
 
-    std::string UserName;
-    std::string UserUuid;
-    std::string UserToken;
+	std::string UserName;
+	std::string UserUuid;
+	std::string UserToken;
 
 private:
-    CachedProtoData();
+	CachedProtoData();
 };

@@ -1,45 +1,40 @@
 #pragma once
 
 #include <QDialog>
+
 #include "EditorBase.h"
 #include "TreeWidget/TreeWidget.h"
 
 QT_BEGIN_NAMESPACE
 
 namespace Ui {
-    class EditorAdminUserManager;
+	class EditorAdminUserManager;
 }
 
 QT_END_NAMESPACE
 
 class EditorAdminUserManager : public QDialog, public EditorBase {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit EditorAdminUserManager(QWidget* parent = nullptr);
+	explicit EditorAdminUserManager(QWidget* parent = nullptr);
 
-    ~EditorAdminUserManager() override;
+	~EditorAdminUserManager() override;
 
-    std::string getName() override {
-        return "";
-    }
+	std::string getName() override { return ""; }
 
-    std::string getUuid() override {
-        return "";
-    }
+	std::string getUuid() override { return ""; }
 
-    MetaInfoType getMetaInfoType() override {
-        return MetaInfoType::eUserManagerMetaInfo;
-    }
+	MetaInfoType getMetaInfoType() override {
+		return MetaInfoType::eUserManagerMetaInfo;
+	}
 
-    bool save() override {
-        return true;
-    }
+	bool save() override { return true; }
 
-    void refresh();
+	void refresh();
 
 private:
-    Ui::EditorAdminUserManager* ui;
+	Ui::EditorAdminUserManager* ui;
 
-    TreeWidget* m_TreeWidget;
+	TreeWidget* m_TreeWidget;
 };

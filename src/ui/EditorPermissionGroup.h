@@ -4,47 +4,42 @@
 #include <QWidget>
 
 #include "EditorBase.h"
-#include "TreeWidget/TreeWidget.h"
 #include "Message/Message.pb.h"
+#include "TreeWidget/TreeWidget.h"
 
 QT_BEGIN_NAMESPACE
 
 namespace Ui {
-    class EditorPermissionGroup;
+	class EditorPermissionGroup;
 }
 
 QT_END_NAMESPACE
 
 class EditorPermissionGroup : public QDialog, public EditorBase {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit EditorPermissionGroup(QWidget* parent = nullptr);
+	explicit EditorPermissionGroup(QWidget* parent = nullptr);
 
-    ~EditorPermissionGroup() override;
+	~EditorPermissionGroup() override;
 
-    std::string getName() override {
-        return "";
-    }
+	std::string getName() override { return ""; }
 
-    std::string getUuid() override {
-        return "";
-    }
+	std::string getUuid() override { return ""; }
 
-    MetaInfoType getMetaInfoType() override {
-        return MetaInfoType::ePermissionGroupMetaInfo;
-    }
+	MetaInfoType getMetaInfoType() override {
+		return MetaInfoType::ePermissionGroupMetaInfo;
+	}
 
-    bool save() override {
-        return true;
-    }
+	bool save() override { return true; }
 
-    void refresh();
+	void refresh();
 
 private:
-    Ui::EditorPermissionGroup* ui;
+	Ui::EditorPermissionGroup* ui;
 
-    TreeWidget* m_TreeWidget;
+	TreeWidget* m_TreeWidget;
 
-    google::protobuf::RepeatedPtrField<proto::PermissionGroupMetaInfoV1> m_PermissionGroupList;
+	google::protobuf::RepeatedPtrField<proto::PermissionGroupMetaInfoV1>
+		m_PermissionGroupList;
 };

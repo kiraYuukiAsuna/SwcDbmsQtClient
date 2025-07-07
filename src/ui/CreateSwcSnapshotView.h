@@ -2,19 +2,21 @@
 
 #include <QDialog>
 
-
 QT_BEGIN_NAMESPACE
-namespace Ui { class CreateSwcSnapshotView; }
+namespace Ui {
+	class CreateSwcSnapshotView;
+}
 QT_END_NAMESPACE
 
 class CreateSwcSnapshotView : public QDialog {
-Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit CreateSwcSnapshotView(const std::string& swcName, QWidget *parent = nullptr);
-    ~CreateSwcSnapshotView() override;
+	explicit CreateSwcSnapshotView(const std::string &swcName,
+								   QWidget *parent = nullptr);
+	~CreateSwcSnapshotView() override;
 
 private:
-    Ui::CreateSwcSnapshotView *ui;
-    std::string m_SwcName;
+	Ui::CreateSwcSnapshotView *ui;
+	std::string m_SwcName;
 };

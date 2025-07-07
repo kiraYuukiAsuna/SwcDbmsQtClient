@@ -2,157 +2,168 @@
 
 #include <QFileDialog>
 #include <QStandardPaths>
-
-#include "ui_EditorAnoAttachment.h"
-#include "src/framework/service/WrappedCall.h"
-#include "src/FileIo/AnoIo.hpp"
-#include "src/FileIo/ApoIo.hpp"
 #include <filesystem>
 
-EditorAnoAttachment::EditorAnoAttachment(const std::string&swcUUid, QWidget* parent) : QDialog(parent),
-    ui(new Ui::EditorAnoAttachment), m_SwcUuid(swcUUid){
-    ui->setupUi(this);
+#include "src/FileIo/AnoIo.hpp"
+#include "src/FileIo/ApoIo.hpp"
+#include "src/framework/service/WrappedCall.h"
+#include "ui_EditorAnoAttachment.h"
 
-    getSwcAnoAttachment();
+EditorAnoAttachment::EditorAnoAttachment(const std::string& swcUUid,
+										 QWidget* parent)
+	: QDialog(parent), ui(new Ui::EditorAnoAttachment), m_SwcUuid(swcUUid) {
+	ui->setupUi(this);
 
-    connect(ui->OKBtn, &QPushButton::clicked, this, [&]() {
-        if (m_IsAnoAttachmentExist) {
-            proto::UpdateSwcAttachmentAnoResponse response;
-            if (WrappedCall::updateSwcAttachmentAnoByUuid(m_SwcUuid, m_AttachmentUuid, ui->ApoFileName->text().toStdString(),
-                                                    ui->SwcFileName->text().toStdString(), response, parent
-            )) {
-                QMessageBox::information(this, "Info", "Update Swc Ano attachment successfully!");
-                accept();
-            }
-            else {
-                QMessageBox::critical(this, "Error",
-                                      "Update Swc Ano attachment Failed! " + QString::fromStdString(
-                                          response.metainfo().message()));
-            }
-        }
-        else {
-            proto::CreateSwcAttachmentAnoResponse response;
-            if (WrappedCall::createSwcAttachmentAno(m_SwcUuid, ui->ApoFileName->text().toStdString(),
-                                                    ui->SwcFileName->text().toStdString(), response, parent
-            )) {
-                QMessageBox::information(this, "Info", "Create Swc Ano attachment successfully!");
-                accept();
-            }
-            else {
-                QMessageBox::critical(this, "Error",
-                                      "Create Swc Ano attachment Failed! " + QString::fromStdString(
-                                          response.metainfo().message()));
-            }
-        }
-    });
+	getSwcAnoAttachment();
 
-    connect(ui->DeleteBtn, &QPushButton::clicked, this, [&]() {
-        if (m_IsAnoAttachmentExist) {
-            proto::DeleteSwcAttachmentAnoResponse response;
-            if (WrappedCall::deleteSwcAttachmentAnoByUuid(m_SwcUuid, m_AttachmentUuid, response, parent
-            )) {
-                QMessageBox::information(this, "Info", "Delete Swc Ano attachment successfully!");
-                accept();
-            }
-        }
-        else {
-            QMessageBox::information(this, "Info", "No Ano Attachment found!");
-        }
-    });
+	connect(ui->OKBtn, &QPushButton::clicked, this, [&]() {
+		if (m_IsAnoAttachmentExist) {
+			proto::UpdateSwcAttachmentAnoResponse response;
+			if (WrappedCall::updateSwcAttachmentAnoByUuid(
+					m_SwcUuid, m_AttachmentUuid,
+					ui->ApoFileName->text().toStdString(),
+					ui->SwcFileName->text().toStdString(), response, parent)) {
+				QMessageBox::information(
+					this, "Info", "Update Swc Ano attachment successfully!");
+				accept();
+			} else {
+				QMessageBox::critical(
+					this, "Error",
+					"Update Swc Ano attachment Failed! " +
+						QString::fromStdString(response.metainfo().message()));
+			}
+		} else {
+			proto::CreateSwcAttachmentAnoResponse response;
+			if (WrappedCall::createSwcAttachmentAno(
+					m_SwcUuid, ui->ApoFileName->text().toStdString(),
+					ui->SwcFileName->text().toStdString(), response, parent)) {
+				QMessageBox::information(
+					this, "Info", "Create Swc Ano attachment successfully!");
+				accept();
+			} else {
+				QMessageBox::critical(
+					this, "Error",
+					"Create Swc Ano attachment Failed! " +
+						QString::fromStdString(response.metainfo().message()));
+			}
+		}
+	});
 
-    connect(ui->ImportBtn, &QPushButton::clicked, this, [&]() {
-        QFileDialog dialog;
-        dialog.setDirectory(QStandardPaths::displayName(QStandardPaths::HomeLocation));
-        dialog.setFilter(QDir::Files);
-        dialog.setNameFilter("*.ano");
+	connect(ui->DeleteBtn, &QPushButton::clicked, this, [&]() {
+		if (m_IsAnoAttachmentExist) {
+			proto::DeleteSwcAttachmentAnoResponse response;
+			if (WrappedCall::deleteSwcAttachmentAnoByUuid(
+					m_SwcUuid, m_AttachmentUuid, response, parent)) {
+				QMessageBox::information(
+					this, "Info", "Delete Swc Ano attachment successfully!");
+				accept();
+			}
+		} else {
+			QMessageBox::information(this, "Info", "No Ano Attachment found!");
+		}
+	});
 
-        if (dialog.exec()) {
-            std::string filePath;
-            if (int num = dialog.selectedFiles().count(); num != 0) {
-                filePath = dialog.selectedFiles()[0].toStdString();
-            }
+	connect(ui->ImportBtn, &QPushButton::clicked, this, [&]() {
+		QFileDialog dialog;
+		dialog.setDirectory(
+			QStandardPaths::displayName(QStandardPaths::HomeLocation));
+		dialog.setFilter(QDir::Files);
+		dialog.setNameFilter("*.ano");
 
-            std::filesystem::path path(filePath);
-            if (std::filesystem::exists(path)) {
-                AnoIo io(filePath);
+		if (dialog.exec()) {
+			std::string filePath;
+			if (int num = dialog.selectedFiles().count(); num != 0) {
+				filePath = dialog.selectedFiles()[0].toStdString();
+			}
 
-                try {
-                    io.ReadFromFile();
+			std::filesystem::path path(filePath);
+			if (std::filesystem::exists(path)) {
+				AnoIo io(filePath);
 
-                    ui->ApoFileName->setText(QString::fromStdString(io.getValue().APOFILE));
-                    ui->SwcFileName->setText(QString::fromStdString(io.getValue().SWCFILE));
+				try {
+					io.ReadFromFile();
 
-                    QMessageBox::information(this, "Info", "Import Successfully!");
-                }
-                catch (std::exception&e) {
-                    QMessageBox::critical(this, "Error", e.what());
-                }
-            }
-            else {
-                QMessageBox::critical(this, "Error", "Selected Ano File Not Exists!");
-            }
-        }
-    });
+					ui->ApoFileName->setText(
+						QString::fromStdString(io.getValue().APOFILE));
+					ui->SwcFileName->setText(
+						QString::fromStdString(io.getValue().SWCFILE));
 
-    connect(ui->ExportBtn, &QPushButton::clicked, this, [&]() {
-        QString dirPath = QFileDialog::getExistingDirectory(this, tr("Select Save Directory"),
-                                                            QStandardPaths::displayName(QStandardPaths::HomeLocation),
-                                                            QFileDialog::ShowDirsOnly
-                                                            | QFileDialog::DontResolveSymlinks);
-        if (dirPath.isEmpty()) {
-            return;
-        }
+					QMessageBox::information(this, "Info",
+											 "Import Successfully!");
+				} catch (std::exception& e) {
+					QMessageBox::critical(this, "Error", e.what());
+				}
+			} else {
+				QMessageBox::critical(this, "Error",
+									  "Selected Ano File Not Exists!");
+			}
+		}
+	});
 
-        std::filesystem::path path(dirPath.toStdString());
-        if (std::filesystem::exists(path)) {
-            proto::GetSwcMetaInfoResponse response;
-            WrappedCall::getSwcMetaInfoByUuid(m_SwcUuid,response,this);
-            auto filePath = path / (response.swcinfo().name() + ".ano");
-            AnoIo io(filePath.string());
-            AnoUnit unit;
-            unit.APOFILE = ui->ApoFileName->text().toStdString();
-            unit.SWCFILE = ui->SwcFileName->text().toStdString();
-            io.setValue(unit);
-            io.WriteToFile();
+	connect(ui->ExportBtn, &QPushButton::clicked, this, [&]() {
+		QString dirPath = QFileDialog::getExistingDirectory(
+			this, tr("Select Save Directory"),
+			QStandardPaths::displayName(QStandardPaths::HomeLocation),
+			QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+		if (dirPath.isEmpty()) {
+			return;
+		}
 
-            QMessageBox::information(this, "Info", "Export Successfully!");
-        }
-        else {
-            QMessageBox::critical(this, "Error", "Selected Ano File Save Path Not Exists!");
-        }
-    });
+		std::filesystem::path path(dirPath.toStdString());
+		if (std::filesystem::exists(path)) {
+			proto::GetSwcMetaInfoResponse response;
+			WrappedCall::getSwcMetaInfoByUuid(m_SwcUuid, response, this);
+			auto filePath = path / (response.swcinfo().name() + ".ano");
+			AnoIo io(filePath.string());
+			AnoUnit unit;
+			unit.APOFILE = ui->ApoFileName->text().toStdString();
+			unit.SWCFILE = ui->SwcFileName->text().toStdString();
+			io.setValue(unit);
+			io.WriteToFile();
 
-    connect(ui->CancelBtn, &QPushButton::clicked, this, [&]() {
-        reject();
-    });
+			QMessageBox::information(this, "Info", "Export Successfully!");
+		} else {
+			QMessageBox::critical(this, "Error",
+								  "Selected Ano File Save Path Not Exists!");
+		}
+	});
+
+	connect(ui->CancelBtn, &QPushButton::clicked, this, [&]() { reject(); });
 }
 
-EditorAnoAttachment::~EditorAnoAttachment() {
-    delete ui;
-}
+EditorAnoAttachment::~EditorAnoAttachment() { delete ui; }
 
 void EditorAnoAttachment::getSwcAnoAttachment() {
-    proto::GetSwcMetaInfoResponse get_swc_meta_info_response;
-    if (!WrappedCall::getSwcMetaInfoByUuid(m_SwcUuid, get_swc_meta_info_response, this)) {
-        return;
-    }
+	proto::GetSwcMetaInfoResponse get_swc_meta_info_response;
+	if (!WrappedCall::getSwcMetaInfoByUuid(m_SwcUuid,
+										   get_swc_meta_info_response, this)) {
+		return;
+	}
 
-    if (!get_swc_meta_info_response.swcinfo().swcattachmentanometainfo().attachmentuuid().empty()) {
-        m_IsAnoAttachmentExist = true;
-    }
-    else {
-        QMessageBox::critical(this, "Error", "No Ano Attachment found! You can create a new ano attchment!");
-        return;
-    }
+	if (!get_swc_meta_info_response.swcinfo()
+			 .swcattachmentanometainfo()
+			 .attachmentuuid()
+			 .empty()) {
+		m_IsAnoAttachmentExist = true;
+	} else {
+		QMessageBox::critical(
+			this, "Error",
+			"No Ano Attachment found! You can create a new ano attchment!");
+		return;
+	}
 
-    proto::GetSwcAttachmentAnoResponse get_swc_attachment_ano_response;
-    m_AttachmentUuid = get_swc_meta_info_response.swcinfo().swcattachmentanometainfo().attachmentuuid();
-    if (!WrappedCall::getSwcAttachmentAnoByUuid(m_SwcUuid, m_AttachmentUuid, get_swc_attachment_ano_response,
-                                          this)) {
-        return;
-    }
+	proto::GetSwcAttachmentAnoResponse get_swc_attachment_ano_response;
+	m_AttachmentUuid = get_swc_meta_info_response.swcinfo()
+						   .swcattachmentanometainfo()
+						   .attachmentuuid();
+	if (!WrappedCall::getSwcAttachmentAnoByUuid(m_SwcUuid, m_AttachmentUuid,
+												get_swc_attachment_ano_response,
+												this)) {
+		return;
+	}
 
-    ui->ApoFileName->setText(QString::fromStdString(get_swc_attachment_ano_response.swcattachmentano().apofile()));
-    ui->SwcFileName->setText(QString::fromStdString(get_swc_attachment_ano_response.swcattachmentano().swcfile()));
+	ui->ApoFileName->setText(QString::fromStdString(
+		get_swc_attachment_ano_response.swcattachmentano().apofile()));
+	ui->SwcFileName->setText(QString::fromStdString(
+		get_swc_attachment_ano_response.swcattachmentano().swcfile()));
 }
-

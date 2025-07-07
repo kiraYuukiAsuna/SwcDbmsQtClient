@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(SwcManagerClient)
+project(SwcManagerClient VERSION 1.1.0)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -25,13 +25,57 @@ find_package(asio CONFIG REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
 
+# 查找Git包
+find_package(Git QUIET)
+# 设置默认版本信息（如果无法获取Git信息）
+set(GIT_COMMIT_HASH "unknown")
+set(GIT_BRANCH "unknown")
+set(GIT_COMMIT_DATE "unknown")
+# 如果找到Git，尝试获取提交信息
+if(GIT_FOUND)
+    # 获取最新的commit hash
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} log -1 --pretty=format:%h
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT_HASH
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    
+    # 获取当前分支
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_BRANCH
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    
+    # 获取提交日期
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} log -1 --pretty=format:%cd --date=short
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT_DATE
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif()
+# 配置头文件以传递版本信息
+configure_file(
+    ${CMAKE_SOURCE_DIR}/version.h.in
+    ${CMAKE_BINARY_DIR}/Generated/version.h
+    @ONLY
+)
+# 将生成的头文件添加到包含路径中
+include_directories(${CMAKE_BINARY_DIR}/Generated)
+
 include_directories(
         src/styles
         ThirdParty/nlohmann_json
-        ThirdParty/nodeeditor-3.0.10/src
-        ThirdParty/nodeeditor-3.0.10/include
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal
+        ThirdParty/nodeeditor/src
+        ThirdParty/nodeeditor/include
+        ThirdParty/nodeeditor/include/QtNodes
+        ThirdParty/nodeeditor/include/QtNodes/internal
         src/framework/util/unsortswc
 )
 
@@ -40,73 +84,18 @@ link_directories(
 
 )
 
-set(NODEEDITOR_SOURCE_FILES
-        ThirdParty/nodeeditor-3.0.10/src/AbstractGraphModel.cpp
-        ThirdParty/nodeeditor-3.0.10/src/AbstractNodeGeometry.cpp
-        ThirdParty/nodeeditor-3.0.10/src/BasicGraphicsScene.cpp
-        ThirdParty/nodeeditor-3.0.10/src/ConnectionGraphicsObject.cpp
-        ThirdParty/nodeeditor-3.0.10/src/ConnectionPainter.cpp
-        ThirdParty/nodeeditor-3.0.10/src/ConnectionState.cpp
-        ThirdParty/nodeeditor-3.0.10/src/ConnectionStyle.cpp
-        ThirdParty/nodeeditor-3.0.10/src/DataFlowGraphModel.cpp
-        ThirdParty/nodeeditor-3.0.10/src/DataFlowGraphicsScene.cpp
-        ThirdParty/nodeeditor-3.0.10/src/DefaultHorizontalNodeGeometry.cpp
-        ThirdParty/nodeeditor-3.0.10/src/DefaultVerticalNodeGeometry.cpp
-        ThirdParty/nodeeditor-3.0.10/src/Definitions.cpp
-        ThirdParty/nodeeditor-3.0.10/src/GraphicsView.cpp
-        ThirdParty/nodeeditor-3.0.10/src/GraphicsViewStyle.cpp
-        ThirdParty/nodeeditor-3.0.10/src/NodeDelegateModelRegistry.cpp
-        ThirdParty/nodeeditor-3.0.10/src/NodeConnectionInteraction.cpp
-        ThirdParty/nodeeditor-3.0.10/src/NodeDelegateModel.cpp
-        ThirdParty/nodeeditor-3.0.10/src/NodeGraphicsObject.cpp
-        ThirdParty/nodeeditor-3.0.10/src/DefaultNodePainter.cpp
-        ThirdParty/nodeeditor-3.0.10/src/NodeState.cpp
-        ThirdParty/nodeeditor-3.0.10/src/NodeStyle.cpp
-        ThirdParty/nodeeditor-3.0.10/src/StyleCollection.cpp
-        ThirdParty/nodeeditor-3.0.10/src/UndoCommands.cpp
-        ThirdParty/nodeeditor-3.0.10/src/locateNode.cpp
+# 自动查找 nodeeditor 的源文件和头文件
+file(GLOB_RECURSE NODEEDITOR_SOURCE_FILES
+        "${PROJECT_SOURCE_DIR}/ThirdParty/nodeeditor/src/*.cpp"
 )
 
-set(NODEEDITOR_HEADER_FILES
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/AbstractGraphModel.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/AbstractNodeGeometry.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/AbstractNodePainter.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/BasicGraphicsScene.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/Compiler.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/ConnectionGraphicsObject.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/ConnectionIdHash.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/ConnectionIdUtils.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/ConnectionState.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/ConnectionStyle.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/DataFlowGraphicsScene.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/DataFlowGraphModel.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/DefaultNodePainter.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/Definitions.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/Export.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/GraphicsView.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/GraphicsViewStyle.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/locateNode.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/NodeData.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/NodeDelegateModel.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/NodeDelegateModelRegistry.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/NodeGraphicsObject.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/NodeState.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/NodeStyle.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/OperatingSystem.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/QStringStdHash.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/QUuidStdHash.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/Serializable.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/Style.hpp
-        ThirdParty/nodeeditor-3.0.10/include/QtNodes/internal/StyleCollection.hpp
-        ThirdParty/nodeeditor-3.0.10/src/ConnectionPainter.hpp
-        ThirdParty/nodeeditor-3.0.10/src/DefaultHorizontalNodeGeometry.hpp
-        ThirdParty/nodeeditor-3.0.10/src/DefaultVerticalNodeGeometry.hpp
-        ThirdParty/nodeeditor-3.0.10/src/NodeConnectionInteraction.hpp
-        ThirdParty/nodeeditor-3.0.10/src/UndoCommands.hpp
+file(GLOB_RECURSE NODEEDITOR_HEADER_FILES
+        "${PROJECT_SOURCE_DIR}/ThirdParty/nodeeditor/src/*.hpp"
+        "${PROJECT_SOURCE_DIR}/ThirdParty/nodeeditor/include/*.hpp"
 )
 
 set(QRESOURCE
-        ThirdParty/nodeeditor-3.0.10/resources/nodeeditorresources.qrc
+        ThirdParty/nodeeditor/resources/nodeeditorresources.qrc
         Resource/swcdbmsclientresources.qrc
 )
 
@@ -187,6 +176,14 @@ add_executable(${PROJECT_NAME}
 
 # 使主目标依赖于生成的代码
 add_dependencies(${PROJECT_NAME} proto_gen)
+
+# 添加自定义目标来更新版本信息
+add_custom_target(version_info ALL
+    COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_SOURCE_DIR}/version.h.in
+    COMMENT "Updating version information"
+)
+# 确保在构建可执行文件前更新版本信息
+add_dependencies(${PROJECT_NAME} version_info)
 
 # 包含生成的目录
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROTO_SRC_DIR})

@@ -1,23 +1,24 @@
 #pragma once
 
-#include <QDialog>
-#include <QLabel>
 #include <qprogressbar.h>
 
+#include <QDialog>
+#include <QLabel>
+
 class ProgressBar : public QDialog {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    ProgressBar(QWidget* parent = nullptr);
-    ~ProgressBar();
+	ProgressBar(QWidget* parent = nullptr);
+	~ProgressBar();
 
-    void setText(const std::string& text);
-    void setValue(int value);
+	void setText(const std::string& text);
+	void setValue(int value);
 
-    void finish();
+	void finish();
 
 private:
-    QProgressBar* m_ProgressBar;
-    QLabel* m_TitleLabel;
-    QLabel* m_ProgressLabel;
+	QProgressBar* m_ProgressBar;
+	QLabel* m_TitleLabel;
+	QLabel* m_ProgressLabel;
 };
