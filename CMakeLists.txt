@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(SwcManagerClient VERSION 1.1.0)
+project(SwcManagerClient VERSION 1.1.2)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -111,7 +111,7 @@ file(GLOB_RECURSE PROTO_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/SwcDbmsCommon/proto/*.proto
 )
 # 设置生成文件的输出目录
-set(PROTO_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
+set(PROTO_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/Generated)
 file(MAKE_DIRECTORY ${PROTO_SRC_DIR})
 # 获取 proto 文件的根目录路径
 get_filename_component(PROTO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/SwcDbmsCommon/proto" ABSOLUTE)

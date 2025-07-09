@@ -10,9 +10,8 @@
 #include <QOpenGLWidget>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <QWheelEvent>
 
-#include "SwcDbmsCommon/Generated/cpp/Message/Message.pb.h"
+#include "Message/Message.pb.h"
 #include "src/FileIo/SwcIo.hpp"
 
 enum class SwcRendererMode {

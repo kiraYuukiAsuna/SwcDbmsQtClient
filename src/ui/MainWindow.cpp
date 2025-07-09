@@ -28,13 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
 	QString appTitle =
 		QString("SWC DBMS Qt Client") +
 		QString(" - Version: %1")
-			.arg(QString::fromStdString(version::VERSION_STRING)) +
-		QString(" - Git Commit: %1")
-			.arg(QString::fromStdString(version::GIT_COMMIT_HASH)) +
-		QString(" - Git Branch: %1")
-			.arg(QString::fromStdString(version::GIT_BRANCH)) +
-		QString(" - Git Commit Date: %1")
-			.arg(QString::fromStdString(version::GIT_COMMIT_DATE));
+			.arg(QString::fromStdString(version::VERSION_STRING));
 
 	setWindowTitle(appTitle);
 

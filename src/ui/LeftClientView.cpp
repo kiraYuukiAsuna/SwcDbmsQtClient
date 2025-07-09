@@ -17,6 +17,7 @@
 #include "ViewCreateSwc.h"
 #include "ViewExportSwcToFile.h"
 #include "ViewImportSwcFromFile.h"
+#include "ProgressBar.h"
 #include "src/framework/config/AppConfig.h"
 #include "src/framework/defination/ImageDefination.h"
 #include "src/framework/defination/TypeDef.h"
@@ -274,6 +275,94 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint& pos) {
 		view.exec();
 		refreshTree();
 	});
+
+	auto* MenuExportDefinedSomaSwc = new QAction(this);
+	MenuExportDefinedSomaSwc->setText("Export Defined Soma Swc");
+	MenuExportDefinedSomaSwc->setIcon(QIcon(Image::ImageExport));
+	connect(
+		MenuExportDefinedSomaSwc, &QAction::triggered, this,
+		[this, data](bool checked) {
+			auto result = QMessageBox::information(
+				this, "Info",
+				"Exporting defined soma SWC may take some time, please wait "
+				"for export steps to finish!",
+				QMessageBox::StandardButton::Ok,
+				QMessageBox::StandardButton::Cancel);
+			if (result == QMessageBox::StandardButton::Ok) {
+				if (data.type == MetaInfoType::eProject) {
+					// 创建进度条
+					ProgressBar progressBar(this);
+					progressBar.setText("Loading defined soma SWC data...");
+					progressBar.setValue(0);
+					progressBar.show();
+					
+					QApplication::processEvents(); // 确保进度条显示
+
+					// 获取项目定义的soma SWC UUIDs
+					progressBar.setText("Getting project defined soma SWC UUIDs...");
+					progressBar.setValue(20);
+					QApplication::processEvents();
+					
+					std::vector<std::string> projectUuids = {data.uuid};
+					proto::GetProjectsDefinedSomaSwcResponse somaSwcResponse;
+					if (!WrappedCall::getProjectsDefinedSomaSwc(
+							projectUuids, somaSwcResponse, this)) {
+						progressBar.finish();
+						return;
+					}
+
+					if (somaSwcResponse.swcuuids_size() == 0) {
+						progressBar.finish();
+						QMessageBox::information(
+							this, "Info",
+							"No defined soma SWC found in this project.");
+						return;
+					}
+
+					// 获取所有SWC元信息
+					progressBar.setText("Getting SWC meta info...");
+					progressBar.setValue(50);
+					QApplication::processEvents();
+
+					std::vector<ExportSwcData> dataList;
+
+					// 直接获取每个定义的soma SWC的元信息
+					int processedCount = 0;
+					int totalCount = somaSwcResponse.swcuuids_size();
+
+					for (const auto& swcUuid : somaSwcResponse.swcuuids()) {
+						progressBar.setText(QString("Getting SWC meta info... (%1/%2)")
+							.arg(processedCount + 1).arg(totalCount).toStdString());
+						progressBar.setValue(50 + (processedCount * 30 / totalCount));
+						QApplication::processEvents();
+
+						proto::GetSwcMetaInfoResponse response;
+						if (WrappedCall::getSwcMetaInfoByUuid(swcUuid, response, this)) {
+							ExportSwcData exportSwcData;
+							exportSwcData.swcMetaInfo = response.swcinfo();
+							dataList.push_back(exportSwcData);
+						}
+						processedCount++;
+					}
+
+					if (dataList.empty()) {
+						progressBar.finish();
+						QMessageBox::information(
+							this, "Info", "No valid defined soma SWC found.");
+						return;
+					}
+
+					progressBar.setText("Preparing export dialog...");
+					progressBar.setValue(100);
+					QApplication::processEvents();
+					
+					progressBar.finish();
+
+					ViewExportSwcToFile view(dataList, true, this);
+					view.exec();
+				}
+			}
+		});
 
 	auto* MenuDeleteProject = new QAction(this);
 	MenuDeleteProject->setText("Delete Project");
@@ -689,6 +778,7 @@ void LeftClientView::customTreeWidgetContentMenu(const QPoint& pos) {
 			popMenu->addSeparator();
 			popMenu->addAction(MenuImportSwcFile);
 			popMenu->addAction(MenuExportToSwcFile);
+			popMenu->addAction(MenuExportDefinedSomaSwc);
 			popMenu->addSeparator();
 			popMenu->addAction(MenuDeleteProject);
 			break;

@@ -858,4 +858,21 @@ public:
 		return defaultErrorHandler(__func__, status, response.metainfo(),
 								   parent);
 	}
+
+	static bool getProjectsDefinedSomaSwc(
+		const std::vector<std::string>& projectUuids,
+		proto::GetProjectsDefinedSomaSwcResponse& response, QWidget* parent) {
+		proto::GetProjectsDefinedSomaSwcRequest request;
+		setCommonRequestField(request);
+
+		for (const auto& projectUuid : projectUuids) {
+			request.add_projectuuid(projectUuid);
+		}
+
+		grpc::ClientContext context;
+		auto status = RpcCall::getInstance().Stub()->GetProjectsDefinedSomaSwc(
+			&context, request, &response);
+		return defaultErrorHandler(__func__, status, response.metainfo(),
+								   parent);
+	}
 };
