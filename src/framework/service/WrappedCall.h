@@ -859,6 +859,61 @@ public:
 								   parent);
 	}
 
+	static bool getAllFreeSwcMetaInfo(
+		proto::GetAllFreeSwcMetaInfoResponse& response, QWidget* parent) {
+		proto::GetAllFreeSwcMetaInfoRequest request;
+		setCommonRequestField(request);
+
+		grpc::ClientContext context;
+		auto status = RpcCall::getInstance().Stub()->GetAllFreeSwcMetaInfo(
+			&context, request, &response);
+		return defaultErrorHandler(__func__, status, response.metainfo(),
+								   parent);
+	}
+
+	static bool DeleteProject(const std::string& projectUuid,
+							  proto::DeleteProjectResponse& response,
+							  QWidget* parent) {
+		proto::DeleteProjectRequest request;
+		setCommonRequestField(request);
+		request.set_projectuuid(projectUuid);
+
+		grpc::ClientContext context;
+		auto status = RpcCall::getInstance().Stub()->DeleteProject(
+			&context, request, &response);
+		return defaultErrorHandler(__func__, status, response.metainfo(),
+								   parent);
+	}
+
+	static bool DeleteDailyStatistics(
+		const std::string& dailyStatisticsName,
+		proto::DeleteDailyStatisticsResponse& response, QWidget* parent) {
+		proto::DeleteDailyStatisticsRequest request;
+		setCommonRequestField(request);
+		request.set_dailystatisticsname(dailyStatisticsName);
+
+		grpc::ClientContext context;
+		auto status = RpcCall::getInstance().Stub()->DeleteDailyStatistics(
+			&context, request, &response);
+		return defaultErrorHandler(__func__, status, response.metainfo(),
+								   parent);
+	}
+
+	static bool UserOnlineHeartBeat(
+		proto::UserOnlineHeartBeatResponse& response, QWidget* parent) {
+		proto::UserOnlineHeartBeatNotification notification;
+		setCommonRequestField(notification);
+		notification.set_heartbeattime(
+			std::chrono::system_clock::now().time_since_epoch().count());
+
+		grpc::ClientContext context;
+		auto status =
+			RpcCall::getInstance().Stub()->UserOnlineHeartBeatNotifications(
+				&context, notification, &response);
+		return defaultErrorHandlerNoMessageBox(__func__, status,
+											   response.metainfo(), parent);
+	}
+
 	static bool getProjectsDefinedSomaSwc(
 		const std::vector<std::string>& projectUuids,
 		proto::GetProjectsDefinedSomaSwcResponse& response, QWidget* parent) {

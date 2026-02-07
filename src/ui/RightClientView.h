@@ -4,15 +4,10 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "EditorBase.h"
 #include "src/framework/defination/TypeDef.h"
 
 class MainWindow;
-
-QT_BEGIN_NAMESPACE
-namespace Ui {
-	class RightClientView;
-}
-QT_END_NAMESPACE
 
 class RightClientView : public QWidget {
 	Q_OBJECT
@@ -38,10 +33,12 @@ public:
 	void refreshAllOpenedProjectMetaInfo();
 
 private:
-	int findIfTabAlreadOpenned(const std::string& name,
+	int findIfTabAlreadyOpened(const std::string& name,
 							   MetaInfoType metaInfoType);
+	void closeTab(const std::string& identifier, MetaInfoType type);
+	EditorBase* findEditorBase(const std::string& identifier,
+							   MetaInfoType type);
 
-	Ui::RightClientView* ui;
 	QVBoxLayout* m_MainLayout;
 	MainWindow* m_MainWindow;
 

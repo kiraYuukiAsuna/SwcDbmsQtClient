@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
 
 	auto timestamp = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).
             time_since_epoch();
-    SeeleInfoTag("Main", "App Start At: {}", timestampToString(timestamp.count()));
+    SeeleInfoTag("main", "App Start At: {}", timestampToString(timestamp.count()));
 
     QApplication app(argc, argv);
 

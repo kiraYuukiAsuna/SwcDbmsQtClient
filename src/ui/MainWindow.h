@@ -7,12 +7,6 @@
 #include "LeftClientView.h"
 #include "RightClientView.h"
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-	class MainWindow;
-}
-QT_END_NAMESPACE
-
 class MainWindow : public QMainWindow {
 	Q_OBJECT
 
@@ -24,7 +18,6 @@ public:
 	RightClientView& getRightClientView();
 
 private:
-	Ui::MainWindow* ui;
 	QTimer* m_HeartBeatTimer;
 	QTimer* m_OnlineStatusTimer;
 

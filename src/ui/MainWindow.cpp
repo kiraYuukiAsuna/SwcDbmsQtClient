@@ -1,11 +1,10 @@
 #include "MainWindow.h"
 
-#include <Message/Request.pb.h>
 #include <Message/Response.pb.h>
-#include <grpcpp/client_context.h>
 #include <qdesktopservices.h>
 #include <qurl.h>
 
+#include <QMenuBar>
 #include <QMessageBox>
 #include <QTimer>
 
@@ -15,13 +14,10 @@
 #include "ViewImportSwcFromFile.h"
 #include "src/framework/defination/ImageDefination.h"
 #include "src/framework/service/CachedProtoData.h"
-#include "src/framework/service/RpcCall.h"
-#include "ui_MainWindow.h"
+#include "src/framework/service/WrappedCall.h"
 #include "version.h"
 
-MainWindow::MainWindow(QWidget *parent)
-	: QMainWindow(parent), ui(new Ui::MainWindow) {
-	ui->setupUi(this);
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	setWindowIcon(QIcon(Image::ImageAppIcon));
 	setWindowState(Qt::WindowMaximized);
 
@@ -39,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	m_Splitter->addWidget(m_LeftClientView);
 	m_Splitter->addWidget(m_RightClientView);
-	m_Splitter->setSizes(QList<int>() << 100000000 << 400000000);
+	m_Splitter->setSizes(QList<int>() << 1 << 4);
 	m_Splitter->setCollapsible(0, false);
 	m_Splitter->setCollapsible(1, false);
 
@@ -113,19 +109,8 @@ MainWindow::MainWindow(QWidget *parent)
 	m_HeartBeatTimer = new QTimer;
 	m_HeartBeatTimer->setInterval(30000);
 	connect(m_HeartBeatTimer, &QTimer::timeout, this, [this]() {
-		proto::UserOnlineHeartBeatNotification notification;
-		notification.mutable_metainfo()->set_apiversion(RpcCall::ApiVersion);
-		auto *userInfo = notification.mutable_userverifyinfo();
-		userInfo->set_username(CachedProtoData::getInstance().UserName);
-		userInfo->set_usertoken(CachedProtoData::getInstance().UserToken);
-		notification.set_heartbeattime(
-			std::chrono::system_clock::now().time_since_epoch().count());
 		proto::UserOnlineHeartBeatResponse response;
-		grpc::ClientContext context;
-		auto status =
-			RpcCall::getInstance().Stub()->UserOnlineHeartBeatNotifications(
-				&context, notification, &response);
-		if (status.ok()) {
+		if (WrappedCall::UserOnlineHeartBeat(response, this)) {
 			CachedProtoData::getInstance().UserName =
 				response.userverifyinfo().username();
 			CachedProtoData::getInstance().UserToken =
@@ -133,8 +118,6 @@ MainWindow::MainWindow(QWidget *parent)
 			CachedProtoData::getInstance().OnlineStatus = true;
 		} else {
 			CachedProtoData::getInstance().OnlineStatus = false;
-			QMessageBox::critical(
-				this, "Error", QString::fromStdString(status.error_message()));
 		}
 	});
 	m_HeartBeatTimer->start();
@@ -152,7 +135,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_OnlineStatusTimer->start();
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow() = default;
 
 LeftClientView &MainWindow::getLeftClientView() { return *m_LeftClientView; }
 

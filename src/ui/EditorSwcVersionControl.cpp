@@ -16,6 +16,125 @@
 #include "src/GraphModel/Registry.hpp"
 #include "src/framework/service/WrappedCall.h"
 
+namespace {
+
+const QString kPrimaryButtonStyle =
+	"QPushButton {"
+	"  background-color: #2196F3;"
+	"  color: white;"
+	"  border: none;"
+	"  border-radius: 6px;"
+	"  padding: 8px 16px;"
+	"  font-weight: bold;"
+	"  min-height: 20px;"
+	"}"
+	"QPushButton:hover {"
+	"  background-color: #1976D2;"
+	"}"
+	"QPushButton:pressed {"
+	"  background-color: #0D47A1;"
+	"}";
+
+const QString kSecondaryButtonStyle =
+	"QPushButton {"
+	"  background-color: #f5f5f5;"
+	"  color: #333;"
+	"  border: 1px solid #ddd;"
+	"  border-radius: 6px;"
+	"  padding: 8px 16px;"
+	"  font-weight: bold;"
+	"  min-height: 20px;"
+	"}"
+	"QPushButton:hover {"
+	"  background-color: #e8e8e8;"
+	"  border-color: #bbb;"
+	"}"
+	"QPushButton:pressed {"
+	"  background-color: #ddd;"
+	"}";
+
+const QString kDangerButtonStyle =
+	"QPushButton {"
+	"  background-color: #f44336;"
+	"  color: white;"
+	"  border: none;"
+	"  border-radius: 6px;"
+	"  padding: 8px 16px;"
+	"  font-weight: bold;"
+	"  min-height: 20px;"
+	"}"
+	"QPushButton:hover {"
+	"  background-color: #d32f2f;"
+	"}"
+	"QPushButton:pressed {"
+	"  background-color: #b71c1c;"
+	"}";
+
+const QString kTimePointPrimaryButtonStyle =
+	"QPushButton {"
+	"  background-color: #FF9800;"
+	"  color: white;"
+	"  border: none;"
+	"  border-radius: 6px;"
+	"  padding: 8px 12px;"
+	"  font-weight: bold;"
+	"  min-height: 16px;"
+	"}"
+	"QPushButton:hover {"
+	"  background-color: #F57C00;"
+	"}"
+	"QPushButton:pressed {"
+	"  background-color: #E65100;"
+	"}"
+	"QPushButton:disabled {"
+	"  background-color: #ccc;"
+	"  color: #888;"
+	"}";
+
+const QString kTimePointSecondaryButtonStyle =
+	"QPushButton {"
+	"  background-color: #f5f5f5;"
+	"  color: #333;"
+	"  border: 1px solid #ddd;"
+	"  border-radius: 6px;"
+	"  padding: 8px 12px;"
+	"  font-weight: bold;"
+	"  min-height: 16px;"
+	"}"
+	"QPushButton:hover {"
+	"  background-color: #e8e8e8;"
+	"  border-color: #bbb;"
+	"}"
+	"QPushButton:pressed {"
+	"  background-color: #ddd;"
+	"}"
+	"QPushButton:disabled {"
+	"  background-color: #f8f8f8;"
+	"  color: #ccc;"
+	"  border-color: #eee;"
+	"}";
+
+QString kGroupBoxStyle(const QString& accentColor) {
+	return QString(
+		"QGroupBox {"
+		"  font-weight: bold;"
+		"  border: 2px solid #cccccc;"
+		"  border-radius: 8px;"
+		"  margin-top: 1ex;"
+		"  padding-top: 10px;"
+		"  background-color: #fafafa;"
+		"}"
+		"QGroupBox::title {"
+		"  subcontrol-origin: margin;"
+		"  left: 10px;"
+		"  padding: 0 8px 0 8px;"
+		"  color: %1;"
+		"}")
+		.arg(accentColor);
+}
+
+}  // namespace
+
 EditorSwcVersionControl::EditorSwcVersionControl(const std::string &swcUuid,
 												 QWidget *parent)
 	: QDialog(parent),
@@ -24,7 +143,7 @@ EditorSwcVersionControl::EditorSwcVersionControl(const std::string &swcUuid,
 	setWindowTitle("SWC Version Control Manager");
 	setWindowIcon(QApplication::style()->standardIcon(QStyle::SP_ComputerIcon));
 	resize(1500, 900);
-	setMinimumSize(1400, 800);
+	setMinimumSize(1500, 800);
 
 	// 初始化UI组件
 	setupUI();
@@ -98,21 +217,7 @@ void EditorSwcVersionControl::setupUI() {
 	// 注释掉固定宽度限制，让setStretchFactor生效
 	// m_InfoPanel->setMinimumWidth(320);
 	// m_InfoPanel->setMaximumWidth(450);
-	m_InfoPanel->setStyleSheet(
-		"QGroupBox {"
-		"  font-weight: bold;"
-		"  border: 2px solid #cccccc;"
-		"  border-radius: 8px;"
-		"  margin-top: 1ex;"
-		"  padding-top: 10px;"
-		"  background-color: #fafafa;"
-		"}"
-		"QGroupBox::title {"
-		"  subcontrol-origin: margin;"
-		"  left: 10px;"
-		"  padding: 0 8px 0 8px;"
-		"  color: #2196F3;"
-		"}");
+	m_InfoPanel->setStyleSheet(kGroupBoxStyle("#2196F3"));
 
 	// 设置时间点面板
 	setupTimePointPanel();
@@ -249,20 +354,7 @@ void EditorSwcVersionControl::setupControlPanel() {
 	m_ControlPanel = new QGroupBox("🔧 Version Control Operations", this);
 	m_ControlPanel->setMinimumHeight(180);
 	m_ControlPanel->setMaximumHeight(200);
-	m_ControlPanel->setStyleSheet(
-		"QGroupBox {"
-		"  font-weight: bold;"
-		"  border: 2px solid #cccccc;"
-		"  border-radius: 8px;"
-		"  margin-top: 1ex;"
-		"  padding-top: 10px;"
-		"}"
-		"QGroupBox::title {"
-		"  subcontrol-origin: margin;"
-		"  left: 10px;"
-		"  padding: 0 8px 0 8px;"
-		"  color: #2196F3;"
-		"}");
+	m_ControlPanel->setStyleSheet(kGroupBoxStyle("#2196F3"));
 
 	auto *controlLayout = new QGridLayout(m_ControlPanel);
 	controlLayout->setSpacing(12);
@@ -291,88 +383,35 @@ void EditorSwcVersionControl::setupControlPanel() {
 	auto *buttonLayout = new QHBoxLayout();
 	buttonLayout->setSpacing(8);
 
-	// 样式定义
-	QString primaryButtonStyle =
-		"QPushButton {"
-		"  background-color: #2196F3;"
-		"  color: white;"
-		"  border: none;"
-		"  border-radius: 6px;"
-		"  padding: 8px 16px;"
-		"  font-weight: bold;"
-		"  min-height: 20px;"
-		"}"
-		"QPushButton:hover {"
-		"  background-color: #1976D2;"
-		"}"
-		"QPushButton:pressed {"
-		"  background-color: #0D47A1;"
-		"}";
-
-	QString secondaryButtonStyle =
-		"QPushButton {"
-		"  background-color: #f5f5f5;"
-		"  color: #333;"
-		"  border: 1px solid #ddd;"
-		"  border-radius: 6px;"
-		"  padding: 8px 16px;"
-		"  font-weight: bold;"
-		"  min-height: 20px;"
-		"}"
-		"QPushButton:hover {"
-		"  background-color: #e8e8e8;"
-		"  border-color: #bbb;"
-		"}"
-		"QPushButton:pressed {"
-		"  background-color: #ddd;"
-		"}";
-
-	QString dangerButtonStyle =
-		"QPushButton {"
-		"  background-color: #f44336;"
-		"  color: white;"
-		"  border: none;"
-		"  border-radius: 6px;"
-		"  padding: 8px 16px;"
-		"  font-weight: bold;"
-		"  min-height: 20px;"
-		"}"
-		"QPushButton:hover {"
-		"  background-color: #d32f2f;"
-		"}"
-		"QPushButton:pressed {"
-		"  background-color: #b71c1c;"
-		"}";
-
 	// 时间相关操作
 	m_ExportBtn = new QPushButton("💾 Export Current Query Time Version", this);
-	m_ExportBtn->setStyleSheet(primaryButtonStyle);
+	m_ExportBtn->setStyleSheet(kPrimaryButtonStyle);
 	m_ExportBtn->setToolTip("Export version at current query time point");
 
 	m_RevertBtn = new QPushButton("⏪ Revert To Query Time", this);
-	m_RevertBtn->setStyleSheet(dangerButtonStyle);
+	m_RevertBtn->setStyleSheet(kDangerButtonStyle);
 	m_RevertBtn->setToolTip(
 		"Revert to current query time point (requires backup)");
 
 	// 版本图操作
 	m_RefreshBtn = new QPushButton("🔄 Refresh", this);
-	m_RefreshBtn->setStyleSheet(secondaryButtonStyle);
+	m_RefreshBtn->setStyleSheet(kSecondaryButtonStyle);
 	m_RefreshBtn->setToolTip("Refresh version graph");
 
 	m_VisualizeBtn = new QPushButton("👁️ Visualize Snapshot", this);
-	m_VisualizeBtn->setStyleSheet(primaryButtonStyle);
+	m_VisualizeBtn->setStyleSheet(kPrimaryButtonStyle);
 	m_VisualizeBtn->setToolTip("Visualize selected snapshot");
 
 	m_VisualizeDiffBtn = new QPushButton("🔍 Compare Two Snapshots", this);
-	m_VisualizeDiffBtn->setStyleSheet(primaryButtonStyle);
+	m_VisualizeDiffBtn->setStyleSheet(kPrimaryButtonStyle);
 	m_VisualizeDiffBtn->setToolTip("Compare two selected snapshots");
 
 	m_ExportSelectedBtn = new QPushButton("📤 Export Selected Snapshot", this);
-	m_ExportSelectedBtn->setStyleSheet(secondaryButtonStyle);
+	m_ExportSelectedBtn->setStyleSheet(kSecondaryButtonStyle);
 	m_ExportSelectedBtn->setToolTip("Export selected snapshot");
 
 	m_RevertToSnapshotBtn = new QPushButton("⏮️ Revert to Snapshot", this);
-	m_RevertToSnapshotBtn->setStyleSheet(dangerButtonStyle);
+	m_RevertToSnapshotBtn->setStyleSheet(kDangerButtonStyle);
 	m_RevertToSnapshotBtn->setToolTip(
 		"Revert to selected snapshot (requires backup)");
 
@@ -1490,21 +1529,7 @@ void EditorSwcVersionControl::setupTimePointPanel() {
 	// 注释掉固定宽度限制，让setStretchFactor生效
 	// m_TimePointPanel->setMinimumWidth(300);
 	// m_TimePointPanel->setMaximumWidth(400);
-	m_TimePointPanel->setStyleSheet(
-		"QGroupBox {"
-		"  font-weight: bold;"
-		"  border: 2px solid #cccccc;"
-		"  border-radius: 8px;"
-		"  margin-top: 1ex;"
-		"  padding-top: 10px;"
-		"  background-color: #fafafa;"
-		"}"
-		"QGroupBox::title {"
-		"  subcontrol-origin: margin;"
-		"  left: 10px;"
-		"  padding: 0 8px 0 8px;"
-		"  color: #FF9800;"
-		"}");
+	m_TimePointPanel->setStyleSheet(kGroupBoxStyle("#FF9800"));
 
 	auto *timePointLayout = new QVBoxLayout(m_TimePointPanel);
 	timePointLayout->setSpacing(10);
@@ -1552,62 +1577,18 @@ void EditorSwcVersionControl::setupTimePointPanel() {
 	auto *buttonLayout = new QVBoxLayout();
 	buttonLayout->setSpacing(8);
 
-	QString primaryButtonStyle =
-		"QPushButton {"
-		"  background-color: #FF9800;"
-		"  color: white;"
-		"  border: none;"
-		"  border-radius: 6px;"
-		"  padding: 8px 12px;"
-		"  font-weight: bold;"
-		"  min-height: 16px;"
-		"}"
-		"QPushButton:hover {"
-		"  background-color: #F57C00;"
-		"}"
-		"QPushButton:pressed {"
-		"  background-color: #E65100;"
-		"}"
-		"QPushButton:disabled {"
-		"  background-color: #ccc;"
-		"  color: #888;"
-		"}";
-
-	QString secondaryButtonStyle =
-		"QPushButton {"
-		"  background-color: #f5f5f5;"
-		"  color: #333;"
-		"  border: 1px solid #ddd;"
-		"  border-radius: 6px;"
-		"  padding: 8px 12px;"
-		"  font-weight: bold;"
-		"  min-height: 16px;"
-		"}"
-		"QPushButton:hover {"
-		"  background-color: #e8e8e8;"
-		"  border-color: #bbb;"
-		"}"
-		"QPushButton:pressed {"
-		"  background-color: #ddd;"
-		"}"
-		"QPushButton:disabled {"
-		"  background-color: #f8f8f8;"
-		"  color: #ccc;"
-		"  border-color: #eee;"
-		"}";
-
 	m_RevertToTimePointBtn = new QPushButton("⏪ Revert to Time Point", this);
-	m_RevertToTimePointBtn->setStyleSheet(primaryButtonStyle);
+	m_RevertToTimePointBtn->setStyleSheet(kTimePointPrimaryButtonStyle);
 	m_RevertToTimePointBtn->setToolTip("Revert SWC to selected time point");
 	m_RevertToTimePointBtn->setEnabled(false);
 
 	m_ExportTimePointBtn = new QPushButton("📤 Export Time Point", this);
-	m_ExportTimePointBtn->setStyleSheet(secondaryButtonStyle);
+	m_ExportTimePointBtn->setStyleSheet(kTimePointSecondaryButtonStyle);
 	m_ExportTimePointBtn->setToolTip("Export SWC data at selected time point");
 	m_ExportTimePointBtn->setEnabled(false);
 
 	m_VisualizeTimePointBtn = new QPushButton("👁️ Visualize Time Point", this);
-	m_VisualizeTimePointBtn->setStyleSheet(secondaryButtonStyle);
+	m_VisualizeTimePointBtn->setStyleSheet(kTimePointSecondaryButtonStyle);
 	m_VisualizeTimePointBtn->setToolTip(
 		"Visualize SWC data at selected time point");
 	m_VisualizeTimePointBtn->setEnabled(false);

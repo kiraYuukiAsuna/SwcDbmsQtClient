@@ -10,11 +10,9 @@
 #include "ViewSwcNodeData.h"
 #include "src/framework/defination/ImageDefination.h"
 #include "src/framework/service/WrappedCall.h"
-#include "ui_RightClientView.h"
 
 RightClientView::RightClientView(MainWindow *mainWindow)
-	: QWidget(mainWindow), ui(new Ui::RightClientView) {
-	ui->setupUi(this);
+	: QWidget(mainWindow) {
 	m_MainWindow = mainWindow;
 
 	m_TabWidget = new QTabWidget(this);
@@ -31,7 +29,6 @@ RightClientView::RightClientView(MainWindow *mainWindow)
 				if (base) {
 					if (base->save()) {
 						m_TabWidget->removeTab(index);
-						// mainWindow->getLeftClientView().refreshTree();
 					}
 				} else {
 					m_TabWidget->removeTab(index);
@@ -83,31 +80,55 @@ RightClientView::RightClientView(MainWindow *mainWindow)
 	this->setLayout(m_MainLayout);
 }
 
-RightClientView::~RightClientView() { delete ui; }
+RightClientView::~RightClientView() = default;
+
+int RightClientView::findIfTabAlreadyOpened(const std::string &identifier,
+											MetaInfoType metaInfoType) {
+	for (int i = 0; i < m_TabWidget->count(); i++) {
+		auto editorBase = dynamic_cast<EditorBase *>(m_TabWidget->widget(i));
+		if (!editorBase) {
+			continue;
+		}
+
+		if (editorBase->getUuid() == identifier &&
+			editorBase->getMetaInfoType() == metaInfoType) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+void RightClientView::closeTab(const std::string &identifier,
+							   MetaInfoType type) {
+	auto index = findIfTabAlreadyOpened(identifier, type);
+	if (index != -1) {
+		m_TabWidget->removeTab(index);
+	}
+}
+
+EditorBase *RightClientView::findEditorBase(const std::string &identifier,
+											MetaInfoType type) {
+	auto index = findIfTabAlreadyOpened(identifier, type);
+	if (index == -1) {
+		return nullptr;
+	}
+	return dynamic_cast<EditorBase *>(m_TabWidget->widget(index));
+}
 
 void RightClientView::openProjectMetaInfo(const std::string &projectUuid) {
-	auto index = findIfTabAlreadOpenned(projectUuid, MetaInfoType::eProject);
+	auto index = findIfTabAlreadyOpened(projectUuid, MetaInfoType::eProject);
 
 	proto::GetProjectResponse response;
 
 	if (index != -1) {
 		m_TabWidget->setCurrentIndex(index);
-
-		auto editor = m_TabWidget->widget(index);
-		if (!editor) {
-			return;
-		}
-		auto base = dynamic_cast<EditorBase *>(editor);
-		if (!base) {
-			return;
-		}
 		if (WrappedCall::getProjectMetaInfoByUuid(projectUuid, response,
 												  this)) {
-			auto projectEditor = dynamic_cast<EditorProjectMetaInfo *>(base);
-			if (!projectEditor) {
-				return;
+			auto projectEditor = dynamic_cast<EditorProjectMetaInfo *>(
+				findEditorBase(projectUuid, MetaInfoType::eProject));
+			if (projectEditor) {
+				projectEditor->refresh(response);
 			}
-			projectEditor->refresh(response);
 		}
 		return;
 	}
@@ -123,58 +144,35 @@ void RightClientView::openProjectMetaInfo(const std::string &projectUuid) {
 
 void RightClientView::closeWithoutSavingProject(
 	const std::string &projectUuid) {
-	auto index = findIfTabAlreadOpenned(projectUuid, MetaInfoType::eProject);
-	if (index != -1) {
-		m_TabWidget->removeTab(index);
-	}
+	closeTab(projectUuid, MetaInfoType::eProject);
 }
 
 void RightClientView::refreshProjectMetaInfo(const std::string &projectUuid) {
-	auto index = findIfTabAlreadOpenned(projectUuid, MetaInfoType::eProject);
-
+	auto *base = findEditorBase(projectUuid, MetaInfoType::eProject);
+	if (!base) {
+		return;
+	}
 	proto::GetProjectResponse response;
-
-	if (index != -1) {
-		auto editor = m_TabWidget->widget(index);
-		if (!editor) {
-			return;
-		}
-		auto base = dynamic_cast<EditorBase *>(editor);
-		if (!base) {
-			return;
-		}
-		if (WrappedCall::getProjectMetaInfoByUuid(projectUuid, response,
-												  this)) {
-			auto projectEditor = dynamic_cast<EditorProjectMetaInfo *>(base);
-			if (!projectEditor) {
-				return;
-			}
+	if (WrappedCall::getProjectMetaInfoByUuid(projectUuid, response, this)) {
+		auto projectEditor = dynamic_cast<EditorProjectMetaInfo *>(base);
+		if (projectEditor) {
 			projectEditor->refresh(response);
 		}
 	}
 }
 
 void RightClientView::openSwcMetaInfo(const std::string &swcUuid) {
-	auto index = findIfTabAlreadOpenned(swcUuid, MetaInfoType::eFreeSwc);
+	auto index = findIfTabAlreadyOpened(swcUuid, MetaInfoType::eFreeSwc);
 
 	proto::GetSwcMetaInfoResponse response;
 	if (index != -1) {
 		m_TabWidget->setCurrentIndex(index);
-
-		auto editor = m_TabWidget->widget(index);
-		if (!editor) {
-			return;
-		}
-		auto base = dynamic_cast<EditorBase *>(editor);
-		if (!base) {
-			return;
-		}
 		if (WrappedCall::getSwcMetaInfoByUuid(swcUuid, response, this)) {
-			auto swcEditor = dynamic_cast<EditorSwcMetaInfo *>(base);
-			if (!swcEditor) {
-				return;
+			auto swcEditor = dynamic_cast<EditorSwcMetaInfo *>(
+				findEditorBase(swcUuid, MetaInfoType::eFreeSwc));
+			if (swcEditor) {
+				swcEditor->refresh(response);
 			}
-			swcEditor->refresh(response);
 		}
 		return;
 	}
@@ -188,31 +186,19 @@ void RightClientView::openSwcMetaInfo(const std::string &swcUuid) {
 	}
 }
 
-void RightClientView::closeWithoutSavingSwc(const std::string &projectUuid) {
-	auto index = findIfTabAlreadOpenned(projectUuid, MetaInfoType::eFreeSwc);
-	if (index != -1) {
-		m_TabWidget->removeTab(index);
-	}
+void RightClientView::closeWithoutSavingSwc(const std::string &swcUuid) {
+	closeTab(swcUuid, MetaInfoType::eFreeSwc);
 }
 
 void RightClientView::refreshSwcMetaInfo(const std::string &swcUuid) {
-	auto index = findIfTabAlreadOpenned(swcUuid, MetaInfoType::eFreeSwc);
-
+	auto *base = findEditorBase(swcUuid, MetaInfoType::eFreeSwc);
+	if (!base) {
+		return;
+	}
 	proto::GetSwcMetaInfoResponse response;
-	if (index != -1) {
-		auto editor = m_TabWidget->widget(index);
-		if (!editor) {
-			return;
-		}
-		auto base = dynamic_cast<EditorBase *>(editor);
-		if (!base) {
-			return;
-		}
-		if (WrappedCall::getSwcMetaInfoByUuid(swcUuid, response, this)) {
-			auto swcEditor = dynamic_cast<EditorSwcMetaInfo *>(base);
-			if (!swcEditor) {
-				return;
-			}
+	if (WrappedCall::getSwcMetaInfoByUuid(swcUuid, response, this)) {
+		auto swcEditor = dynamic_cast<EditorSwcMetaInfo *>(base);
+		if (swcEditor) {
 			swcEditor->refresh(response);
 		}
 	}
@@ -220,30 +206,21 @@ void RightClientView::refreshSwcMetaInfo(const std::string &swcUuid) {
 
 void RightClientView::openDailyStatisticsMetaInfo(
 	const std::string &dailyStatisticsName) {
-	auto index = findIfTabAlreadOpenned(dailyStatisticsName,
+	auto index = findIfTabAlreadyOpened(dailyStatisticsName,
 										MetaInfoType::eDailyStatistics);
 
 	proto::GetDailyStatisticsResponse response;
 
 	if (index != -1) {
 		m_TabWidget->setCurrentIndex(index);
-
-		auto editor = m_TabWidget->widget(index);
-		if (!editor) {
-			return;
-		}
-		auto base = dynamic_cast<EditorBase *>(editor);
-		if (!base) {
-			return;
-		}
 		if (WrappedCall::getDailyStatisticsmMetaInfoByName(dailyStatisticsName,
 														   response, this)) {
 			auto dailyStatisticsEditor =
-				dynamic_cast<EditorDailyStatisticsMetaInfo *>(base);
-			if (!dailyStatisticsEditor) {
-				return;
+				dynamic_cast<EditorDailyStatisticsMetaInfo *>(findEditorBase(
+					dailyStatisticsName, MetaInfoType::eDailyStatistics));
+			if (dailyStatisticsEditor) {
+				dailyStatisticsEditor->refresh(response);
 			}
-			dailyStatisticsEditor->refresh(response);
 		}
 		return;
 	}
@@ -260,36 +237,22 @@ void RightClientView::openDailyStatisticsMetaInfo(
 
 void RightClientView::closeWithoutSavingDailyStatistics(
 	const std::string &dailyStatisticsName) {
-	auto index = findIfTabAlreadOpenned(dailyStatisticsName,
-										MetaInfoType::eDailyStatistics);
-	if (index != -1) {
-		m_TabWidget->removeTab(index);
-	}
+	closeTab(dailyStatisticsName, MetaInfoType::eDailyStatistics);
 }
 
 void RightClientView::refreshDailyStatisticsMetaInfo(
 	const std::string &dailyStatisticsName) {
-	auto index = findIfTabAlreadOpenned(dailyStatisticsName,
-										MetaInfoType::eDailyStatistics);
-
+	auto *base =
+		findEditorBase(dailyStatisticsName, MetaInfoType::eDailyStatistics);
+	if (!base) {
+		return;
+	}
 	proto::GetDailyStatisticsResponse response;
-
-	if (index != -1) {
-		auto editor = m_TabWidget->widget(index);
-		if (!editor) {
-			return;
-		}
-		auto base = dynamic_cast<EditorBase *>(editor);
-		if (!base) {
-			return;
-		}
-		if (WrappedCall::getDailyStatisticsmMetaInfoByName(dailyStatisticsName,
-														   response, this)) {
-			auto dailyStatisticsEditor =
-				dynamic_cast<EditorDailyStatisticsMetaInfo *>(base);
-			if (!dailyStatisticsEditor) {
-				return;
-			}
+	if (WrappedCall::getDailyStatisticsmMetaInfoByName(dailyStatisticsName,
+													   response, this)) {
+		auto dailyStatisticsEditor =
+			dynamic_cast<EditorDailyStatisticsMetaInfo *>(base);
+		if (dailyStatisticsEditor) {
 			dailyStatisticsEditor->refresh(response);
 		}
 	}
@@ -308,41 +271,16 @@ void RightClientView::refreshAllOpenedProjectMetaInfo() {
 	}
 }
 
-int RightClientView::findIfTabAlreadOpenned(const std::string &swcUuid,
-											MetaInfoType metaInfoType) {
-	for (int i = 0; i < m_TabWidget->count(); i++) {
-		auto editorBase = dynamic_cast<EditorBase *>(m_TabWidget->widget(i));
-		if (!editorBase) {
-			continue;
-		}
-
-		if (editorBase->getUuid() == swcUuid &&
-			editorBase->getMetaInfoType() == metaInfoType) {
-			return i;
-		}
-	}
-	return -1;
-}
-
 void RightClientView::openSwcNodeData(const std::string &swcUuid) {
-	auto index = findIfTabAlreadOpenned(swcUuid, MetaInfoType::eSwcData);
+	auto index = findIfTabAlreadyOpened(swcUuid, MetaInfoType::eSwcData);
 
 	if (index != -1) {
 		m_TabWidget->setCurrentIndex(index);
-
-		auto qeditor = m_TabWidget->widget(index);
-		if (!qeditor) {
-			return;
+		auto editor = dynamic_cast<EditorSwcNode *>(
+			findEditorBase(swcUuid, MetaInfoType::eSwcData));
+		if (editor) {
+			editor->refreshUserArea();
 		}
-		auto base = dynamic_cast<EditorBase *>(qeditor);
-		if (!base) {
-			return;
-		}
-		auto editor = dynamic_cast<EditorSwcNode *>(base);
-		if (!editor) {
-			return;
-		}
-		editor->refreshUserArea();
 		return;
 	}
 	proto::GetSwcMetaInfoResponse response;
@@ -357,8 +295,5 @@ void RightClientView::openSwcNodeData(const std::string &swcUuid) {
 
 void RightClientView::closeWithoutSavingSwcNodeData(
 	const std::string &swcUuid) {
-	auto index = findIfTabAlreadOpenned(swcUuid, MetaInfoType::eSwcData);
-	if (index != -1) {
-		m_TabWidget->removeTab(index);
-	}
+	closeTab(swcUuid, MetaInfoType::eSwcData);
 }
