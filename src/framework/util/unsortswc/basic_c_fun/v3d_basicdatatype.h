@@ -84,7 +84,7 @@ typedef void* v3dhandle;
 #if defined(_MSC_VER) && (_WIN64)
 // #if defined(_MSC_VER) && defined(_WIN64) //correct?
 
-#define V3DLONG long long
+using V3DLONG = long long;
 
 #else
 

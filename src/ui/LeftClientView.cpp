@@ -736,6 +736,14 @@ void LeftClientView::buildSwcItemMenu(
 		}
 	});
 
+	auto* lmeasureAnalysis = new QAction("L-Measure Analysis", this);
+	lmeasureAnalysis->setIcon(QIcon(Image::ImageTool));
+	connect(lmeasureAnalysis, &QAction::triggered, this,
+			[this, data](bool checked) {
+				m_MainWindow->getRightClientView().openLMeasureAnalysis(
+					data.uuid, data.name);
+			});
+
 	menu->addAction(editSwc);
 	menu->addAction(editSwcNodeData);
 	menu->addAction(editPermission);
@@ -747,6 +755,8 @@ void LeftClientView::buildSwcItemMenu(
 	menu->addAction(viewSnapshot);
 	menu->addAction(viewIncrement);
 	menu->addAction(versionControl);
+	menu->addSeparator();
+	menu->addAction(lmeasureAnalysis);
 	menu->addSeparator();
 	menu->addAction(deleteSwc);
 }

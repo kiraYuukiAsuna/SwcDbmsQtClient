@@ -13,6 +13,7 @@ enum class MetaInfoType {
 	ePermissionGroupMetaInfo,
 	eUserManagerMetaInfo,
 	eSwcData,
+	eLMeasure,
 	eUnknown
 };
 

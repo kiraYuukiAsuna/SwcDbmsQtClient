@@ -4,6 +4,7 @@
 #include <qdesktopservices.h>
 #include <qurl.h>
 
+#include <QFileDialog>
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QTimer>
@@ -79,6 +80,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	connect(menuManageUser, &QAction::triggered, this, [&]() {
 		EditorAdminUserManager view(this);
 		view.exec();
+	});
+
+	menuTools->addSeparator();
+
+	auto *menuLMeasure = new QAction(menuTools);
+	menuLMeasure->setText("L-Measure (Local File)");
+	menuLMeasure->setIcon(QIcon(Image::ImageTool));
+	menuTools->addAction(menuLMeasure);
+	connect(menuLMeasure, &QAction::triggered, this, [this]() {
+		auto filePath = QFileDialog::getOpenFileName(
+			this, "Open SWC File", QString(), "SWC Files (*.swc *.SWC)");
+		if (!filePath.isEmpty()) {
+			m_RightClientView->openLMeasureLocalFile(filePath);
+		}
 	});
 
 	auto *menuHelp = new QMenu(menuBar);

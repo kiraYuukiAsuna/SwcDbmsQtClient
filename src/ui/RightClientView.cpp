@@ -1,8 +1,10 @@
 #include "RightClientView.h"
 
+#include <QFileInfo>
 #include <QMenu>
 
 #include "EditorDailyStatisticsMetaInfo.h"
+#include "EditorLMeasure.h"
 #include "EditorProjectMetaInfo.h"
 #include "EditorSwcMetaInfo.h"
 #include "EditorSwcNode.h"
@@ -296,4 +298,33 @@ void RightClientView::openSwcNodeData(const std::string &swcUuid) {
 void RightClientView::closeWithoutSavingSwcNodeData(
 	const std::string &swcUuid) {
 	closeTab(swcUuid, MetaInfoType::eSwcData);
+}
+
+void RightClientView::openLMeasureAnalysis(const std::string &swcUuid,
+										   const std::string &swcName) {
+	auto index = findIfTabAlreadyOpened(swcUuid, MetaInfoType::eLMeasure);
+	if (index != -1) {
+		m_TabWidget->setCurrentIndex(index);
+		return;
+	}
+
+	auto *editor = new EditorLMeasure(swcUuid, swcName, m_TabWidget);
+	auto newIndex = m_TabWidget->addTab(
+		editor, QString::fromStdString(swcName) + " [L-Measure]");
+	m_TabWidget->setCurrentIndex(newIndex);
+}
+
+void RightClientView::openLMeasureLocalFile(const QString &filePath) {
+	auto identifier = filePath.toStdString();
+	auto index = findIfTabAlreadyOpened(identifier, MetaInfoType::eLMeasure);
+	if (index != -1) {
+		m_TabWidget->setCurrentIndex(index);
+		return;
+	}
+
+	auto *editor = new EditorLMeasure(filePath, m_TabWidget);
+	QFileInfo fi(filePath);
+	auto newIndex = m_TabWidget->addTab(
+		editor, fi.fileName() + " [L-Measure]");
+	m_TabWidget->setCurrentIndex(newIndex);
 }

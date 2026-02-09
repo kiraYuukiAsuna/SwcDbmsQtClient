@@ -30,6 +30,10 @@ public:
 	void openSwcNodeData(const std::string& swcUuid);
 	void closeWithoutSavingSwcNodeData(const std::string& swcUuid);
 
+	void openLMeasureAnalysis(const std::string& swcUuid,
+							  const std::string& swcName);
+	void openLMeasureLocalFile(const QString& filePath);
+
 	void refreshAllOpenedProjectMetaInfo();
 
 private:
