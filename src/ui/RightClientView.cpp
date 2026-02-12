@@ -4,7 +4,8 @@
 #include <QMenu>
 
 #include "EditorDailyStatisticsMetaInfo.h"
-#include "EditorLMeasure.h"
+#include "EditorQualityControl.h"
+#include "EditorSwcFeature.h"
 #include "EditorProjectMetaInfo.h"
 #include "EditorSwcMetaInfo.h"
 #include "EditorSwcNode.h"
@@ -300,31 +301,62 @@ void RightClientView::closeWithoutSavingSwcNodeData(
 	closeTab(swcUuid, MetaInfoType::eSwcData);
 }
 
-void RightClientView::openLMeasureAnalysis(const std::string &swcUuid,
-										   const std::string &swcName) {
-	auto index = findIfTabAlreadyOpened(swcUuid, MetaInfoType::eLMeasure);
+void RightClientView::openSwcFeatureAnalysis(const std::string &swcUuid,
+											 const std::string &swcName) {
+	auto index = findIfTabAlreadyOpened(swcUuid, MetaInfoType::eSwcFeature);
 	if (index != -1) {
 		m_TabWidget->setCurrentIndex(index);
 		return;
 	}
 
-	auto *editor = new EditorLMeasure(swcUuid, swcName, m_TabWidget);
+	auto *editor = new EditorSwcFeature(swcUuid, swcName, m_TabWidget);
 	auto newIndex = m_TabWidget->addTab(
-		editor, QString::fromStdString(swcName) + " [L-Measure]");
+		editor, QString::fromStdString(swcName) + " [Feature]");
 	m_TabWidget->setCurrentIndex(newIndex);
 }
 
-void RightClientView::openLMeasureLocalFile(const QString &filePath) {
+void RightClientView::openSwcFeatureLocalFile(const QString &filePath) {
 	auto identifier = filePath.toStdString();
-	auto index = findIfTabAlreadyOpened(identifier, MetaInfoType::eLMeasure);
+	auto index =
+		findIfTabAlreadyOpened(identifier, MetaInfoType::eSwcFeature);
 	if (index != -1) {
 		m_TabWidget->setCurrentIndex(index);
 		return;
 	}
 
-	auto *editor = new EditorLMeasure(filePath, m_TabWidget);
+	auto *editor = new EditorSwcFeature(filePath, m_TabWidget);
 	QFileInfo fi(filePath);
+	auto newIndex =
+		m_TabWidget->addTab(editor, fi.fileName() + " [Feature]");
+	m_TabWidget->setCurrentIndex(newIndex);
+}
+
+void RightClientView::openQualityControl(const std::string &swcUuid,
+										  const std::string &swcName) {
+	auto index =
+		findIfTabAlreadyOpened(swcUuid, MetaInfoType::eQualityControl);
+	if (index != -1) {
+		m_TabWidget->setCurrentIndex(index);
+		return;
+	}
+
+	auto *editor = new EditorQualityControl(swcUuid, swcName, m_TabWidget);
 	auto newIndex = m_TabWidget->addTab(
-		editor, fi.fileName() + " [L-Measure]");
+		editor, QString::fromStdString(swcName) + " [QC]");
+	m_TabWidget->setCurrentIndex(newIndex);
+}
+
+void RightClientView::openQualityControlLocalFile(const QString &filePath) {
+	auto identifier = filePath.toStdString();
+	auto index =
+		findIfTabAlreadyOpened(identifier, MetaInfoType::eQualityControl);
+	if (index != -1) {
+		m_TabWidget->setCurrentIndex(index);
+		return;
+	}
+
+	auto *editor = new EditorQualityControl(filePath, m_TabWidget);
+	QFileInfo fi(filePath);
+	auto newIndex = m_TabWidget->addTab(editor, fi.fileName() + " [QC]");
 	m_TabWidget->setCurrentIndex(newIndex);
 }

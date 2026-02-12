@@ -84,15 +84,27 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
 	menuTools->addSeparator();
 
-	auto *menuLMeasure = new QAction(menuTools);
-	menuLMeasure->setText("L-Measure (Local File)");
-	menuLMeasure->setIcon(QIcon(Image::ImageTool));
-	menuTools->addAction(menuLMeasure);
-	connect(menuLMeasure, &QAction::triggered, this, [this]() {
+	auto *menuSwcFeature = new QAction(menuTools);
+	menuSwcFeature->setText("SWC Feature (Local File)");
+	menuSwcFeature->setIcon(QIcon(Image::ImageTool));
+	menuTools->addAction(menuSwcFeature);
+	connect(menuSwcFeature, &QAction::triggered, this, [this]() {
 		auto filePath = QFileDialog::getOpenFileName(
 			this, "Open SWC File", QString(), "SWC Files (*.swc *.SWC)");
 		if (!filePath.isEmpty()) {
-			m_RightClientView->openLMeasureLocalFile(filePath);
+			m_RightClientView->openSwcFeatureLocalFile(filePath);
+		}
+	});
+
+	auto *menuQualityControl = new QAction(menuTools);
+	menuQualityControl->setText("Quality Control (Local File)");
+	menuQualityControl->setIcon(QIcon(Image::ImageTool));
+	menuTools->addAction(menuQualityControl);
+	connect(menuQualityControl, &QAction::triggered, this, [this]() {
+		auto filePath = QFileDialog::getOpenFileName(
+			this, "Open SWC File", QString(), "SWC Files (*.swc *.SWC)");
+		if (!filePath.isEmpty()) {
+			m_RightClientView->openQualityControlLocalFile(filePath);
 		}
 	});
 

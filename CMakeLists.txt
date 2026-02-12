@@ -77,6 +77,9 @@ include_directories(
         ThirdParty/nodeeditor/include/QtNodes
         ThirdParty/nodeeditor/include/QtNodes/internal
         src/framework/util/unsortswc
+        src/SWCFeature/common
+        src/SWCQualityControl/include
+        src/SWCQualityControl/third_party/octree
 )
 
 link_directories(
@@ -105,6 +108,10 @@ file(GLOB_RECURSE SRC_LIST
         "${PROJECT_SOURCE_DIR}/src/*.h"
         "${PROJECT_SOURCE_DIR}/src/*.hpp"
 )
+# Exclude standalone main files and build artifacts from sub-projects
+list(FILTER SRC_LIST EXCLUDE REGEX ".*/SWCFeature/.*/main\\.cpp$")
+list(FILTER SRC_LIST EXCLUDE REGEX ".*/SWCQualityControl/main\\.cpp$")
+list(FILTER SRC_LIST EXCLUDE REGEX ".*/build/.*")
 
 # 自动查找所有 proto 文件
 file(GLOB_RECURSE PROTO_FILES

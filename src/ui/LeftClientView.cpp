@@ -736,11 +736,19 @@ void LeftClientView::buildSwcItemMenu(
 		}
 	});
 
-	auto* lmeasureAnalysis = new QAction("L-Measure Analysis", this);
-	lmeasureAnalysis->setIcon(QIcon(Image::ImageTool));
-	connect(lmeasureAnalysis, &QAction::triggered, this,
+	auto* swcFeatureAnalysis = new QAction("SWC Feature Analysis", this);
+	swcFeatureAnalysis->setIcon(QIcon(Image::ImageTool));
+	connect(swcFeatureAnalysis, &QAction::triggered, this,
 			[this, data](bool checked) {
-				m_MainWindow->getRightClientView().openLMeasureAnalysis(
+				m_MainWindow->getRightClientView().openSwcFeatureAnalysis(
+					data.uuid, data.name);
+			});
+
+	auto* qualityControl = new QAction("Quality Control", this);
+	qualityControl->setIcon(QIcon(Image::ImageTool));
+	connect(qualityControl, &QAction::triggered, this,
+			[this, data](bool checked) {
+				m_MainWindow->getRightClientView().openQualityControl(
 					data.uuid, data.name);
 			});
 
@@ -756,7 +764,8 @@ void LeftClientView::buildSwcItemMenu(
 	menu->addAction(viewIncrement);
 	menu->addAction(versionControl);
 	menu->addSeparator();
-	menu->addAction(lmeasureAnalysis);
+	menu->addAction(swcFeatureAnalysis);
+	menu->addAction(qualityControl);
 	menu->addSeparator();
 	menu->addAction(deleteSwc);
 }

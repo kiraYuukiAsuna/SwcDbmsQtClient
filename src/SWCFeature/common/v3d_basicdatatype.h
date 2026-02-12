@@ -1,0 +1,6 @@
+#ifndef V3D_BASICDATATYPE_H
+#define V3D_BASICDATATYPE_H
+
+typedef long long V3DLONG;
+
+#endif // V3D_BASICDATATYPE_H
