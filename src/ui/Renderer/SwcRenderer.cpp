@@ -170,6 +170,9 @@ void SwcRenderer::renderOneSwc() {
 	glEnd();
 
 	renderBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
+
+	// Render detection markers on top
+	renderMarkers(centerX, centerY, centerZ, scale);
 }
 
 void SwcRenderer::renderDiffSwc() {
@@ -676,6 +679,28 @@ void SwcRenderer::compareNeuronUnits(const std::vector<NeuronUnit>& oldUnits,
 			added.push_back(newUnit);
 		}
 	}
+}
+
+void SwcRenderer::renderMarkers(float centerX, float centerY, float centerZ,
+								float scale) {
+	auto& markers = m_CreateInfo.markers;
+	if (markers.empty()) return;
+
+	glPointSize(m_CreateInfo.style.markerPointSize);
+	glBegin(GL_POINTS);
+	for (auto& m : markers) {
+		float x = (m.x - centerX) * scale;
+		float y = (m.y - centerY) * scale;
+		float z = (m.z - centerZ) * scale;
+		glColor4f(m.color[0], m.color[1], m.color[2], m.color[3]);
+		glVertex3f(x, y, z);
+	}
+	glEnd();
+}
+
+void SwcRenderer::setMarkerPointSize(int size) {
+	m_CreateInfo.style.markerPointSize = static_cast<float>(size);
+	update();
 }
 
 void SwcRenderer::resetView() {

@@ -4,128 +4,12 @@
 #include <QFileInfo>
 #include <QHeaderView>
 #include <QMessageBox>
-#include <QScrollArea>
+#include <QTextStream>
 #include <QVBoxLayout>
 
-#include <fstream>
-#include <functional>
-#include <map>
-#include <sstream>
-
 #include "SWCDetection/SWCDetection.h"
+#include "neuron_editing/neuron_format_converter.h"
 #include "src/framework/service/WrappedCall.h"
-
-namespace {
-
-struct RawNode {
-	int n, type, parent;
-	float x, y, z, r;
-};
-
-// Build V_NeuronSWC_list from flat node list by DFS, splitting at branch points
-V_NeuronSWC_list buildSegList(const std::vector<RawNode>& rawNodes) {
-	V_NeuronSWC_list result;
-	if (rawNodes.empty()) return result;
-
-	std::map<int, int> nodeIndex;
-	for (int i = 0; i < static_cast<int>(rawNodes.size()); i++) {
-		nodeIndex[rawNodes[i].n] = i;
-	}
-
-	std::map<int, std::vector<int>> childMap;
-	std::vector<int> roots;
-	for (auto& node : rawNodes) {
-		if (node.parent == -1) {
-			roots.push_back(node.n);
-		} else {
-			childMap[node.parent].push_back(node.n);
-		}
-	}
-
-	std::function<void(int, V_NeuronSWC&)> buildSegment =
-		[&](int nodeId, V_NeuronSWC& currentSeg) {
-			auto& rn = rawNodes[nodeIndex[nodeId]];
-			V_NeuronSWC_unit unit;
-			unit.n = currentSeg.row.size() + 1;
-			unit.type = rn.type;
-			unit.x = rn.x;
-			unit.y = rn.y;
-			unit.z = rn.z;
-			unit.r = rn.r;
-			unit.parent =
-				currentSeg.row.empty() ? -1 : static_cast<int>(currentSeg.row.size());
-			currentSeg.row.push_back(unit);
-
-			auto it = childMap.find(nodeId);
-			if (it == childMap.end() || it->second.empty()) {
-				return;
-			} else if (it->second.size() == 1) {
-				buildSegment(it->second[0], currentSeg);
-			} else {
-				for (int childId : it->second) {
-					V_NeuronSWC newSeg;
-					V_NeuronSWC_unit branchUnit;
-					branchUnit.n = 1;
-					branchUnit.type = rn.type;
-					branchUnit.x = rn.x;
-					branchUnit.y = rn.y;
-					branchUnit.z = rn.z;
-					branchUnit.r = rn.r;
-					branchUnit.parent = -1;
-					newSeg.row.push_back(branchUnit);
-					buildSegment(childId, newSeg);
-					result.append(newSeg);
-				}
-			}
-		};
-
-	for (int rootId : roots) {
-		V_NeuronSWC seg;
-		buildSegment(rootId, seg);
-		result.append(seg);
-	}
-
-	return result;
-}
-
-std::vector<RawNode> parseSwcFile(const std::string& filepath) {
-	std::vector<RawNode> nodes;
-	std::ifstream infile(filepath);
-	if (!infile.is_open()) return nodes;
-
-	std::string line;
-	while (std::getline(infile, line)) {
-		if (line.empty() || line[0] == '#') continue;
-		std::istringstream iss(line);
-		RawNode node;
-		if (iss >> node.n >> node.type >> node.x >> node.y >> node.z >>
-			node.r >> node.parent) {
-			nodes.push_back(node);
-		}
-	}
-	return nodes;
-}
-
-std::vector<RawNode> parseSwcFromProto(
-	const proto::GetSwcFullNodeDataResponse& response) {
-	std::vector<RawNode> nodes;
-	const auto& swcData = response.swcnodedata();
-	for (int i = 0; i < swcData.swcdata_size(); i++) {
-		const auto& nd = swcData.swcdata(i).swcnodeinternaldata();
-		RawNode node;
-		node.n = nd.n();
-		node.type = nd.type();
-		node.x = static_cast<float>(nd.x());
-		node.y = static_cast<float>(nd.y());
-		node.z = static_cast<float>(nd.z());
-		node.r = static_cast<float>(nd.radius());
-		node.parent = nd.parent();
-		nodes.push_back(node);
-	}
-	return nodes;
-}
-
-}  // namespace
 
 EditorQualityControl::EditorQualityControl(const std::string& swcUuid,
 										   const std::string& swcName,
@@ -195,6 +79,12 @@ void EditorQualityControl::setupUi() {
 			&EditorQualityControl::runAnalysis);
 	leftPanel->addWidget(m_RunButton);
 
+	m_VisualizeButton = new QPushButton("Visualize");
+	m_VisualizeButton->setEnabled(false);
+	connect(m_VisualizeButton, &QPushButton::clicked, this,
+			&EditorQualityControl::onVisualize);
+	leftPanel->addWidget(m_VisualizeButton);
+
 	m_StatusLabel = new QLabel("Ready");
 	leftPanel->addWidget(m_StatusLabel);
 
@@ -217,33 +107,66 @@ void EditorQualityControl::setupUi() {
 	setLayout(mainLayout);
 }
 
+bool EditorQualityControl::writeSwcToTempFile(const QString& tempPath) {
+	proto::GetSwcFullNodeDataResponse response;
+	if (!WrappedCall::getSwcFullNodeDataByUuid(m_SwcUuid, response, this)) {
+		return false;
+	}
+
+	QFile file(tempPath);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		return false;
+	}
+	QTextStream out(&file);
+
+	const auto& swcData = response.swcnodedata();
+	for (int i = 0; i < swcData.swcdata_size(); i++) {
+		const auto& node = swcData.swcdata(i).swcnodeinternaldata();
+		out << node.n() << " " << node.type() << " " << node.x() << " "
+			<< node.y() << " " << node.z() << " " << node.radius()
+			<< " " << node.parent() << "\n";
+	}
+	file.close();
+	return true;
+}
+
 void EditorQualityControl::runAnalysis() {
 	m_StatusLabel->setText("Running analysis...");
 	m_RunButton->setEnabled(false);
 
-	// Load SWC data
-	std::vector<RawNode> rawNodes;
+	// 1. Load SWC as NeuronTree
+	QString swcPath;
+	QString tempFilePath;
+
 	if (!m_SwcUuid.empty()) {
-		proto::GetSwcFullNodeDataResponse response;
-		if (!WrappedCall::getSwcFullNodeDataByUuid(m_SwcUuid, response, this)) {
+		tempFilePath = QDir::tempPath() + "/swcqc_" +
+					   QString::fromStdString(m_SwcUuid).left(8) + ".swc";
+		if (!writeSwcToTempFile(tempFilePath)) {
 			m_StatusLabel->setText("Failed to fetch SWC data from server.");
 			m_RunButton->setEnabled(true);
 			return;
 		}
-		rawNodes = parseSwcFromProto(response);
+		swcPath = tempFilePath;
 	} else {
-		rawNodes = parseSwcFile(m_FilePath.toStdString());
+		swcPath = m_FilePath;
 	}
 
-	if (rawNodes.empty()) {
+	NeuronTree nt = readSWC_file(swcPath);
+
+	if (!tempFilePath.isEmpty()) {
+		QFile::remove(tempFilePath);
+	}
+
+	if (nt.listNeuron.isEmpty()) {
 		QMessageBox::critical(this, "Error",
-							  "Failed to parse SWC data or data is empty.");
-		m_StatusLabel->setText("Error: no SWC data.");
+							  "Failed to parse SWC file or file is empty.");
+		m_StatusLabel->setText("Error: invalid SWC file.");
 		m_RunButton->setEnabled(true);
 		return;
 	}
 
-	V_NeuronSWC_list segList = buildSegList(rawNodes);
+	// 2. Convert to V_NeuronSWC_list using unsortswc converter
+	V_NeuronSWC_list segList = NeuronTree__2__V_NeuronSWC_list(nt);
 
 	if (segList.seg.empty()) {
 		QMessageBox::critical(this, "Error",
@@ -253,13 +176,23 @@ void EditorQualityControl::runAnalysis() {
 		return;
 	}
 
-	// Collect results
+	// 3. Run detections and build markers
 	struct ResultRow {
 		QString type;
 		float x, y, z;
 		QString description;
 	};
 	std::vector<ResultRow> rows;
+	m_Markers.clear();
+
+	auto addMarker = [this](float x, float y, float z,
+							float r, float g, float b) {
+		SwcMarker marker;
+		marker.x = x; marker.y = y; marker.z = z;
+		marker.color[0] = r; marker.color[1] = g;
+		marker.color[2] = b; marker.color[3] = 1.0f;
+		m_Markers.push_back(marker);
+	};
 
 	int totalIssues = 0;
 
@@ -269,6 +202,7 @@ void EditorQualityControl::runAnalysis() {
 		for (auto& r : results) {
 			rows.push_back({"Loop", r.x, r.y, r.z,
 							QString::fromStdString(r.description)});
+			addMarker(r.x, r.y, r.z, 1.0f, 0.2f, 0.2f);
 		}
 	}
 
@@ -281,6 +215,7 @@ void EditorQualityControl::runAnalysis() {
 		for (auto& r : results) {
 			rows.push_back({"Tip", r.x, r.y, r.z,
 							QString::fromStdString(r.description)});
+			addMarker(r.x, r.y, r.z, 1.0f, 0.8f, 0.0f);
 		}
 	}
 
@@ -290,6 +225,7 @@ void EditorQualityControl::runAnalysis() {
 		for (auto& r : results) {
 			rows.push_back({"Branching", r.x, r.y, r.z,
 							QString::fromStdString(r.description)});
+			addMarker(r.x, r.y, r.z, 0.0f, 0.8f, 0.2f);
 		}
 	}
 
@@ -306,6 +242,8 @@ void EditorQualityControl::runAnalysis() {
 					 .arg(r.x2, 0, 'f', 2)
 					 .arg(r.y2, 0, 'f', 2)
 					 .arg(r.z2, 0, 'f', 2)});
+			addMarker(r.x1, r.y1, r.z1, 0.8f, 0.2f, 0.8f);
+			addMarker(r.x2, r.y2, r.z2, 0.8f, 0.2f, 0.8f);
 		}
 	}
 
@@ -315,10 +253,11 @@ void EditorQualityControl::runAnalysis() {
 		for (auto& r : results) {
 			rows.push_back({"SpecStructs", r.x, r.y, r.z,
 							QString::fromStdString(r.description)});
+			addMarker(r.x, r.y, r.z, 0.0f, 0.8f, 0.8f);
 		}
 	}
 
-	// Populate table
+	// 5. Populate table
 	m_ResultTable->setRowCount(static_cast<int>(rows.size()));
 	for (int i = 0; i < static_cast<int>(rows.size()); i++) {
 		m_ResultTable->setItem(i, 0, new QTableWidgetItem(rows[i].type));
@@ -340,4 +279,47 @@ void EditorQualityControl::runAnalysis() {
 	m_StatusLabel->setText(
 		QString("Analysis complete. %1 issues found.").arg(totalIssues));
 	m_RunButton->setEnabled(true);
+	m_VisualizeButton->setEnabled(totalIssues > 0);
+}
+
+void EditorQualityControl::onVisualize() {
+	SwcRendererCreateInfo info;
+	info.mode = SwcRendererMode::eVisualizeOneSwc;
+	info.markers = m_Markers;
+
+	// Build legend from checked detection types
+	if (m_ChkLoop->isChecked())
+		info.markerLegend.push_back({"Loop", {1.0f, 0.2f, 0.2f}});
+	if (m_ChkTip->isChecked())
+		info.markerLegend.push_back({"Tip", {1.0f, 0.8f, 0.0f}});
+	if (m_ChkBranching->isChecked())
+		info.markerLegend.push_back({"Branching", {0.0f, 0.8f, 0.2f}});
+	if (m_ChkCrossing->isChecked())
+		info.markerLegend.push_back({"Crossing", {0.8f, 0.2f, 0.8f}});
+	if (m_ChkSpecStructs->isChecked())
+		info.markerLegend.push_back({"SpecStructs", {0.0f, 0.8f, 0.8f}});
+
+	if (!m_SwcUuid.empty()) {
+		// Server data: fetch SWC nodes via gRPC
+		info.dataSource = DataSource::eLoadFromMemory;
+		proto::GetSwcFullNodeDataResponse response;
+		if (!WrappedCall::getSwcFullNodeDataByUuid(m_SwcUuid, response,
+												   this)) {
+			QMessageBox::critical(this, "Error",
+								  "Failed to fetch SWC data for visualization.");
+			return;
+		}
+		*info.swcData.mutable_swcdata() =
+			response.swcnodedata().swcdata();
+	} else {
+		// Local file
+		info.dataSource = DataSource::eLoadFromFile;
+		info.swcPath = m_FilePath.toStdString();
+	}
+
+	auto* dialog = new SwcRendererDailog(std::move(info), this);
+	dialog->setAttribute(Qt::WA_DeleteOnClose);
+	dialog->setWindowTitle(
+		QString::fromStdString(m_Name) + " - Quality Control Visualization");
+	dialog->show();
 }

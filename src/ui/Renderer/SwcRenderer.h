@@ -9,10 +9,21 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLWidget>
 #include <QPushButton>
+#include <QSlider>
 #include <QVBoxLayout>
 
 #include "Message/Message.pb.h"
 #include "src/FileIo/SwcIo.hpp"
+
+struct SwcMarker {
+	float x, y, z;
+	float color[4]; // RGBA
+};
+
+struct MarkerLegendEntry {
+	QString label;
+	float color[3]; // RGB
+};
 
 enum class SwcRendererMode {
 	eVisualizeOneSwc,
@@ -29,6 +40,7 @@ inline float backgroundColor[4] = {
 struct SwcStyle {
 	float lineWidth = 2.0f;
 	float pointSize = 4.0f;	 // Slightly smaller points for cleaner look
+	float markerPointSize = 12.0f;	// Large points for detection markers
 
 	float boundingBoxLineColor[4] = {0.5f, 0.5f, 0.5f,
 									 0.8f};	 // Semi-transparent gray
@@ -55,6 +67,9 @@ struct SwcRendererCreateInfo {
 	std::string newSwcPath;
 	proto::SwcDataV1 newSwcData;
 	proto::SwcIncrementOperationListV1 incrementOperationList;
+
+	std::vector<SwcMarker> markers;
+	std::vector<MarkerLegendEntry> markerLegend;
 };
 
 class SwcRenderer : public QOpenGLWidget, protected QOpenGLFunctions {
@@ -68,7 +83,8 @@ public:
 	void renderDiffSwc();
 
 public slots:
-	void resetView();  // Reset view to optimal position
+	void resetView();
+	void setMarkerPointSize(int size);
 
 protected:
 	void initializeGL() override;
@@ -90,6 +106,9 @@ protected:
 	void setZRotation(int angle);
 
 	void normalizeAngle(int* angle);
+
+	void renderMarkers(float centerX, float centerY, float centerZ,
+					   float scale);
 
 	void renderBoundingBox(float minX, float minY, float minZ, float maxX,
 						   float maxY, float maxZ);
@@ -130,7 +149,6 @@ public:
 	SwcRendererDailog(SwcRendererCreateInfo createInfo,
 					  QWidget* parent = nullptr)
 		: QDialog(parent), m_Renderer(createInfo, this) {
-		// 根据模式设置不同的窗口标题
 		QString title;
 		switch (createInfo.mode) {
 			case SwcRendererMode::eVisualizeOneSwc:
@@ -144,38 +162,74 @@ public:
 				break;
 		}
 
-		// 设置窗口属性
 		setWindowTitle(title);
 		setWindowFlags(Qt::Window | Qt::WindowCloseButtonHint |
 					   Qt::WindowMaximizeButtonHint |
 					   Qt::WindowMinimizeButtonHint);
 
-		// 设置窗口大小
 		resize(1600, 800);
 		setMinimumSize(800, 600);
 
-		// 设置布局
 		auto layout = new QVBoxLayout(this);
 		layout->setContentsMargins(5, 5, 5, 5);
-		layout->addWidget(&m_Renderer);
+		layout->addWidget(&m_Renderer, 1);
 
-		// 添加重置视角按钮和帮助信息
+		// Legend row (only if legend entries exist)
+		if (!createInfo.markerLegend.empty()) {
+			auto legendLayout = new QHBoxLayout();
+			auto legendTitle = new QLabel("Legend:", this);
+			legendTitle->setStyleSheet(
+				"font-weight: bold; font-size: 12px; padding: 2px 5px;");
+			legendLayout->addWidget(legendTitle);
+
+			for (auto& entry : createInfo.markerLegend) {
+				auto colorBlock = new QLabel(this);
+				colorBlock->setFixedSize(14, 14);
+				colorBlock->setStyleSheet(
+					QString("background-color: rgb(%1,%2,%3); "
+							"border: 1px solid #888; border-radius: 2px;")
+						.arg(static_cast<int>(entry.color[0] * 255))
+						.arg(static_cast<int>(entry.color[1] * 255))
+						.arg(static_cast<int>(entry.color[2] * 255)));
+				auto label = new QLabel(entry.label, this);
+				label->setStyleSheet("font-size: 12px; padding-right: 8px;");
+				legendLayout->addWidget(colorBlock);
+				legendLayout->addWidget(label);
+			}
+			legendLayout->addStretch();
+			layout->addLayout(legendLayout);
+		}
+
+		// Bottom toolbar: help, marker size slider, reset button
 		auto buttonLayout = new QHBoxLayout();
 
-		// 帮助标签
 		auto helpLabel = new QLabel(
-			"💡 Left click + drag: rotate, Right click + drag: tilt, Mouse "
-			"wheel: zoom",
-			this);
-		helpLabel->setStyleSheet("color: #666; font-size: 12px; padding: 5px;");
+			"Left drag: rotate | Right drag: tilt | Wheel: zoom", this);
+		helpLabel->setStyleSheet(
+			"color: #666; font-size: 12px; padding: 5px;");
+		buttonLayout->addWidget(helpLabel);
+		buttonLayout->addStretch();
+
+		// Marker size slider (only if markers exist)
+		if (!createInfo.markers.empty()) {
+			auto sizeLabel = new QLabel("Marker Size:", this);
+			sizeLabel->setStyleSheet("font-size: 12px;");
+			auto sizeSlider = new QSlider(Qt::Horizontal, this);
+			sizeSlider->setRange(4, 30);
+			sizeSlider->setValue(
+				static_cast<int>(createInfo.style.markerPointSize));
+			sizeSlider->setFixedWidth(120);
+			sizeSlider->setToolTip("Adjust marker point size");
+			connect(sizeSlider, &QSlider::valueChanged, &m_Renderer,
+					&SwcRenderer::setMarkerPointSize);
+			buttonLayout->addWidget(sizeLabel);
+			buttonLayout->addWidget(sizeSlider);
+		}
 
 		auto resetViewButton = new QPushButton("Reset View", this);
 		resetViewButton->setToolTip("Reset to optimal viewing angle");
 		connect(resetViewButton, &QPushButton::clicked, &m_Renderer,
 				&SwcRenderer::resetView);
-
-		buttonLayout->addWidget(helpLabel);
-		buttonLayout->addStretch();
 		buttonLayout->addWidget(resetViewButton);
 
 		layout->addLayout(buttonLayout);
