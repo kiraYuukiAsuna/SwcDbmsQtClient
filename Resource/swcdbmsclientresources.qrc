@@ -82,6 +82,7 @@
         <file>styles/qt_material_modified/themes/light_red.xml</file>
         <file>styles/qt_material_modified/themes/light_teal.xml</file>
         <file>styles/qt_material_modified/themes/light_yellow.xml</file>
+        <file>styles/overlay.qss</file>
         <file>fonts/SourceHanSansCN/SourceHanSansCN-Regular.ttf</file>
         <file>images/daily.png</file>
         <file>images/node.png</file>

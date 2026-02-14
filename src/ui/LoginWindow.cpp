@@ -18,7 +18,7 @@ LoginWindow::LoginWindow(QWidget* parent)
 	ui->setupUi(this);
 
 	this->setWindowFlags(this->windowFlags() & ~Qt::WindowMaximizeButtonHint);
-	this->setFixedSize(this->size());
+	this->setMinimumSize(420, 300);
 
 	connect(ui->loginBtn, &QPushButton::clicked, this,
 			&LoginWindow::onLoginBtnClicked);

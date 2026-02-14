@@ -79,6 +79,8 @@ RightClientView::RightClientView(MainWindow *mainWindow)
 		});
 
 	m_MainLayout = new QVBoxLayout(this);
+	m_MainLayout->setContentsMargins(2, 6, 6, 6);
+	m_MainLayout->setSpacing(0);
 	m_MainLayout->addWidget(m_TabWidget);
 	this->setLayout(m_MainLayout);
 }

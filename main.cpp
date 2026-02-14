@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QFile>
 #include <QFontDatabase>
 #include <QProcess>
 
@@ -33,8 +34,8 @@ int main(int argc, char* argv[]) {
         const QString&sansCNFamily = loadedFontFamilies.at(0);
         QFont defaultFont = QApplication::font();
         defaultFont.setFamily(sansCNFamily);
-		defaultFont.setPixelSize(16);
-		defaultFont.setBold(true);
+		defaultFont.setPixelSize(14);
+		defaultFont.setBold(false);
         QApplication::setFont(defaultFont);
     }
     
@@ -45,7 +46,13 @@ int main(int argc, char* argv[]) {
     styleManager.setCurrentStyle("qt_material_modified");
     styleManager.setCurrentTheme("light_blue");
     styleManager.updateStylesheet();
-    qApp->setStyleSheet(styleManager.styleSheet());
+    QString baseStylesheet = styleManager.styleSheet();
+    QFile overlayFile(":/styles/overlay.qss");
+    if (overlayFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        baseStylesheet += "\n" + overlayFile.readAll();
+        overlayFile.close();
+    }
+    qApp->setStyleSheet(baseStylesheet);
     // setWindowIcon(advancedStyleSheet.styleIcon());
     // qApp->setStyleSheet(advancedStyleSheet.styleSheet());
     // connect(&advancedStyleSheet, SIGNAL(stylesheetChanged()), this,

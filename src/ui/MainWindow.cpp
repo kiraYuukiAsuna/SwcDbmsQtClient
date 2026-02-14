@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	setWindowTitle(appTitle);
 
 	m_Splitter = new QSplitter(this);
+	m_Splitter->setHandleWidth(4);
 
 	m_LeftClientView = new LeftClientView(this);
 	m_RightClientView = new RightClientView(this);

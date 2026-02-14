@@ -1,0 +1,139 @@
+/* ========================================================================== */
+/* Overlay QSS - Targeted refinements on top of qt_material_modified theme   */
+/* ========================================================================== */
+
+/* --- Primary action buttons (filled) --- */
+QPushButton#loginBtn,
+QPushButton#registerBtn,
+QPushButton#OKBtn,
+QPushButton#ImportBtn {
+    background-color: #2979ff;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 24px;
+    font-weight: bold;
+}
+
+QPushButton#loginBtn:hover,
+QPushButton#registerBtn:hover,
+QPushButton#OKBtn:hover,
+QPushButton#ImportBtn:hover {
+    background-color: #448aff;
+}
+
+QPushButton#loginBtn:pressed,
+QPushButton#registerBtn:pressed,
+QPushButton#OKBtn:pressed,
+QPushButton#ImportBtn:pressed {
+    background-color: #2962ff;
+}
+
+/* --- General button hover refinement --- */
+QPushButton:hover {
+    background-color: rgba(41, 121, 255, 0.08);
+}
+
+QPushButton:pressed {
+    background-color: rgba(41, 121, 255, 0.15);
+}
+
+/* --- QTreeView / QTreeWidget items --- */
+QTreeView::item {
+    padding: 4px 2px;
+    border-radius: 3px;
+}
+
+QTreeView::item:hover {
+    background-color: rgba(41, 121, 255, 0.08);
+}
+
+QTreeView::item:selected {
+    background-color: rgba(41, 121, 255, 0.18);
+    color: #2979ff;
+}
+
+/* --- QTabBar --- */
+QTabBar::tab {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+QTabBar::tab:!selected {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+QTabBar::tab:hover {
+    background-color: rgba(41, 121, 255, 0.08);
+}
+
+QTabBar::close-button:hover {
+    background-color: rgba(244, 67, 54, 0.15);
+    border-radius: 3px;
+}
+
+/* --- QHeaderView (table headers) --- */
+QHeaderView::section {
+    padding: 6px 8px;
+    font-weight: bold;
+}
+
+/* --- QTableView alternating rows --- */
+QTableView {
+    alternate-background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* --- QGroupBox --- */
+QGroupBox {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    margin-top: 12px;
+    padding-top: 16px;
+}
+
+QGroupBox::title {
+    color: #2979ff;
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 6px;
+}
+
+/* --- QSplitter handle --- */
+QSplitter::handle:hover {
+    background-color: rgba(41, 121, 255, 0.25);
+}
+
+/* --- QScrollBar handle --- */
+QScrollBar::handle:vertical,
+QScrollBar::handle:horizontal {
+    border-radius: 4px;
+}
+
+/* --- LoginWindow card style --- */
+QDialog#LoginWindow {
+    background-color: #fafafa;
+}
+
+QDialog#LoginWindow QFrame#loginCard {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+/* --- QToolTip --- */
+QToolTip {
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #bdbdbd;
+}
+
+/* --- QMenu --- */
+QMenu::item {
+    padding: 6px 28px 6px 16px;
+}
+
+QMenu::separator {
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 4px 8px;
+}

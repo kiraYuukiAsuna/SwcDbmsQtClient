@@ -27,6 +27,8 @@ LeftClientView::LeftClientView(MainWindow* mainWindow)
 	m_MainWindow = mainWindow;
 
 	m_ControlBtnLayout = new QHBoxLayout;
+	m_ControlBtnLayout->setContentsMargins(4, 8, 4, 4);
+	m_ControlBtnLayout->setSpacing(6);
 
 	m_UserSettingBtn = new QPushButton(this);
 	m_UserSettingBtn->setText("User Settings");
@@ -146,6 +148,8 @@ LeftClientView::LeftClientView(MainWindow* mainWindow)
 			&LeftClientView::customTreeWidgetContentMenu);
 
 	m_MainLayout = new QVBoxLayout(this);
+	m_MainLayout->setContentsMargins(6, 6, 2, 6);
+	m_MainLayout->setSpacing(8);
 	m_MainLayout->addLayout(m_ControlBtnLayout);
 	m_MainLayout->addWidget(m_TreeWidget);
 	this->setLayout(m_MainLayout);
