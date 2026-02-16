@@ -918,6 +918,13 @@ void EditorSwcVersionControl::onVisualizeDiffVersion() {
 	createInfo.mode = SwcRendererMode::eVisualizeDiffSwc;
 	createInfo.swcData = oldSnapResponse.swcnodedata();
 	createInfo.newSwcData = newSnapResponse.swcnodedata();
+	createInfo.markerLegend.push_back(
+		{"Added branches", {0.0f, 0.8f, 0.2f}});
+	createInfo.markerLegend.push_back(
+		{"Deleted branches", {1.0f, 0.2f, 0.2f}});
+	createInfo.markerLegend.push_back(
+		{"Modified attributes", {1.0f, 0.7f, 0.0f}});
+	createInfo.markerLegend.push_back({"Unchanged", {0.3f, 0.4f, 0.6f}});
 	auto *renderer = new SwcRendererDailog(createInfo);
 	renderer->setAttribute(Qt::WA_DeleteOnClose);
 	renderer->exec();

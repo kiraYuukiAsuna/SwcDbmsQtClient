@@ -12,6 +12,7 @@
 #include "About.h"
 #include "EditorAdminUserManager.h"
 #include "EditorPermissionGroup.h"
+#include "Renderer/SwcRenderer.h"
 #include "ViewImportSwcFromFile.h"
 #include "src/framework/defination/ImageDefination.h"
 #include "src/framework/service/CachedProtoData.h"
@@ -107,6 +108,40 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 		if (!filePath.isEmpty()) {
 			m_RightClientView->openQualityControlLocalFile(filePath);
 		}
+	});
+
+	auto *menuCompareSwc = new QAction(menuTools);
+	menuCompareSwc->setText("Compare SWC Files (Local)");
+	menuCompareSwc->setIcon(QIcon(Image::ImageTool));
+	menuTools->addAction(menuCompareSwc);
+	connect(menuCompareSwc, &QAction::triggered, this, [this]() {
+		auto oldPath = QFileDialog::getOpenFileName(
+			this, "Open Old SWC File", QString(),
+			"SWC Files (*.swc *.eswc *.SWC *.ESWC)");
+		if (oldPath.isEmpty()) return;
+
+		auto newPath = QFileDialog::getOpenFileName(
+			this, "Open New SWC File", QString(),
+			"SWC Files (*.swc *.eswc *.SWC *.ESWC)");
+		if (newPath.isEmpty()) return;
+
+		SwcRendererCreateInfo createInfo;
+		createInfo.mode = SwcRendererMode::eVisualizeDiffSwc;
+		createInfo.dataSource = DataSource::eLoadFromFile;
+		createInfo.swcPath = oldPath.toStdString();
+		createInfo.newSwcPath = newPath.toStdString();
+		createInfo.markerLegend.push_back(
+			{"Added branches", {0.0f, 0.8f, 0.2f}});
+		createInfo.markerLegend.push_back(
+			{"Deleted branches", {1.0f, 0.2f, 0.2f}});
+		createInfo.markerLegend.push_back(
+			{"Modified attributes", {1.0f, 0.7f, 0.0f}});
+		createInfo.markerLegend.push_back(
+			{"Unchanged", {0.3f, 0.4f, 0.6f}});
+
+		auto *renderer = new SwcRendererDailog(createInfo);
+		renderer->setAttribute(Qt::WA_DeleteOnClose);
+		renderer->exec();
 	});
 
 	auto *menuHelp = new QMenu(menuBar);

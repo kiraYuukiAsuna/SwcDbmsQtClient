@@ -15,6 +15,11 @@
 #include "Message/Message.pb.h"
 #include "src/FileIo/SwcIo.hpp"
 
+struct DiffEdge {
+	float x1, y1, z1;	// child position
+	float x2, y2, z2;	// parent position
+};
+
 struct SwcMarker {
 	float x, y, z;
 	float color[4]; // RGBA
@@ -54,6 +59,8 @@ struct SwcStyle {
 								0.9f};	// Vibrant red for deletions
 	float lineColorModified[4] = {1.0f, 0.7f, 0.0f,
 								  0.9f};  // Orange for modifications
+	float lineColorUnchanged[4] = {0.3f, 0.4f, 0.6f,
+								   0.3f};  // Dim blue-gray for unchanged
 };
 
 struct SwcRendererCreateInfo {
@@ -113,27 +120,23 @@ protected:
 	void renderBoundingBox(float minX, float minY, float minZ, float maxX,
 						   float maxY, float maxZ);
 
-	void compareNeuronUnits(const std::vector<NeuronUnit>& oldUnits,
-							const std::vector<NeuronUnit>& newUnits,
-							std::vector<NeuronUnit>& deleted,
-							std::vector<NeuronUnit>& added,
-							std::vector<NeuronUnit>& modified,
-							std::vector<NeuronUnit>& unchanged);
+	void computeEdgeDiff(const std::vector<NeuronUnit>& oldUnits,
+						 const std::vector<NeuronUnit>& newUnits);
 
 	SwcRendererCreateInfo m_CreateInfo;
 
 	std::vector<NeuronUnit> m_NeuronUnits;
 	std::unordered_map<int, int> n_to_index_map;
-	std::unordered_map<int, NeuronUnit> childMap;
 
 	std::vector<NeuronUnit> m_NewNeuronUnits;
-	std::unordered_map<int, int> new_n_to_index_map;
-	std::unordered_map<int, NeuronUnit> newChildMap;
 
-	std::vector<NeuronUnit> deletedUnits;
-	std::vector<NeuronUnit> addedUnits;
-	std::vector<NeuronUnit> modifiedUnits;
-	std::vector<NeuronUnit> unchangedUnits;
+	// Edge-based diff results
+	std::vector<DiffEdge> m_DeletedEdges;
+	std::vector<DiffEdge> m_AddedEdges;
+	std::vector<DiffEdge> m_ModifiedEdges;
+	std::vector<DiffEdge> m_UnchangedEdges;
+	float m_DiffMinX{}, m_DiffMinY{}, m_DiffMinZ{};
+	float m_DiffMaxX{}, m_DiffMaxY{}, m_DiffMaxZ{};
 
 	QPoint lastPos;
 	int xRot = 15 * 16;	 // Initial slight downward angle for better view

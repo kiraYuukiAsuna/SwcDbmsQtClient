@@ -1,5 +1,6 @@
 #include "SwcRenderer.h"
 
+#include <algorithm>
 #include <cmath>
 
 #ifndef M_PI
@@ -60,37 +61,19 @@ SwcRenderer::SwcRenderer(SwcRendererCreateInfo createInfo, QWidget* parent)
 
 	switch (m_CreateInfo.mode) {
 		case SwcRendererMode::eVisualizeOneSwc: {
+			for (int i = 0; i < m_NeuronUnits.size(); ++i) {
+				n_to_index_map[m_NeuronUnits[i].n] = i;
+			}
 			break;
 		}
 		case SwcRendererMode::eVisualizeDiffSwc: {
-			compareNeuronUnits(m_NeuronUnits, m_NewNeuronUnits, deletedUnits,
-							   addedUnits, modifiedUnits, unchangedUnits);
+			computeEdgeDiff(m_NeuronUnits, m_NewNeuronUnits);
 			break;
 		}
 		case SwcRendererMode::eVisualizeUser:
 			break;
 		case SwcRendererMode::eVisualizeTime:
 			break;
-	}
-
-	for (int i = 0; i < m_NeuronUnits.size(); ++i) {
-		n_to_index_map[m_NeuronUnits[i].n] = i;
-	}
-
-	for (int i = 0; i < m_NewNeuronUnits.size(); ++i) {
-		new_n_to_index_map[m_NewNeuronUnits[i].n] = i;
-	}
-
-	for (int i = 0; i < m_NeuronUnits.size(); ++i) {
-		if (m_NeuronUnits[i].parent != -1) {
-			childMap[m_NeuronUnits[i].parent] = m_NeuronUnits[i];
-		}
-	}
-
-	for (int i = 0; i < m_NewNeuronUnits.size(); ++i) {
-		if (m_NewNeuronUnits[i].parent != -1) {
-			newChildMap[m_NewNeuronUnits[i].parent] = m_NewNeuronUnits[i];
-		}
 	}
 }
 
@@ -176,247 +159,44 @@ void SwcRenderer::renderOneSwc() {
 }
 
 void SwcRenderer::renderDiffSwc() {
-	auto& oldUnits = m_NeuronUnits;
-	auto& newUnits = m_NewNeuronUnits;
+	float centerX = (m_DiffMinX + m_DiffMaxX) / 2.0f;
+	float centerY = (m_DiffMinY + m_DiffMaxY) / 2.0f;
+	float centerZ = (m_DiffMinZ + m_DiffMaxZ) / 2.0f;
 
-	// Find the min and max coordinates from both datasets
-	float minX = std::numeric_limits<float>::max();
-	float minY = std::numeric_limits<float>::max();
-	float minZ = std::numeric_limits<float>::max();
-	float maxX = std::numeric_limits<float>::min();
-	float maxY = std::numeric_limits<float>::min();
-	float maxZ = std::numeric_limits<float>::min();
-	for (auto& node : oldUnits) {
-		minX = (std::min)(minX, node.x);
-		minY = (std::min)(minY, node.y);
-		minZ = (std::min)(minZ, node.z);
-		maxX = (std::max)(maxX, node.x);
-		maxY = (std::max)(maxY, node.y);
-		maxZ = (std::max)(maxZ, node.z);
-	}
-	for (auto& node : newUnits) {
-		minX = (std::min)(minX, node.x);
-		minY = (std::min)(minY, node.y);
-		minZ = (std::min)(minZ, node.z);
-		maxX = (std::max)(maxX, node.x);
-		maxY = (std::max)(maxY, node.y);
-		maxZ = (std::max)(maxZ, node.z);
-	}
-
-	// Calculate center and scale for optimal viewing
-	float centerX = (minX + maxX) / 2.0f;
-	float centerY = (minY + maxY) / 2.0f;
-	float centerZ = (minZ + maxZ) / 2.0f;
-
-	float rangeX = maxX - minX;
-	float rangeY = maxY - minY;
-	float rangeZ = maxZ - minZ;
+	float rangeX = m_DiffMaxX - m_DiffMinX;
+	float rangeY = m_DiffMaxY - m_DiffMinY;
+	float rangeZ = m_DiffMaxZ - m_DiffMinZ;
 	float maxRange = (std::max)((std::max)(rangeX, rangeY), rangeZ);
-
-	// Add padding to ensure complete visibility
 	float scale = maxRange > 0 ? 1.6f / maxRange : 1.0f;
 
-	// render point for added units
-	glPointSize(m_CreateInfo.style.pointSize);
-	glBegin(GL_POINTS);
-	for (auto& node : addedUnits) {
-		float x = (node.x - centerX) * scale;
-		float y = (node.y - centerY) * scale;
-		float z = (node.z - centerZ) * scale;
-		glColor4f(m_CreateInfo.style.lineColorAdd[0],
-				  m_CreateInfo.style.lineColorAdd[1],
-				  m_CreateInfo.style.lineColorAdd[2],
-				  m_CreateInfo.style.lineColorAdd[3]);
-		glVertex3f(x, y, z);
-	}
-	glEnd();
-
-	glPointSize(m_CreateInfo.style.pointSize);
-	glBegin(GL_POINTS);
-	for (auto& node : deletedUnits) {
-		float x = (node.x - centerX) * scale;
-		float y = (node.y - centerY) * scale;
-		float z = (node.z - centerZ) * scale;
-		glColor4f(m_CreateInfo.style.lineColorDelete[0],
-				  m_CreateInfo.style.lineColorDelete[1],
-				  m_CreateInfo.style.lineColorDelete[2],
-				  m_CreateInfo.style.lineColorDelete[3]);
-		glVertex3f(x, y, z);
-	}
-	glEnd();
-
-	glPointSize(m_CreateInfo.style.pointSize);
-	glBegin(GL_POINTS);
-	for (auto& node : modifiedUnits) {
-		float x = (node.x - centerX) * scale;
-		float y = (node.y - centerY) * scale;
-		float z = (node.z - centerZ) * scale;
-		glColor4f(m_CreateInfo.style.lineColorModified[0],
-				  m_CreateInfo.style.lineColorModified[1],
-				  m_CreateInfo.style.lineColorModified[2],
-				  m_CreateInfo.style.lineColorModified[3]);
-		glVertex3f(x, y, z);
-	}
-	glEnd();
-
-	glPointSize(m_CreateInfo.style.pointSize);
-	glBegin(GL_POINTS);
-	for (auto& node : unchangedUnits) {
-		float x = (node.x - centerX) * scale;
-		float y = (node.y - centerY) * scale;
-		float z = (node.z - centerZ) * scale;
-		glColor4f(
-			m_CreateInfo.style.lineColor[0], m_CreateInfo.style.lineColor[1],
-			m_CreateInfo.style.lineColor[2], m_CreateInfo.style.lineColor[3]);
-		glVertex3f(x, y, z);
-	}
-	glEnd();
-
-	// Render lines for added units
-	glLineWidth(m_CreateInfo.style.lineWidth);
-	glBegin(GL_LINES);
-	glColor4f(
-		m_CreateInfo.style.lineColorAdd[0], m_CreateInfo.style.lineColorAdd[1],
-		m_CreateInfo.style.lineColorAdd[2], m_CreateInfo.style.lineColorAdd[3]);
-	for (int i = 0; i < addedUnits.size(); ++i) {
-		auto node = addedUnits[i];
-		if (node.parent != -1) {
-			auto iter = new_n_to_index_map.find(node.parent);
-			if (iter == new_n_to_index_map.end()) {
-				continue;
-			}
-
-			// Center and scale coordinates
-			float x1 = (node.x - centerX) * scale;
-			float y1 = (node.y - centerY) * scale;
-			float z1 = (node.z - centerZ) * scale;
-
-			float x2 = (newUnits[iter->second].x - centerX) * scale;
-			float y2 = (newUnits[iter->second].y - centerY) * scale;
-			float z2 = (newUnits[iter->second].z - centerZ) * scale;
-
-			glVertex3f(x1, y1, z1);
-			glVertex3f(x2, y2, z2);
+	auto renderEdges = [&](const std::vector<DiffEdge>& edges,
+						   const float color[4], float lineWidth) {
+		glLineWidth(lineWidth);
+		glBegin(GL_LINES);
+		glColor4f(color[0], color[1], color[2], color[3]);
+		for (auto& e : edges) {
+			glVertex3f((e.x1 - centerX) * scale, (e.y1 - centerY) * scale,
+					   (e.z1 - centerZ) * scale);
+			glVertex3f((e.x2 - centerX) * scale, (e.y2 - centerY) * scale,
+					   (e.z2 - centerZ) * scale);
 		}
-	}
-	glEnd();
+		glEnd();
+	};
 
-	glLineWidth(m_CreateInfo.style.lineWidth);
-	glBegin(GL_LINES);
-	glColor4f(m_CreateInfo.style.lineColorDelete[0],
-			  m_CreateInfo.style.lineColorDelete[1],
-			  m_CreateInfo.style.lineColorDelete[2],
-			  m_CreateInfo.style.lineColorDelete[3]);
-	for (int i = 0; i < deletedUnits.size(); ++i) {
-		auto node = deletedUnits[i];
-		if (node.parent != -1) {
-			auto iter = n_to_index_map.find(node.parent);
-			if (iter == n_to_index_map.end()) {
-				continue;
-			}
+	float baseWidth = m_CreateInfo.style.lineWidth;
 
-			// Center and scale coordinates
-			float x1 = (node.x - centerX) * scale;
-			float y1 = (node.y - centerY) * scale;
-			float z1 = (node.z - centerZ) * scale;
+	// Render order: unchanged (dim) -> modified -> deleted -> added (bright)
+	renderEdges(m_UnchangedEdges, m_CreateInfo.style.lineColorUnchanged,
+				baseWidth);
+	renderEdges(m_ModifiedEdges, m_CreateInfo.style.lineColorModified,
+				baseWidth * 1.5f);
+	renderEdges(m_DeletedEdges, m_CreateInfo.style.lineColorDelete,
+				baseWidth * 1.5f);
+	renderEdges(m_AddedEdges, m_CreateInfo.style.lineColorAdd,
+				baseWidth * 1.5f);
 
-			float x2 = (oldUnits[iter->second].x - centerX) * scale;
-			float y2 = (oldUnits[iter->second].y - centerY) * scale;
-			float z2 = (oldUnits[iter->second].z - centerZ) * scale;
-
-			glVertex3f(x1, y1, z1);
-			glVertex3f(x2, y2, z2);
-		}
-
-		if (childMap.find(node.n) != childMap.end()) {
-			auto childNode = childMap[node.n];
-			// Center and scale coordinates
-			float x1 = (node.x - centerX) * scale;
-			float y1 = (node.y - centerY) * scale;
-			float z1 = (node.z - centerZ) * scale;
-
-			float x2 = (childNode.x - centerX) * scale;
-			float y2 = (childNode.y - centerY) * scale;
-			float z2 = (childNode.z - centerZ) * scale;
-
-			glVertex3f(x1, y1, z1);
-			glVertex3f(x2, y2, z2);
-		}
-	}
-	glEnd();
-
-	glLineWidth(m_CreateInfo.style.lineWidth);
-	glBegin(GL_LINES);
-	glColor4f(m_CreateInfo.style.lineColorModified[0],
-			  m_CreateInfo.style.lineColorModified[1],
-			  m_CreateInfo.style.lineColorModified[2],
-			  m_CreateInfo.style.lineColorModified[3]);
-	for (int i = 0; i < modifiedUnits.size(); ++i) {
-		auto node = modifiedUnits[i];
-		if (node.parent != -1) {
-			auto iter = new_n_to_index_map.find(node.parent);
-			if (iter == new_n_to_index_map.end()) {
-				continue;
-			}
-
-			// Center and scale coordinates
-			float x1 = (node.x - centerX) * scale;
-			float y1 = (node.y - centerY) * scale;
-			float z1 = (node.z - centerZ) * scale;
-
-			float x2 = (newUnits[iter->second].x - centerX) * scale;
-			float y2 = (newUnits[iter->second].y - centerY) * scale;
-			float z2 = (newUnits[iter->second].z - centerZ) * scale;
-
-			glVertex3f(x1, y1, z1);
-			glVertex3f(x2, y2, z2);
-		}
-
-		if (childMap.find(node.n) != childMap.end()) {
-			auto childNode = childMap[node.n];
-			// Center and scale coordinates
-			float x1 = (node.x - centerX) * scale;
-			float y1 = (node.y - centerY) * scale;
-			float z1 = (node.z - centerZ) * scale;
-
-			float x2 = (childNode.x - centerX) * scale;
-			float y2 = (childNode.y - centerY) * scale;
-			float z2 = (childNode.z - centerZ) * scale;
-
-			glVertex3f(x1, y1, z1);
-			glVertex3f(x2, y2, z2);
-		}
-	}
-	glEnd();
-
-	glLineWidth(m_CreateInfo.style.lineWidth);
-	glBegin(GL_LINES);
-	glColor4f(m_CreateInfo.style.lineColor[0], m_CreateInfo.style.lineColor[1],
-			  m_CreateInfo.style.lineColor[2], m_CreateInfo.style.lineColor[3]);
-	for (int i = 0; i < unchangedUnits.size(); ++i) {
-		auto node = unchangedUnits[i];
-		if (node.parent != -1) {
-			auto iter = new_n_to_index_map.find(node.parent);
-			if (iter == new_n_to_index_map.end()) {
-				continue;
-			}
-
-			// Center and scale coordinates
-			float x1 = (node.x - centerX) * scale;
-			float y1 = (node.y - centerY) * scale;
-			float z1 = (node.z - centerZ) * scale;
-
-			float x2 = (newUnits[iter->second].x - centerX) * scale;
-			float y2 = (newUnits[iter->second].y - centerY) * scale;
-			float z2 = (newUnits[iter->second].z - centerZ) * scale;
-
-			glVertex3f(x1, y1, z1);
-			glVertex3f(x2, y2, z2);
-		}
-	}
-	glEnd();
-
-	renderBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
+	renderBoundingBox(m_DiffMinX, m_DiffMinY, m_DiffMinZ, m_DiffMaxX,
+					  m_DiffMaxY, m_DiffMaxZ);
 }
 
 void SwcRenderer::initializeGL() {
@@ -624,60 +404,199 @@ void SwcRenderer::renderBoundingBox(float minX, float minY, float minZ,
 	glEnd();
 }
 
-void SwcRenderer::compareNeuronUnits(const std::vector<NeuronUnit>& oldUnits,
-									 const std::vector<NeuronUnit>& newUnits,
-									 std::vector<NeuronUnit>& deleted,
-									 std::vector<NeuronUnit>& added,
-									 std::vector<NeuronUnit>& modified,
-									 std::vector<NeuronUnit>& unchanged) {
-	// Clear output vectors
-	deleted.clear();
-	added.clear();
-	modified.clear();
-	unchanged.clear();
+void SwcRenderer::computeEdgeDiff(const std::vector<NeuronUnit>& oldUnits,
+								  const std::vector<NeuronUnit>& newUnits) {
+	m_DeletedEdges.clear();
+	m_AddedEdges.clear();
+	m_ModifiedEdges.clear();
+	m_UnchangedEdges.clear();
 
-	// Create maps for efficient lookup
-	std::unordered_map<std::string, const NeuronUnit*> oldUnitMap;
-	std::unordered_map<std::string, const NeuronUnit*> newUnitMap;
+	// --- Step 1: Build all edges from both trees -----------------------
+	struct EdgeAttrib {
+		DiffEdge geo;
+		int type;
+		float radius;
+	};
 
-	// Build maps using UUID as key
-	for (const auto& unit : oldUnits) {
-		oldUnitMap[unit.uuid] = &unit;
-	}
+	auto buildEdges =
+		[](const std::vector<NeuronUnit>& units) -> std::vector<EdgeAttrib> {
+		std::unordered_map<int, const NeuronUnit*> nMap;
+		for (auto& u : units) nMap[u.n] = &u;
 
-	for (const auto& unit : newUnits) {
-		newUnitMap[unit.uuid] = &unit;
-	}
+		std::vector<EdgeAttrib> edges;
+		for (auto& u : units) {
+			if (u.parent == -1) continue;
+			auto pit = nMap.find(u.parent);
+			if (pit == nMap.end()) continue;
+			auto* p = pit->second;
+			edges.push_back(
+				{{u.x, u.y, u.z, p->x, p->y, p->z}, u.type, u.radius});
+		}
+		return edges;
+	};
 
-	// Find deleted and unchanged/modified units
-	for (const auto& oldUnit : oldUnits) {
-		auto newIt = newUnitMap.find(oldUnit.uuid);
-		if (newIt == newUnitMap.end()) {
-			// Unit not found in new data - deleted
-			deleted.push_back(oldUnit);
+	auto oldEdges = buildEdges(oldUnits);
+	auto newEdges = buildEdges(newUnits);
+
+	// --- Step 2: Compute adaptive threshold ----------------------------
+	auto edgeLen = [](const DiffEdge& e) {
+		float dx = e.x1 - e.x2, dy = e.y1 - e.y2, dz = e.z1 - e.z2;
+		return std::sqrt(dx * dx + dy * dy + dz * dz);
+	};
+
+	float totalLen = 0;
+	for (auto& e : oldEdges) totalLen += edgeLen(e.geo);
+	for (auto& e : newEdges) totalLen += edgeLen(e.geo);
+	auto totalCount =
+		static_cast<int>(oldEdges.size() + newEdges.size());
+	float avgLen = totalCount > 0 ? totalLen / totalCount : 1.0f;
+	float threshold = avgLen * 3.0f;
+
+	// --- Step 3: Spatial grid on old edges for fast lookup --------------
+	// Distance between two edges: min of (avg endpoint dist) over both
+	// orientations. Handles coordinate drift gracefully.
+	auto edgeDist = [](const DiffEdge& a, const DiffEdge& b) -> float {
+		auto dist = [](float ax, float ay, float az, float bx, float by,
+					   float bz) {
+			float dx = ax - bx, dy = ay - by, dz = az - bz;
+			return std::sqrt(dx * dx + dy * dy + dz * dz);
+		};
+		float fwd = (dist(a.x1, a.y1, a.z1, b.x1, b.y1, b.z1) +
+					 dist(a.x2, a.y2, a.z2, b.x2, b.y2, b.z2)) /
+					2.0f;
+		float rev = (dist(a.x1, a.y1, a.z1, b.x2, b.y2, b.z2) +
+					 dist(a.x2, a.y2, a.z2, b.x1, b.y1, b.z1)) /
+					2.0f;
+		return (std::min)(fwd, rev);
+	};
+
+	struct GridKey {
+		int x, y, z;
+		bool operator==(const GridKey& o) const {
+			return x == o.x && y == o.y && z == o.z;
+		}
+	};
+	struct GridKeyHash {
+		size_t operator()(const GridKey& k) const {
+			size_t h = 17;
+			h = h * 31 + std::hash<int>()(k.x);
+			h = h * 31 + std::hash<int>()(k.y);
+			h = h * 31 + std::hash<int>()(k.z);
+			return h;
+		}
+	};
+
+	float cellSize = threshold > 0 ? threshold : 1.0f;
+
+	// Helper: build a spatial grid from a set of edges
+	using Grid =
+		std::unordered_map<GridKey, std::vector<size_t>, GridKeyHash>;
+
+	auto buildGrid = [&](const std::vector<EdgeAttrib>& edges) -> Grid {
+		Grid g;
+		for (size_t i = 0; i < edges.size(); ++i) {
+			auto& e = edges[i].geo;
+			float mx = (e.x1 + e.x2) * 0.5f;
+			float my = (e.y1 + e.y2) * 0.5f;
+			float mz = (e.z1 + e.z2) * 0.5f;
+			g[{static_cast<int>(std::floor(mx / cellSize)),
+			   static_cast<int>(std::floor(my / cellSize)),
+			   static_cast<int>(std::floor(mz / cellSize))}]
+				.push_back(i);
+		}
+		return g;
+	};
+
+	// Helper: find closest edge in target set (no 1-to-1 constraint).
+	// Multiple source edges may match the same target edge — this is
+	// intentional so that resampling (3 edges → 4 edges in the same
+	// spatial region) does not produce false positives.
+	auto findClosest = [&](const DiffEdge& edge,
+						   const std::vector<EdgeAttrib>& targetEdges,
+						   const Grid& targetGrid) -> int {
+		float mx = (edge.x1 + edge.x2) * 0.5f;
+		float my = (edge.y1 + edge.y2) * 0.5f;
+		float mz = (edge.z1 + edge.z2) * 0.5f;
+		int gx = static_cast<int>(std::floor(mx / cellSize));
+		int gy = static_cast<int>(std::floor(my / cellSize));
+		int gz = static_cast<int>(std::floor(mz / cellSize));
+
+		float bestDist = threshold;
+		int bestIdx = -1;
+		for (int dx = -1; dx <= 1; ++dx)
+			for (int dy = -1; dy <= 1; ++dy)
+				for (int dz = -1; dz <= 1; ++dz) {
+					auto it = targetGrid.find(
+						{gx + dx, gy + dy, gz + dz});
+					if (it == targetGrid.end()) continue;
+					for (size_t ti : it->second) {
+						float d =
+							edgeDist(edge, targetEdges[ti].geo);
+						if (d < bestDist) {
+							bestDist = d;
+							bestIdx = static_cast<int>(ti);
+						}
+					}
+				}
+		return bestIdx;
+	};
+
+	Grid oldGrid = buildGrid(oldEdges);
+	Grid newGrid = buildGrid(newEdges);
+
+	// --- Step 4: Classify new edges ------------------------------------
+	// Each new edge independently searches for the closest old edge.
+	constexpr float kRadiusEpsilon = 1e-4f;
+
+	for (size_t i = 0; i < newEdges.size(); ++i) {
+		int closest = findClosest(newEdges[i].geo, oldEdges, oldGrid);
+		if (closest < 0) {
+			m_AddedEdges.push_back(newEdges[i].geo);
 		} else {
-			// Unit exists in both - check if modified
-			const NeuronUnit& newUnit = *(newIt->second);
-			if (oldUnit.x != newUnit.x || oldUnit.y != newUnit.y ||
-				oldUnit.z != newUnit.z || oldUnit.radius != newUnit.radius ||
-				oldUnit.type != newUnit.type ||
-				oldUnit.parent != newUnit.parent) {
-				// Unit has been modified
-				modified.push_back(newUnit);
+			auto& oe = oldEdges[closest];
+			auto& ne = newEdges[i];
+			if (ne.type != oe.type ||
+				std::fabs(ne.radius - oe.radius) > kRadiusEpsilon) {
+				m_ModifiedEdges.push_back(ne.geo);
 			} else {
-				// Unit is unchanged
-				unchanged.push_back(newUnit);
+				m_UnchangedEdges.push_back(ne.geo);
 			}
 		}
 	}
 
-	// Find added units
-	for (const auto& newUnit : newUnits) {
-		auto oldIt = oldUnitMap.find(newUnit.uuid);
-		if (oldIt == oldUnitMap.end()) {
-			// Unit not found in old data - added
-			added.push_back(newUnit);
+	// --- Step 5: Find deleted old edges --------------------------------
+	// Each old edge independently searches for the closest new edge.
+	for (size_t j = 0; j < oldEdges.size(); ++j) {
+		int closest = findClosest(oldEdges[j].geo, newEdges, newGrid);
+		if (closest < 0) {
+			m_DeletedEdges.push_back(oldEdges[j].geo);
 		}
+	}
+
+	// --- Step 7: Bounding box ------------------------------------------
+	m_DiffMinX = m_DiffMinY = m_DiffMinZ = std::numeric_limits<float>::max();
+	m_DiffMaxX = m_DiffMaxY = m_DiffMaxZ =
+		std::numeric_limits<float>::lowest();
+
+	auto updateBoundsFromEdges = [this](const std::vector<DiffEdge>& edges) {
+		for (auto& e : edges) {
+			m_DiffMinX = (std::min)(m_DiffMinX, (std::min)(e.x1, e.x2));
+			m_DiffMinY = (std::min)(m_DiffMinY, (std::min)(e.y1, e.y2));
+			m_DiffMinZ = (std::min)(m_DiffMinZ, (std::min)(e.z1, e.z2));
+			m_DiffMaxX = (std::max)(m_DiffMaxX, (std::max)(e.x1, e.x2));
+			m_DiffMaxY = (std::max)(m_DiffMaxY, (std::max)(e.y1, e.y2));
+			m_DiffMaxZ = (std::max)(m_DiffMaxZ, (std::max)(e.z1, e.z2));
+		}
+	};
+
+	updateBoundsFromEdges(m_DeletedEdges);
+	updateBoundsFromEdges(m_AddedEdges);
+	updateBoundsFromEdges(m_ModifiedEdges);
+	updateBoundsFromEdges(m_UnchangedEdges);
+
+	if (m_DiffMinX > m_DiffMaxX) {
+		m_DiffMinX = m_DiffMinY = m_DiffMinZ = 0.0f;
+		m_DiffMaxX = m_DiffMaxY = m_DiffMaxZ = 1.0f;
 	}
 }
 
